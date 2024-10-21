@@ -90,7 +90,19 @@ class KlaimKecelakaanController extends Controller
     {
         $klaim = Klaim_kecelakaan::where('id_klaim_kecelakaan', $id)->first();
 
-        return response()->json($klaim);
+        if (!$klaim) {
+            return response()->json([
+                'status' => 'Failed',
+                'message' => 'User Tidak Ditemukan',
+            ]);
+        }else {
+            return response()->json([
+                'status' => 'Failed',
+                'message' => 'User Ditemukan',
+                'data' => $klaim,
+            ]);
+        }
+        
         
     }
 
