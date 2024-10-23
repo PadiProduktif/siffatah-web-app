@@ -38,36 +38,74 @@ class BerkasPengobatanController extends Controller
     public function store(Request $request)
     {
 
-        if ($request->id_badge == null && $request->nama_karyawan == null) {
+        if ($request->input('id_badge') == null && $request->input('nama_karyawan') == null) {
             return response()->json([
                 'status' => 'Gagal',
                 'message' => 'id badge dan nama karyawan tidak boleh kosong',
                
             ]);
         }else {
-            $obat = BerkasPengobatan::create([
-                'id_berkas_pengobatan'=> rand(10,99999999),
-                'id_badge' => $request->id_badge,
-                'nama_karyawan' => $request->nama_karyawan,
-                'jabatan_karyawan' => $request->jabatan_karyawan,
-                'nama_anggota_keluarga' => $request->nama_anggota_keluarga,
-                'hubungan_keluarga' => $request->hubungan_keluarga,
-                'deskripsi' => $request->deskripsi,
-                'nominal' => $request->nominal,
-                'rs_klinik' => $request->rs_klinik,
-                'urgensi' => $request->urgensi,
-                'no_surat_rs' => $request->no_surat_rs,
-                'tanggal_pengobatan' => $request->tanggal_pengobatan,
-                'status' => $request->status,
-                'keterangan' => $request->keterangan,
-            ]);
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/BerkasPengobatan/'), $fileName);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Berhasil Memasukan Data',
-                // 'data' => $karyawan
-                'data' => $obat
-            ]);
+                $obat = BerkasPengobatan::create([
+                    'id_berkas_pengobatan'=> rand(10,99999999),
+                    'id_badge' => $request->input('id_badge'),
+                    'nama_karyawan' => $request->input('nama_karyawan'),
+                    'jabatan_karyawan' => $request->input('jabatan_karyawan'),
+                    'nama_anggota_keluarga' => $request->input('nama_anggota_keluarga'),
+                    'hubungan_keluarga' => $request->input('hubungan_keluarga'),
+                    'deskripsi' => $request->input('deskripsi'),
+                    'nominal' => $request->input('nominal'),
+                    'rs_klinik' => $request->input('rs_klinik'),
+                    'urgensi' => $request->input('urgensi'),
+                    'no_surat_rs' => $request->input('no_surat_rs'),
+                    'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
+                    'status' => $request->input('status'),
+                    'keterangan' => $request->input('keterangan'),
+                    'file_url' => $fileName,
+                    
+                ]);
+    
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Berhasil Memasukan Data',
+                    'file_message' => 'Data Berhasil di Upload',
+                    // 'data' => $karyawan
+                    'data' => $obat
+                ]);
+            }else {
+
+                $obat = BerkasPengobatan::create([
+                    'id_berkas_pengobatan'=> rand(10,99999999),
+                    'id_badge' => $request->input('id_badge'),
+                    'nama_karyawan' => $request->input('nama_karyawan'),
+                    'jabatan_karyawan' => $request->input('jabatan_karyawan'),
+                    'nama_anggota_keluarga' => $request->input('nama_anggota_keluarga'),
+                    'hubungan_keluarga' => $request->input('hubungan_keluarga'),
+                    'deskripsi' => $request->input('deskripsi'),
+                    'nominal' => $request->input('nominal'),
+                    'rs_klinik' => $request->input('rs_klinik'),
+                    'urgensi' => $request->input('urgensi'),
+                    'no_surat_rs' => $request->input('no_surat_rs'),
+                    'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
+                    'status' => $request->input('status'),
+                    'keterangan' => $request->input('keterangan'),
+                    
+                    
+                ]);
+    
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Berhasil Memasukan Data',
+                    'file_message' => 'File Upload Tidak ada',
+                    // 'data' => $karyawan
+                    'data' => $obat
+                ]);
+            }
+            
         }
 
         
@@ -115,7 +153,7 @@ class BerkasPengobatanController extends Controller
         $obat->status = $request->input('status');
         $obat->keterangan = $request->input('keterangan');
         //json siapa saja yang berkeluarga dengan orang tersebut
-        // $karyawan->keluarga = $request->input('nama_karyawan');
+        // $karyawan->keluarga = $request->input(input('nama_karyawan');
         // untuk data url berkas data diri
         $obat->save();
         return response()->json([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Auth\Roles;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -26,6 +27,17 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
+        ]);
+    }
+
+    public function get_role(){
+        $roles = Roles::select('*')->get();
+        // $test_echo = rand(0, 99999);
+        //untuk mengirim json di postman
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berhasil Mendapatkan Data',
+            'data' => $roles
         ]);
     }
 
