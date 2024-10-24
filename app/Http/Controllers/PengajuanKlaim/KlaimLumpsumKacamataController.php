@@ -50,6 +50,14 @@ class KlaimLumpsumKacamataController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_Lumpsum_Kacamata/'), $fileName);
+            }else {
+                $fileName = null;
+            }
+
             $klaim = klaim_lumpsum_kacamata::create([
                 'id_lumpsum_kacamata'=> rand(10,99999999),
                 'id_badge' => $request->id_badge,
@@ -61,8 +69,7 @@ class KlaimLumpsumKacamataController extends Controller
                 'hubungan' => $request->hubungan,
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'nominal' => $request->nominal,
-                'filename' => $request->filename,
-                'file_url' => $request->file_url,
+                'file_url' => $fileName,
             ]);
 
             return response()->json([
@@ -125,6 +132,7 @@ class KlaimLumpsumKacamataController extends Controller
                
             ]);
         }else {
+            
             $klaim = klaim_lumpsum_kacamata::where('id_lumpsum_kacamata', $id)->first();
             // return response()->json([
             //     'status' => 'Gagal',

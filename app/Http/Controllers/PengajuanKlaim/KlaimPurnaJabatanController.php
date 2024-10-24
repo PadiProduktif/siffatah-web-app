@@ -46,10 +46,17 @@ class KlaimPurnaJabatanController extends Controller
         if ($request->nama == null && $request->jabatan == null) {
             return response()->json([
                 'status' => 'Gagal',
-                'message' => 'nama dan id tidak boleh kosong',
+                'message' => 'nama dan jabatan tidak boleh kosong',
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $klaim = klaim_purnajabatan::create([
                 'id_klaim_purnajabatan'=> rand(10,99999999),
                 'nama' => $request->nama,
@@ -62,8 +69,7 @@ class KlaimPurnaJabatanController extends Controller
                 'premi_tahunan' => $request->premi_tahunan,
                 'uang_tertanggung' => $request->uang_tertanggung,
                 'deskripsi' => $request->deskripsi,
-                'filename' => $request->filename,
-                'file_url' => $request->file_url,
+                'file_url' => $fileName,
             ]);
 
             return response()->json([

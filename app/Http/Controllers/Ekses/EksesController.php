@@ -45,27 +45,51 @@ class EksesController extends Controller
                
             ]);
         }else {
-            $ekses = Ekses::create([
-                'id_ekses'=> rand(10,99999999),
-                'id_member' => $request->id_member,
-                'id_badge' => $request->id_badge,
-                'nama_karyawan' => $request->nama_karyawan,
-                'unit_kerja' => $request->unit_kerja,
-                'nama_pasien' => $request->nama_pasien,
-                'deskripsi' => $request->deskripsi,
-                'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'jumlah_ekses' => $request->jumlah_ekses,
-                'filename' => $request->filename,
-                'file_url' => $request->file_url,
-            ]);
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/Ekses/'), $fileName);
+                $ekses = Ekses::create([
+                    'id_ekses'=> rand(10,99999999),
+                    'id_member' => $request->id_member,
+                    'id_badge' => $request->id_badge,
+                    'nama_karyawan' => $request->nama_karyawan,
+                    'unit_kerja' => $request->unit_kerja,
+                    'nama_pasien' => $request->nama_pasien,
+                    'deskripsi' => $request->deskripsi,
+                    'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                    'jumlah_ekses' => $request->jumlah_ekses,
+                    'file_url' => $fileName,
+                ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Berhasil Memasukan Data',
-                // 'data' => $karyawan
-                'data' => $ekses
-            ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Berhasil Memasukan Data',
+                    // 'data' => $karyawan
+                    'data' => $ekses
+                ]);
+            }else {
+                $ekses = Ekses::create([
+                    'id_ekses'=> rand(10,99999999),
+                    'id_member' => $request->id_member,
+                    'id_badge' => $request->id_badge,
+                    'nama_karyawan' => $request->nama_karyawan,
+                    'unit_kerja' => $request->unit_kerja,
+                    'nama_pasien' => $request->nama_pasien,
+                    'deskripsi' => $request->deskripsi,
+                    'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                    'jumlah_ekses' => $request->jumlah_ekses,
+
+                ]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Berhasil Memasukan Data',
+                    // 'data' => $karyawan
+                    'data' => $ekses
+                ]);
         }
+    }
 
     }
 

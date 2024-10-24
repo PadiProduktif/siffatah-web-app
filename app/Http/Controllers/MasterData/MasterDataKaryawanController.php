@@ -37,8 +37,69 @@ class MasterDataKaryawanController extends Controller
      */
     public function store(Request $request)
     {
-
-
+        //fotodiri
+        if ($request->hasFile('foto_diri')) {
+            $foto_diri = $request->file('foto_diri');
+            $foto_diri_fileName = rand(10,99999999).'_'.$foto_diri->getClientOriginalName();
+            $foto_diri->move(public_path('uploads/karyawan/foto_diri/'), $foto_diri_fileName);
+            
+        }else {
+            $foto_diri_fileName = null;
+        }
+        //file_ktp
+        if ($request->hasFile('file_ktp')) {
+            $file_ktp = $request->file('file_ktp');
+            $file_ktp_fileName = rand(10,99999999).'_'.$file_ktp->getClientOriginalName();
+            $file_ktp->move(public_path('uploads/karyawan/file_ktp/'), $file_ktp_fileName);
+                
+        }else {
+            $file_ktp_fileName = null;
+        }
+        //file_kk
+        if ($request->hasFile('file_kk')) {
+            $file_kk = $request->file('file_kk');
+            $file_kk_fileName = rand(10,99999999).'_'.$file_kk->getClientOriginalName();
+            $file_kk->move(public_path('uploads/karyawan/file_kk/'), $file_kk_fileName);
+                
+        }else {
+            $file_kk_fileName = null;
+        }
+        //buku_nikah
+        if ($request->hasFile('buku_nikah')) {
+            $buku_nikah = $request->file('buku_nikah');
+            $buku_nikah_fileName = rand(10,99999999).'_'.$buku_nikah->getClientOriginalName();
+            $buku_nikah->move(public_path('uploads/karyawan/buku_nikah/'), $buku_nikah_fileName);
+                
+        }else {
+            $buku_nikah_fileName = null;
+        }
+        //akta_kelahiran
+        if ($request->hasFile('akta_kelahiran')) {
+            $akta_kelahiran = $request->file('akta_kelahiran');
+            $akta_kelahiran_fileName = rand(10,99999999).'_'.$akta_kelahiran->getClientOriginalName();
+            $akta_kelahiran->move(public_path('uploads/karyawan/akta_kelahiran/'), $akta_kelahiran_fileName);
+                
+        }else {
+            $akta_kelahiran_fileName = null;
+        }
+        //npwp
+        if ($request->hasFile('npwp')) {
+            $npwp = $request->file('npwp');
+            $npwp_fileName = rand(10,99999999).'_'.$npwp->getClientOriginalName();
+            $npwp->move(public_path('uploads/karyawan/npwp/'), $npwp_fileName);
+                
+        }else {
+            $npwp_fileName = null;
+        }
+        //lamaran_pekerjaan
+        if ($request->hasFile('lamaran_pekerjaan')) {
+            $lamaran_pekerjaan = $request->file('lamaran_pekerjaan');
+            $lamaran_pekerjaan_fileName = rand(10,99999999).'_'.$lamaran_pekerjaan->getClientOriginalName();
+            $lamaran_pekerjaan->move(public_path('uploads/karyawan/lamaran_pekerjaan/'), $lamaran_pekerjaan_fileName);
+                
+        }else {
+            $lamaran_pekerjaan_fileName = null;
+        }
         $karyawan = DataKaryawan::create([
             'id_karyawan'=> rand(10,99999999),
             'id_badge' => $request->input('id_badge'),
@@ -54,13 +115,13 @@ class MasterDataKaryawanController extends Controller
             'tanggal_lahir' => $request->input('tanggal_lahir'),
             'jenis_kelamin' => $request->input('jenis_kelamin'),
             'keluarga' => $request->input('keluarga'),
-            'url_foto_diri' => $request->input('url_foto_diri'),
-            'url_file_ktp' => $request->input('url_file_ktp'),
-            'url_file_kk' => $request->input('url_file_kk'),
-            'url_file_buku_nikah' => $request->input('url_file_buku_nikah'),
-            'url_file_akta_kelahiran' => $request->input('url_file_akta_kelahiran'),
-            'url_npwp' => $request->input('url_npwp'),
-            'url_lamaran_pekerjaan' => $request->input('url_lamaran_pekerjaan'),
+            'url_foto_diri' => $foto_diri_fileName,
+            'url_file_ktp' => $file_kk_fileName,
+            'url_file_kk' => $file_kk_fileName,
+            'url_file_buku_nikah' => $buku_nikah_fileName,
+            'url_file_akta_kelahiran' => $akta_kelahiran_fileName,
+            'url_npwp' => $npwp_fileName,
+            'url_lamaran_pekerjaan' => $lamaran_pekerjaan_fileName,
         ]);
 
 

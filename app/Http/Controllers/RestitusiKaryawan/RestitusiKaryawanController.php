@@ -45,6 +45,13 @@ class RestitusiKaryawanController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $restitusi = RestitusiKaryawan::create([
                 'id_pengajuan'=> rand(10,99999999),
                 'id_badge' => $request->id_badge,
@@ -59,8 +66,7 @@ class RestitusiKaryawanController extends Controller
                 'no_surat_rs' => $request->no_surat_rs,
                 'tanggal_pengobatan' => $request->tanggal_pengobatan,
                 'keterangan_pengajuan' => $request->keterangan_pengajuan,
-                'filename' => $request->filename,
-                'url_file' => $request->url_file,
+                'url_file' => $fileName,
                 'status_pengajuan' => $request->status_pengajuan,
             ]);
 

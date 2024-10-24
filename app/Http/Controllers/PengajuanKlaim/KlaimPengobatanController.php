@@ -50,6 +50,13 @@ class KlaimPengobatanController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_Pengobatan/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $klaim = klaim_pengobatan::create([
                 'id_klaim_pengobatan'=> rand(10,99999999),
                 'id_badge' => $request->id_badge,
@@ -60,8 +67,7 @@ class KlaimPengobatanController extends Controller
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'nominal' => $request->nominal,
                 'deskripsi' => $request->deskripsi,
-                'filename' => $request->filename,
-                'file_url' => $request->file_url,
+                'file_url' => $fileName,
             ]);
 
             return response()->json([

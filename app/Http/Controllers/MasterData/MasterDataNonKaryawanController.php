@@ -50,6 +50,15 @@ class MasterDataNonKaryawanController extends Controller
                
             ]);
         }else {
+            //url_foto_diri
+            if ($request->hasFile('url_foto_diri')) {
+                $url_foto_diri = $request->file('url_foto_diri');
+                $url_foto_diri_fileName = rand(10,99999999).'_'.$url_foto_diri->getClientOriginalName();
+                $url_foto_diri->move(public_path('uploads/non_karyawan/url_foto_diri/'), $url_foto_diri_fileName);
+                    
+            }else {
+                $url_foto_diri_fileName = null;
+            }
             $non_karyawan = DataNonKaryawan::create([
                 'id_non_karyawan'=> rand(10,99999999),
                 'nama' => $request->nama,
@@ -64,7 +73,7 @@ class MasterDataNonKaryawanController extends Controller
                 'pekerjaan' => $request->pekerjaan,
                 'nik' => $request->nik,
                 'kewarganegaraan' => $request->kewarganegaraan,
-                'url_foto_diri' => $request->url_foto_diri,
+                'url_foto_diri' => $url_foto_diri_fileName,
                 'id_karyawan_terkait' => $request->id_karyawan_terkait,
             ]);
 

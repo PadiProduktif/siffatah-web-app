@@ -50,6 +50,13 @@ class KlaimKecelakaanController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/klaim_Kecelakaan/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $klaim = Klaim_kecelakaan::create([
                 'id_klaim_kecelakaan'=> rand(10,99999999),
                 'id_badge' => $request->id_badge,
@@ -61,8 +68,7 @@ class KlaimKecelakaanController extends Controller
                 'nama_keluarga' => $request->nama_keluarga,
                 'hubungan_keluarga' => $request->hubungan_keluarga,
                 'deskripsi' => $request->deskripsi,
-                'filename' => $request->filename,
-                'file_url' => $request->file_url,
+                'file_url' => $fileName,
             ]);
 
             return response()->json([
