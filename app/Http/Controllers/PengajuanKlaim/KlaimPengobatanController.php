@@ -138,6 +138,20 @@ class KlaimPengobatanController extends Controller
             //     'klaim_pengobatan' => $klaim
             // ]);
             // die();
+            if ($request->hasFile('file')) {
+                
+                if ($klaim->url_file != null) {
+                    $fileName_outdated = public_path("uploads/PengajuanKlaim/Klaim_Pengobatan/{$klaim->url_file}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_Pengobatan'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $klaim->id_badge = $request->input('id_badge');
             $klaim->nama_karyawan = $request->input('nama_karyawan');
             $klaim->unit_kerja = $request->input('unit_kerja');
@@ -146,8 +160,7 @@ class KlaimPengobatanController extends Controller
             $klaim->tanggal_pengajuan = $request->input('tanggal_pengajuan');
             $klaim->nominal = $request->input('nominal');
             $klaim->deskripsi = $request->input('deskripsi');
-            $klaim->filename = $request->input('filename');
-            $klaim->file_url = $request->input('file_url');
+            $klaim->file_url = $fileName;
         }
         // return response()->json([
         //     'status' => 'Gagal',

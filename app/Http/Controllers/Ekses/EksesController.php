@@ -124,6 +124,7 @@ class EksesController extends Controller
         //     'id_badge' => $request->input('id_badge'),
         // ]);
         // die();
+        
         if ($request->id_badge == null && $request->nama_karyawan == null && $request->id_member == null && $request->unit_kerja == null && $request->nama_pasien == null) {
             return response()->json([
                 'status' => 'Gagal',
@@ -131,6 +132,19 @@ class EksesController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $ekses = Ekses::where('id_ekses', $id)->first();
+                if ($ekses->file_url != null) {
+                $fileName_outdated = public_path("uploads/Ekses/{$ekses->file_url}");
+                unlink($fileName_outdated);
+                }
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/Ekses/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $ekses = Ekses::where('id_ekses', $id)->first();
             // return response()->json([
             //     'status' => 'Gagal',
@@ -147,8 +161,7 @@ class EksesController extends Controller
             $ekses->deskripsi = $request->input('deskripsi');
             $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
             $ekses->jumlah_ekses = $request->input('jumlah_ekses');
-            $ekses->filename = $request->input('filename');
-            $ekses->file_url = $request->input('file_url');
+            $ekses->file_url = $fileName;
         }
         // return response()->json([
         //     'status' => 'Gagal',

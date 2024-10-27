@@ -118,6 +118,7 @@ class MasterDataNonKaryawanController extends Controller
         //     'id_badge' => $request->input('id_badge'),
         // ]);
         // die();
+        
         if ($request->nama == null) {
             return response()->json([
                 'status' => 'Gagal',
@@ -125,6 +126,20 @@ class MasterDataNonKaryawanController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('foto_diri')) {
+                $non_karyawan = DataNonKaryawan::where('id_non_karyawan', $id)->first();
+                if ($non_karyawan->url_foto_diri != null) {
+                    $fileName_outdated = public_path("uploads/non_karyawan/url_foto_diri/{$non_karyawan->url_foto_diri}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('foto_diri');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/non_karyawan/url_foto_diri/'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $non_karyawan = DataNonKaryawan::where('id_non_karyawan', $id)->first();
             // return response()->json([
             //     'status' => 'Gagal',
@@ -145,7 +160,7 @@ class MasterDataNonKaryawanController extends Controller
             $non_karyawan->pekerjaan = $request->input('pekerjaan');
             $non_karyawan->nik = $request->input('nik');
             $non_karyawan->kewarganegaraan = $request->input('kewarganegaraan');
-            $non_karyawan->url_foto_diri = $request->input('url_foto_diri');
+            $non_karyawan->url_foto_diri = $fileName;
             $non_karyawan->id_karyawan_terkait = $request->input('id_karyawan_terkait');
         }
         // return response()->json([

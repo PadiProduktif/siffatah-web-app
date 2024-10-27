@@ -138,6 +138,20 @@ class BerkasPengobatanController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if ($request->hasFile('file')) {
+            $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->first();
+            if ($obat->file_url != null) {
+            $fileName_outdated = public_path("uploads/BerkasPengobatan/{$obat->file_url}");
+            unlink($fileName_outdated);
+            }
+
+            $file = $request->file('file');
+            $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/BerkasPengobatan/'), $fileName);
+        }else {
+            $fileName = null;
+        }
+
         $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->first();
         $obat->id_badge = $request->input('id_badge');
         $obat->nama_karyawan = $request->input('nama_karyawan');
@@ -152,6 +166,7 @@ class BerkasPengobatanController extends Controller
         $obat->tanggal_pengobatan = $request->input('tanggal_pengobatan');
         $obat->status = $request->input('status');
         $obat->keterangan = $request->input('keterangan');
+        $obat->file_url = $fileName;
         //json siapa saja yang berkeluarga dengan orang tersebut
         // $karyawan->keluarga = $request->input(input('nama_karyawan');
         // untuk data url berkas data diri

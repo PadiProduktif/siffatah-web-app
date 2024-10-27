@@ -140,6 +140,20 @@ class KlaimPurnaJabatanController extends Controller
             //     'klaim_purnajabatan' => $klaim
             // ]);
             // die();
+            if ($request->hasFile('file')) {
+                
+                if ($klaim->url_file != null) {
+                    $fileName_outdated = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$klaim->url_file}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan'), $fileName);
+            }else {
+                $fileName = null;
+            }
             $klaim->nama = $request->input('nama');
             $klaim->jabatan = $request->input('jabatan');
             $klaim->tanggal_lahir = $request->input('tanggal_lahir');
@@ -150,8 +164,7 @@ class KlaimPurnaJabatanController extends Controller
             $klaim->premi_tahunan = $request->input('premi_tahunan');
             $klaim->uang_tertanggung = $request->input('uang_tertanggung');
             $klaim->deskripsi = $request->input('deskripsi');
-            $klaim->filename = $request->input('filename');
-            $klaim->file_url = $request->input('file_url');
+            $klaim->file_url = $fileName;
 
 
         }

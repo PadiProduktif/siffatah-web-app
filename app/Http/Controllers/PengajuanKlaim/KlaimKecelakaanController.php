@@ -50,6 +50,7 @@ class KlaimKecelakaanController extends Controller
                
             ]);
         }else {
+            
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
@@ -132,6 +133,21 @@ class KlaimKecelakaanController extends Controller
             ]);
         }else {
             $klaim = Klaim_kecelakaan::where('id_klaim_kecelakaan', $id)->first();
+                
+            if ($request->hasFile('file')) {
+                
+                if ($klaim->url_file != null) {
+                    $fileName_outdated = public_path("uploads/PengajuanKlaim/klaim_Kecelakaan/{$klaim->url_file}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/klaim_Kecelakaan'), $fileName);
+            }else {
+                $fileName = null;
+            }
             // return response()->json([
             //     'status' => 'Gagal',
             //     // 'id_member' => $request->input('id_member'),
@@ -148,8 +164,7 @@ class KlaimKecelakaanController extends Controller
             $klaim->nama_keluarga = $request->input('nama_keluarga');
             $klaim->hubungan_keluarga = $request->input('hubungan_keluarga');
             $klaim->deskripsi = $request->input('deskripsi');
-            $klaim->filename = $request->input('filename');
-            $klaim->file_url = $request->input('file_url');
+            $klaim->file_url = $fileName;
         }
         // return response()->json([
         //     'status' => 'Gagal',

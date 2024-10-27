@@ -118,6 +118,21 @@ class RestitusiKaryawanController extends Controller
                
             ]);
         }else {
+            if ($request->hasFile('file')) {
+                $restitusi = RestitusiKaryawan::where('id_pengajuan', $id)->first();
+                if ($restitusi->url_file != null) {
+                    $fileName_outdated = public_path("uploads/Restitusi_Karyawan/{$restitusi->url_file}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
+            }else {
+                $fileName = null;
+            }
+            
             $restitusi = RestitusiKaryawan::where('id_pengajuan', $id)->first();
             // return response()->json([
             //     'status' => 'Gagal',
@@ -139,7 +154,7 @@ class RestitusiKaryawanController extends Controller
             $restitusi->tanggal_pengobatan = $request->input('tanggal_pengobatan');
             $restitusi->keterangan_pengajuan = $request->input('keterangan_pengajuan');
             $restitusi->filename = $request->input('filename');
-            $restitusi->url_file = $request->input('url_file');
+            $restitusi->url_file = $fileName;
             $restitusi->status_pengajuan = $request->input('status_pengajuan');
 
         }

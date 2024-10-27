@@ -134,13 +134,22 @@ class KlaimKematianController extends Controller
             ]);
         }else {
             $klaim = Klaim_kematian::where('id_Klaim_kematian', $id)->first();
-            // return response()->json([
-            //     'status' => 'Gagal',
-            //     // 'id_member' => $request->input('id_member'),
-            //     // 'id_badge' => $request->input('id_badge'),
-            //     'Klaim_kematian' => $klaim
-            // ]);
-            // die();
+            
+            if ($request->hasFile('file')) {
+                
+                if ($klaim->url_file != null) {
+                    $fileName_outdated = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$klaim->url_file}");
+                    unlink($fileName_outdated);
+                }
+                
+            
+                $file = $request->file('file');
+                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/klaim_Kematian'), $fileName);
+            }else {
+                $fileName = null;
+            }
+
             $klaim->id_badge = $request->input('id_badge');
             $klaim->nama_karyawan = $request->input('nama_karyawan');
             $klaim->unit_kerja = $request->input('unit_kerja');
@@ -150,8 +159,7 @@ class KlaimKematianController extends Controller
             $klaim->nama_keluarga = $request->input('nama_keluarga');
             $klaim->hubungan_keluarga = $request->input('hubungan_keluarga');
             $klaim->no_polis = $request->input('no_polis');
-            $klaim->filename = $request->input('filename');
-            $klaim->file_url = $request->input('file_url');
+            $klaim->file_url = $fileName;
         }
         // return response()->json([
         //     'status' => 'Gagal',
