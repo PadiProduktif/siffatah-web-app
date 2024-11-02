@@ -13,16 +13,24 @@ class KelengkapanKerjaController extends Controller
      */
     public function index()
     {
-        $kelengkapan = KelengkapanKerja::select('*')->get();
-        // $test_echo = rand(0, 99999);
-        //untuk mengirim json di postman
+        $kelengkapan = KelengkapanKerja::all();
+
+        // Check if data exists
+        if ($kelengkapan->isEmpty()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'No data available',
+                'data' => []
+            ], 204); // 204 No Content
+        }
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Berhasil Mendapatkan Data',
+            'message' => 'Data retrieved successfully',
             'data' => $kelengkapan
-        ]);
-        // return view('MasterData/DataKaryawan/list_karyawan', ['karyawan' => $karyawan]);
+        ], 200); // 200 OK
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -37,38 +45,39 @@ class KelengkapanKerjaController extends Controller
      */
     public function store(Request $request)
     {
-
-        if ($request->id_badge == null && $request->nama_karyawan == null && $request->cost_center == null) {
-            return response()->json([
-                'status' => 'Gagal',
-                'message' => 'id badge, nama karyawan, dan cost center tidak boleh kosong',
-               
-            ]);
-        }else {
-            $kelengkapan = KelengkapanKerja::create([
-                'id_kelengkapan_kerja'=> rand(10,99999999),
-                'id_badge' => $request->id_badge,
-                'nama_karyawan' => $request->nama_karyawan,
-                'cost_center' => $request->cost_center,
-                'jabatan_karyawan' => $request->jabatan_karyawan,
-                'grade' => $request->grade,
-                'jenis_pakaian' => $request->jenis_pakaian,
-                'jenis_kelengkapan_kantor' => $request->jenis_kelengkapan_kantor,
-                'tahun' => $request->tahun,
-                'warna' => $request->warna,
-                'gender' => $request->gender,
-                'ukuran' => $request->ukuran,
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Berhasil Memasukan Data',
-                // 'data' => $karyawan
-                'data' => $kelengkapan
-            ]);
-        }
-
+        // Validation for required fields
+        $validatedData = $request->validate([
+            'id_badge' => 'required',
+            'nama_karyawan' => 'required',
+            'cost_center' => 'required',
+        ], [
+            'id_badge.required' => 'ID badge tidak boleh kosong.',
+            'nama_karyawan.required' => 'Nama karyawan tidak boleh kosong.',
+            'cost_center.required' => 'Cost center tidak boleh kosong.',
+        ]);
+    
+        // Create the record
+        $kelengkapan = KelengkapanKerja::create([
+            'id_badge' => $validatedData['id_badge'],
+            'nama_karyawan' => $validatedData['nama_karyawan'],
+            'cost_center' => $validatedData['cost_center'],
+            'jabatan_karyawan' => $request->jabatan_karyawan,
+            'grade' => $request->grade,
+            'jenis_pakaian' => $request->jenis_pakaian,
+            'jenis_kelengkapan_kantor' => $request->jenis_kelengkapan_kantor,
+            'tahun' => $request->tahun,
+            'warna' => $request->warna,
+            'gender' => $request->gender,
+            'ukuran' => $request->ukuran,
+        ]);
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berhasil Memasukan Data',
+            'data' => $kelengkapan
+        ], 201); // 201 Created
     }
+    
 
     /**
      * Display the specified resource.
@@ -84,69 +93,68 @@ class KelengkapanKerjaController extends Controller
     public function edit(string $id)
     {
         $kelengkapan = KelengkapanKerja::where('id_kelengkapan_kerja', $id)->first();
-
-        return response()->json($kelengkapan);
-        
+    
+        if (!$kelengkapan) {
+            return response()->json([
+                'status' => 'Failed',
+                'message' => 'Data tidak ditemukan',
+            ], 404); // 404 Not Found
+        }
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil ditemukan',
+            'data' => $kelengkapan
+        ], 200); // 200 OK
     }
+    
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-
-        // return response()->json([
-        //     'status' => 'Gagal',
-        //     'id_member' => $request->input('id_member'),
-        //     'id_badge' => $request->input('id_badge'),
-        // ]);
-        // die();
-        if ($request->id_badge == null && $request->nama_karyawan == null && $request->cost_center == null) {
+        // Check required fields
+        if (empty($request->id_badge) || empty($request->nama_karyawan) || empty($request->cost_center)) {
             return response()->json([
-                'status' => 'Gagal',
-                'message' => 'id badge dan nama karyawan tidak boleh kosong',
-               
-            ]);
-        }else {
-            $kelengkapan = KelengkapanKerja::where('id_kelengkapan_kerja', $id)->first();
-            // return response()->json([
-            //     'status' => 'Gagal',
-            //     // 'id_member' => $request->input('id_member'),
-            //     // 'id_badge' => $request->input('id_badge'),
-            //     'KelengkapanKerja' => $kelengkapan
-            // ]);
-            // die();
-            $kelengkapan->id_badge = $request->input('id_badge');
-            $kelengkapan->nama_karyawan = $request->input('nama_karyawan');
-            $kelengkapan->cost_center = $request->input('cost_center');
-            $kelengkapan->jabatan_karyawan = $request->input('jabatan_karyawan');
-            $kelengkapan->grade = $request->input('grade');
-            $kelengkapan->jenis_pakaian = $request->input('jenis_pakaian');
-            $kelengkapan->jenis_kelengkapan_kantor = $request->input('jenis_kelengkapan_kantor');
-            $kelengkapan->tahun = $request->input('tahun');
-            $kelengkapan->warna = $request->input('warna');
-            $kelengkapan->gender = $request->input('gender');
-            $kelengkapan->ukuran = $request->input('ukuran');
+                'status' => 'Failed',
+                'message' => 'ID badge, nama karyawan, dan cost center tidak boleh kosong',
+            ], 400); // 400 Bad Request
         }
-        // return response()->json([
-        //     'status' => 'Gagal',
-        //     'id_member' => $request->input('id_member'),
-        //     'id_badge' => $request->input('id_badge'),
-        // ]);
-        // die();
-        
-        //json siapa saja yang berkeluarga dengan orang tersebut
-        // $karyawan->keluarga = $request->input('nama_karyawan');
-        // untuk data url berkas data diri
+
+        // Find the record
+        $kelengkapan = KelengkapanKerja::where('id_kelengkapan_kerja', $id)->first();
+        if (!$kelengkapan) {
+            return response()->json([
+                'status' => 'Failed',
+                'message' => 'Data tidak ditemukan',
+            ], 404); // 404 Not Found
+        }
+
+        // Update fields
+        $kelengkapan->id_badge = $request->input('id_badge');
+        $kelengkapan->nama_karyawan = $request->input('nama_karyawan');
+        $kelengkapan->cost_center = $request->input('cost_center');
+        $kelengkapan->jabatan_karyawan = $request->input('jabatan_karyawan');
+        $kelengkapan->grade = $request->input('grade');
+        $kelengkapan->jenis_pakaian = $request->input('jenis_pakaian');
+        $kelengkapan->jenis_kelengkapan_kantor = $request->input('jenis_kelengkapan_kantor');
+        $kelengkapan->tahun = $request->input('tahun');
+        $kelengkapan->warna = $request->input('warna');
+        $kelengkapan->gender = $request->input('gender');
+        $kelengkapan->ukuran = $request->input('ukuran');
+
+        // Save updated record
         $kelengkapan->save();
+
         return response()->json([
             'status' => 'success',
             'message' => 'Data berhasil diperbarui',
             'data' => $kelengkapan
-        ]);
-        // return redirect()->route('karyawan.index')->with('success', 'Karyawan updated successfully');
+        ], 200); // 200 OK
     }
 
+    
     /**
      * Remove the specified resource from storage.
      */
@@ -154,21 +162,19 @@ class KelengkapanKerjaController extends Controller
     {
         $kelengkapan = KelengkapanKerja::where('id_kelengkapan_kerja', $id)->first();
 
-        
         if (!$kelengkapan) {
             return response()->json([
                 'status' => 'Failed',
-                'message' => 'User Tidak Ditemukan',
-            ]);
+                'message' => 'Data tidak ditemukan',
+            ], 404); // 404 Not Found
         }
 
-       
         $kelengkapan->delete();
 
         return response()->json([
             'status' => 'success',
             'message' => 'Data berhasil dihapus',
-        ]);
-        
+        ], 200); // 200 OK
     }
+
 }
