@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanKlaim\klaim_purnajabatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class KlaimPurnaJabatanController extends Controller
 {
@@ -13,16 +14,30 @@ class KlaimPurnaJabatanController extends Controller
      */
     public function index()
     {
-        $klaim = klaim_purnajabatan::select('*')->get();
-        // $test_echo = rand(0, 99999);
-        //untuk mengirim json di postman
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Berhasil Mendapatkan Data',
-            'data' => $klaim
-        ]);
-        // return view('MasterData/DataKaryawan/list_karyawan', ['karyawan' => $karyawan]);
+        try {
+            // Retrieve all klaim_purnajabatan data
+            $klaim = klaim_purnajabatan::all();
+    
+            // Return success response
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data retrieved successfully',
+                'data' => $klaim
+            ], 200);
+    
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Error retrieving data: " . $e->getMessage());
+    
+            // Return error response
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -36,51 +51,67 @@ class KlaimPurnaJabatanController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        // return response()->json([
-        //     'status' => 'Gagal',
-        //     'nama' => $request->nama,
+{
+    // Validate the request data
+    $validatedData = $request->validate([
+        'nama' => 'required|string|max:255',
+        'jabatan' => 'required|string|max:255',
+        'tanggal_lahir' => 'nullable|date',
+        'mulai_asuransi' => 'nullable|date',
+        'akhir_asuransi' => 'nullable|date',
+        'nama_asuransi' => 'nullable|string|max:255',
+        'no_polis' => 'nullable|string|max:255',
+        'premi_tahunan' => 'nullable|numeric',
+        'uang_tertanggung' => 'nullable|numeric',
+        'deskripsi' => 'nullable|string',
+        'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+    ]);
 
-        // ]);
-        // die();
-        if ($request->nama == null && $request->jabatan == null) {
-            return response()->json([
-                'status' => 'Gagal',
-                'message' => 'nama dan jabatan tidak boleh kosong',
-               
-            ]);
-        }else {
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan/'), $fileName);
-            }else {
-                $fileName = null;
-            }
-            $klaim = klaim_purnajabatan::create([
-                'id_klaim_purnajabatan'=> rand(10,99999999),
-                'nama' => $request->nama,
-                'jabatan' => $request->jabatan,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'mulai_asuransi' => $request->mulai_asuransi,
-                'akhir_asuransi' => $request->akhir_asuransi,
-                'nama_asuransi' => $request->nama_asuransi,
-                'no_polis' => $request->no_polis,
-                'premi_tahunan' => $request->premi_tahunan,
-                'uang_tertanggung' => $request->uang_tertanggung,
-                'deskripsi' => $request->deskripsi,
-                'file_url' => $fileName,
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Berhasil Memasukan Data',
-                // 'data' => $karyawan
-                'data' => $klaim
-            ]);
+    try {
+        // Handle file upload if present
+        $fileName = null;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan/'), $fileName);
         }
 
+        // Create new klaim_purnajabatan record
+        $klaim = klaim_purnajabatan::create([
+            'id_klaim_purnajabatan' => rand(10, 99999999),
+            'nama' => $validatedData['nama'],
+            'jabatan' => $validatedData['jabatan'],
+            'tanggal_lahir' => $validatedData['tanggal_lahir'],
+            'mulai_asuransi' => $validatedData['mulai_asuransi'],
+            'akhir_asuransi' => $validatedData['akhir_asuransi'],
+            'nama_asuransi' => $validatedData['nama_asuransi'],
+            'no_polis' => $validatedData['no_polis'],
+            'premi_tahunan' => $validatedData['premi_tahunan'],
+            'uang_tertanggung' => $validatedData['uang_tertanggung'],
+            'deskripsi' => $validatedData['deskripsi'],
+            'file_url' => $fileName,
+        ]);
+
+        // Return success response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data successfully created',
+            'data' => $klaim
+        ], 201);
+
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        Log::error("Error creating data: " . $e->getMessage());
+
+        // Return error response
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to create data',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     /**
      * Display the specified resource.
@@ -95,120 +126,141 @@ class KlaimPurnaJabatanController extends Controller
      */
     public function edit(string $id)
     {
-        $klaim = klaim_purnajabatan::where('id_klaim_purnajabatan', $id)->first();
-
+        // Find the klaim by ID
+        $klaim = klaim_purnajabatan::find($id);
+    
+        // Check if klaim exists
         if (!$klaim) {
             return response()->json([
-                'status' => 'Failed',
-                'message' => 'User Tidak Ditemukan',
-            ]);
-        }else {
-            return response()->json([
-                'status' => 'Failed',
-                'message' => 'User Ditemukan',
-                'data' => $klaim,
-            ]);
+                'status' => 'error',
+                'message' => 'Data not found',
+            ], 404);
         }
-        
-        
+    
+        // Return success response with klaim data
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $klaim,
+        ], 200);
     }
+    
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-
-        // return response()->json([
-        //     'status' => 'Gagal',
-        //     'id_member' => $request->input('id_member'),
-        //     'id_badge' => $request->input('id_badge'),
-        // ]);
-        // die();
-        if ($request->nama == null && $request->jabatan == null) {
-            return response()->json([
-                'status' => 'Gagal',
-                'message' => 'id badge dan nama karyawan tidak boleh kosong',
-               
-            ]);
-        }else {
-            $klaim = klaim_purnajabatan::where('id_klaim_purnajabatan', $id)->first();
-            // return response()->json([
-            //     'status' => 'Gagal',
-            //     // 'id_member' => $request->input('id_member'),
-            //     // 'id_badge' => $request->input('id_badge'),
-            //     'klaim_purnajabatan' => $klaim
-            // ]);
-            // die();
-            if ($request->hasFile('file')) {
-                
-                if ($klaim->url_file != null) {
-                    $fileName_outdated = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$klaim->url_file}");
-                    unlink($fileName_outdated);
-                }
-                
-            
-                $file = $request->file('file');
-                $fileName = rand(10,99999999).'_'.$file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan'), $fileName);
-            }else {
-                $fileName = null;
-            }
-            $klaim->nama = $request->input('nama');
-            $klaim->jabatan = $request->input('jabatan');
-            $klaim->tanggal_lahir = $request->input('tanggal_lahir');
-            $klaim->mulai_asuransi = $request->input('mulai_asuransi');
-            $klaim->akhir_asuransi = $request->input('akhir_asuransi');
-            $klaim->nama_asuransi = $request->input('nama_asuransi');
-            $klaim->no_polis = $request->input('no_polis');
-            $klaim->premi_tahunan = $request->input('premi_tahunan');
-            $klaim->uang_tertanggung = $request->input('uang_tertanggung');
-            $klaim->deskripsi = $request->input('deskripsi');
-            $klaim->file_url = $fileName;
-
-
-        }
-        // return response()->json([
-        //     'status' => 'Gagal',
-        //     'id_member' => $request->input('id_member'),
-        //     'id_badge' => $request->input('id_badge'),
-        // ]);
-        // die();
-        
-        //json siapa saja yang berkeluarga dengan orang tersebut
-        // $karyawan->keluarga = $request->input('nama_karyawan');
-        // untuk data url berkas data diri
-        $klaim->save();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data berhasil diperbarui',
-            'data' => $klaim
+        // Validate the request data
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:255',
+            'jabatan' => 'required|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+            'mulai_asuransi' => 'nullable|date',
+            'akhir_asuransi' => 'nullable|date',
+            'nama_asuransi' => 'nullable|string|max:255',
+            'no_polis' => 'nullable|string|max:255',
+            'premi_tahunan' => 'nullable|numeric',
+            'uang_tertanggung' => 'nullable|numeric',
+            'deskripsi' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
         ]);
-        // return redirect()->route('karyawan.index')->with('success', 'Karyawan updated successfully');
+    
+        try {
+            // Find the klaim by ID or throw a 404 if not found
+            $klaim = klaim_purnajabatan::findOrFail($id);
+    
+            // Handle file upload if present
+            if ($request->hasFile('file')) {
+                // Delete the old file if it exists
+                if ($klaim->file_url) {
+                    $oldFile = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$klaim->file_url}");
+                    if (file_exists($oldFile)) {
+                        unlink($oldFile);
+                    }
+                }
+    
+                // Save the new file
+                $file = $request->file('file');
+                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan'), $fileName);
+                $validatedData['file_url'] = $fileName;
+            }
+    
+            // Update klaim data
+            $klaim->update($validatedData);
+    
+            // Return success response
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data successfully updated',
+                'data' => $klaim
+            ], 200);
+    
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Return a 404 response if klaim is not found
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found',
+            ], 404);
+    
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Error updating data: " . $e->getMessage());
+    
+            // Return a 500 response for any other errors
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
+    
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        $klaim = klaim_purnajabatan::where('id_klaim_purnajabatan', $id)->first();
-
-        
-        if (!$klaim) {
+        try {
+            // Find the klaim by ID or throw a 404 if not found
+            $klaim = klaim_purnajabatan::findOrFail($id);
+    
+            // Delete associated file if it exists
+            if ($klaim->file_url) {
+                $filePath = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$klaim->file_url}");
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Delete the file
+                }
+            }
+    
+            // Delete the klaim record from the database
+            $klaim->delete();
+    
+            // Return a success response
             return response()->json([
-                'status' => 'Failed',
-                'message' => 'User Tidak Ditemukan',
-            ]);
+                'status' => 'success',
+                'message' => 'Data successfully deleted',
+            ], 200);
+    
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Return a 404 response if klaim is not found
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found',
+            ], 404);
+    
+        } catch (\Exception $e) {
+            // Log error for debugging
+            Log::error("Error deleting data: " . $e->getMessage());
+    
+            // Return a 500 response for any other errors
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete data',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-       
-        $klaim->delete();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data berhasil dihapus',
-        ]);
-        
     }
+    
 }
