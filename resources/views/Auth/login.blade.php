@@ -90,7 +90,7 @@
             @csrf
             <input type="text" name="username" class="form-control" placeholder="Masukan Username Anda" required>
             <input type="password" name="password" class="form-control" placeholder="Masukan Password" required>
-            <a href="#" class="forgot-password">Lupa Password?</a>
+            <!-- <a href="#" class="forgot-password">Lupa Password?</a> -->
             <button type="submit" class="btn">Masuk</button>
         </form>
     </div>

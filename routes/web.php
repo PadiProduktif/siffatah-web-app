@@ -23,6 +23,12 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::get('/', function () {
+    return view('landing-page');
+});
+
+
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/roles', [AuthController::class, 'get_role']);
 Route::post('/action_login', [AuthController::class, 'actionLogin'])->name('actionLogin');

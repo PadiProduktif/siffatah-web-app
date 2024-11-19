@@ -22,6 +22,11 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::get('/', function () {
+    return view('welcome');
+});
+
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/roles', [AuthController::class, 'get_role']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
