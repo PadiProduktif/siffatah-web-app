@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -41,27 +42,41 @@ class AuthController extends Controller
         ]);
     }
 
+    public function login(){
+        return view('Auth/login');
+    }
+
     // Login
-    public function login(Request $request)
+    public function actionLogin(Request $request)
     {
 
         if (!Auth::attempt($request->only('username', 'password'))) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        //     return response()->json(['message' => 'Unauthorized',
+        //     'username' => $request->username,
+        //     'password' => $request->password,   
+        // ], 401);
+            Session::flash('error', 'User anda tidak ditemukan');
+            return redirect('/login');
         }
 
         $user = User::where('username', $request->username)->firstOrFail();
 
         if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            // return response()->json(['message' => 'Unauthorized'], 401);
+            Session::flash('error', 'password yang anda masukan salah');
+            return redirect('/login');
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ],200);
+        // return response()->json([
+        //     'success' => true,
+        //     'access_token' => $token,
+        //     'token_type' => 'Bearer',
+        // ],200);
+
+        Session::flash('success', 'berhasil login');
+        return redirect('admin/dashboard');
     }
 
     // Logout
