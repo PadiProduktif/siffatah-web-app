@@ -26,6 +26,9 @@ Route::get('/user', function (Request $request) {
 Route::get('/', function () {
     return view('landing-page');
 });
+Route::get('/master-data-karyawan', function () {
+    return view('/extras/master-data-karyawan');
+});
 
 
 
