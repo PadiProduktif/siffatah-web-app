@@ -76,17 +76,20 @@ class AuthController extends Controller
         // ],200);
 
         Session::flash('success', 'berhasil login');
-        return redirect('home');
+        return redirect('admin/dashboard');
     }
 
     // Logout
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+            // Hapus semua token akses milik pengguna
+    $request->user()->tokens()->delete();
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+    // Logout dari sesi pengguna jika ada
+    Auth::guard('web')->logout();
+
+    // Redirect ke halaman login
+    return redirect('/login')->with('status', 'Logout berhasil!');
     }
 }
 

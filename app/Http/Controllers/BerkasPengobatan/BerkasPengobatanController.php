@@ -19,11 +19,12 @@ class BerkasPengobatanController extends Controller
             $obat = BerkasPengobatan::all();
     
             
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully.',
-                'data' => $obat
-            ], 200);
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data retrieved successfully.',
+            //     'data' => $obat
+            // ], 200);
+            return view('dashboard/berkas-pengobatan');
             
         } catch (\Exception $e) {
             

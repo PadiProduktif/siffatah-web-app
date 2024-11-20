@@ -19,11 +19,12 @@ class RestitusiKaryawanController extends Controller
             $restitusi = RestitusiKaryawan::all();
     
             // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully',
-                'data' => $restitusi
-            ], 200);
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data retrieved successfully',
+            //     'data' => $restitusi
+            // ], 200);
+            return view('dashboard/restitusi-karyawan');
     
         } catch (\Exception $e) {
             // Log the error for debugging

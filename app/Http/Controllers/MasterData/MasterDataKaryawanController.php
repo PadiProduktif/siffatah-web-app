@@ -18,11 +18,13 @@ class MasterDataKaryawanController extends Controller
             $karyawan = DataKaryawan::all();
 
             // Return success response with 200 status code
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully.',
-                'data' => $karyawan
-            ], 200);
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data retrieved successfully.',
+            //     'data' => $karyawan
+            // ], 200);
+
+            return view('extras/master-data-karyawan');
 
         } catch (\Exception $e) {
 

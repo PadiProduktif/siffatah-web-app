@@ -46,7 +46,7 @@
         .status.new { background-color: #f59e0b; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.verified { background-color: #10b981; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.rejected { background-color: #ef4444; color: #fff; padding: 5px 10px; border-radius: 5px; }
-        .status.processing { background-color: #3b82f6; color: #fff; padding: 5px 10px; border-radius: 5px; 
+        .status.processing { background-color: #3b82f6; color: #fff; padding: 5px 10px; border-radius: 5px; }
 </style>
 
     </style>

@@ -30,6 +30,7 @@ Route::get('/', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/roles', [AuthController::class, 'get_role']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/actionLogin', [AuthController::class, 'actionLogin'])->name('actionLogin');
 
 
 Route::middleware('auth:sanctum')->group(function () {

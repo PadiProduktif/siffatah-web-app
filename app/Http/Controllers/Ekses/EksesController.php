@@ -18,11 +18,12 @@ class EksesController extends Controller
             $ekses = Ekses::all();
 
             
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully.',
-                'data' => $ekses
-            ], 200); 
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data retrieved successfully.',
+            //     'data' => $ekses
+            // ], 200);
+            return view('dashboard/ekses'); 
 
         } catch (\Exception $e) {
             
