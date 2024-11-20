@@ -76,7 +76,7 @@ class AuthController extends Controller
         // ],200);
 
         Session::flash('success', 'berhasil login');
-        return redirect('admin/dashboard');
+        return redirect('home');
     }
 
     // Logout

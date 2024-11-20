@@ -23,6 +23,6 @@
             </ul>
         </li>
         <li><a href="/master-data-karyawan" class="{{ Request::is('master-data-karyawan') ? 'active' : '' }}">Master Data Karyawan</a></li>
-        <li><a href="/profil" class="{{ Request::is('profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
+        <li><a href="/set-profil" class="{{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
     </ul>
 </div>

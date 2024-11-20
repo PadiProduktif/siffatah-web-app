@@ -4,6 +4,6 @@
 
 @section('content')
 
-    ini PENGAJUAN KLAIM
+    ini SET PROFIL
 
 @endsection
