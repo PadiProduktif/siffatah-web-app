@@ -27,7 +27,10 @@ Route::get('/', function () {
     return view('landing-page');
 });
 Route::get('/master-data-karyawan', function () {
-    return view('/extras/master-data-karyawan');
+    return view('extras/master-data-karyawan');
+});
+Route::get('/home', function () {
+    return view('home');
 });
 
 

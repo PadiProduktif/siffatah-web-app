@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard - SI FATAH')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,10 +43,12 @@
             color: #ffffff;
             font-size: 14px;
         }
-        .status.new { background-color: #f59e0b; }
-        .status.verified { background-color: #10b981; }
-        .status.rejected { background-color: #ef4444; }
-        .status.processing { background-color: #3b82f6; }
+        .status.new { background-color: #f59e0b; color: #fff; padding: 5px 10px; border-radius: 5px; }
+        .status.verified { background-color: #10b981; color: #fff; padding: 5px 10px; border-radius: 5px; }
+        .status.rejected { background-color: #ef4444; color: #fff; padding: 5px 10px; border-radius: 5px; }
+        .status.processing { background-color: #3b82f6; color: #fff; padding: 5px 10px; border-radius: 5px; 
+</style>
+
     </style>
     @stack('styles')
 </head>
@@ -53,19 +57,19 @@
         <!-- Sidebar -->
         @include('components.sidebar')
 
-        
-
         <!-- Main Content -->
         <div class="flex-grow-1 p-3">
             <!-- Header -->
             <div class="header d-flex justify-content-between align-items-center mb-4">
+                <!-- Profile Section -->
                 <div class="profile d-flex align-items-center">
-                    <img src="{{ asset('resources/img/user.png') }}" alt="User Profile" class="rounded-circle me-2" style="height: 50px; width: 50px;">
+                    <i class="bi bi-person-circle me-2" style="font-size: 2rem; color: #6b7280;"></i>
                     <span class="fw-bold">Pravitasi Sandrina</span>
                 </div>
-                <img src="{{ asset('resources/img/notification.png') }}" alt="Notifications" class="img-fluid" style="height: 50px;">
+                <!-- Settings Icon -->
+                <i class="bi bi-gear-fill" style="font-size: 2rem; color: #6b7280;"></i>
             </div>
-            
+
             @yield('content')
         </div>
     </div>
