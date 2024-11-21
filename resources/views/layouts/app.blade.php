@@ -64,7 +64,7 @@
                 <!-- Profile Section -->
                 <div class="profile d-flex align-items-center">
                     <i class="bi bi-person-circle me-2" style="font-size: 2rem; color: #6b7280;"></i>
-                    <span class="fw-bold">Pravitasi Sandrina</span>
+                    <span class="fw-bold"><strong>{{ $data['user'] }}</strong></span>
                 </div>
                 <!-- Settings Icon -->
                 <i class="bi bi-gear-fill" style="font-size: 2rem; color: #6b7280;"></i>
@@ -72,7 +72,7 @@
 
             @yield('content')
         </div>
-    </div>
+    </div> 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')

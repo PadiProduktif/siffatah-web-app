@@ -5,30 +5,56 @@ namespace App\Http\Controllers\KelengkapanKerja;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\KelengkapanKerja\KelengkapanKerja;
+use Illuminate\Support\Facades\Auth;
 
 class KelengkapanKerjaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index_wearpack()
     {
         $kelengkapan = KelengkapanKerja::all();
+        $user = Auth::user();
+        $data['user'] = $user->fullname;
 
         // Check if data exists
-        if ($kelengkapan->isEmpty()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'No data available',
-                'data' => []
-            ], 204); // 204 No Content
-        }
+        // if ($kelengkapan->isEmpty()) {
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'message' => 'No data available',
+        //         'data' => []
+        //     ], 204); // 204 No Content
+        // }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data retrieved successfully',
-            'data' => $kelengkapan
-        ], 200); // 200 OK
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Data retrieved successfully',
+        //     'data' => $kelengkapan
+        // ], 200); // 200 OK
+
+        return view('dashboard/kelengkapan-kerja/wearpack',compact('data'));
+    }
+    public function index_sepatu()
+    {
+        $kelengkapan = KelengkapanKerja::all();
+        $user = Auth::user();
+        $data['user'] = $user->fullname;
+        // Check if data exists
+        // if ($kelengkapan->isEmpty()) {
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'message' => 'No data available',
+        //         'data' => []
+        //     ], 204); // 204 No Content
+        // }
+
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Data retrieved successfully',
+        //     'data' => $user->fullname
+        // ], 200); // 200 OK
+        return view('dashboard/kelengkapan-kerja/sepatu',compact('data'));
     }
 
 

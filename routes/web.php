@@ -65,12 +65,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/ekses/update/{id}', [EksesController::class, 'update']);
     Route::get('/admin/ekses/delete/{id}', [EksesController::class, 'destroy']);
     
-    //Kelengkapan Kerja
-    Route::get('/admin/kelengkapan_kerja', [KelengkapanKerjaController::class, 'index']);
-    Route::post('/admin/kelengkapan_kerja/tambah', [KelengkapanKerjaController::class, 'store']);
-    Route::get('/admin/kelengkapan_kerja/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
-    Route::post('/admin/kelengkapan_kerja/update/{id}', [KelengkapanKerjaController::class, 'update']);
-    Route::get('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
+    //Kelengkapan Kerja Wearpack
+    Route::get('/admin/kelengkapan_kerja/wearpack', [KelengkapanKerjaController::class, 'index_wearpack']);
+    Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);
+    Route::get('/admin/kelengkapan_kerja/wearpack/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
+    Route::post('/admin/kelengkapan_kerja/wearpack/update/{id}', [KelengkapanKerjaController::class, 'update']);
+    Route::get('/admin/kelengkapan_kerja/wearpack/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
+
+    //Kelengkapan Kerja Sepatu
+    Route::get('/admin/kelengkapan_kerja/sepatu', [KelengkapanKerjaController::class, 'index_sepatu']);
+    Route::post('/admin/kelengkapan_kerja/sepatu/tambah', [KelengkapanKerjaController::class, 'store']);
+    Route::get('/admin/kelengkapan_kerja/sepatu/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
+    Route::post('/admin/kelengkapan_kerja/sepatu/update/{id}', [KelengkapanKerjaController::class, 'update']);
+    Route::get('/admin/kelengkapan_kerja/sepatu/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
     
     //Klaim Kecelakaan
     Route::get('/admin/klaim_kecelakaan', [KlaimKecelakaanController::class, 'index']);

@@ -19,8 +19,8 @@
                 Kelengkapan Kerja
             </a>
             <ul class="dropdown-menu" aria-labelledby="kelengkapanKerjaDropdown">
-                <li><a href="/wearpack" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Wearpack</a></li>
-                <li><a href="/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Sepatu</a></li>
+                <li><a href="/admin/kelengkapan_kerja/wearpack" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Wearpack</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Sepatu</a></li>
             </ul>
         </li>
         <li><a href="/admin/master_data_karyawan" class="{{ Request::is('master-data-karyawan') ? 'active' : '' }}">Master Data Karyawan</a></li>
