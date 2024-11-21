@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard')
-
 @section('content')
 
     <!-- Stats -->
@@ -25,4 +23,5 @@
             </div>
         </div>
     </div>
+    
 @endsection

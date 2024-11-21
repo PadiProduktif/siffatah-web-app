@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,7 +65,7 @@
                 <!-- Profile Section -->
                 <div class="profile d-flex align-items-center">
                     <i class="bi bi-person-circle me-2" style="font-size: 2rem; color: #6b7280;"></i>
-                    <span class="fw-bold"><strong>{{ $data['user'] }}</strong></span>
+                    <span class="fw-bold"><strong>{{ auth()->user()->fullname }}</strong></span>
                 </div>
                 <!-- Settings Icon -->
                 <i class="bi bi-gear-fill" style="font-size: 2rem; color: #6b7280;"></i>

@@ -1,6 +1,12 @@
 <!-- Sidebar -->
 <div class="sidebar p-3">
-    <h1>SI FATAH</h1>
+    <div class="d-flex align-items-center">
+        <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="PKC Logo" width="70">
+        <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN" width="100">
+    </div>
+    <br>
+    <h1>SI FATAH <span class="text-muted" style="font-size: 12px;">v.01</span></h1>
+    <p class="text-muted" style="font-size: 12px;">Sistem Informasi Fasilitas dan Kesehatan</p>
     <ul class="nav flex-column">
         <li><a href="/admin/dashboard" class="{{ Request::is('home') ? 'active' : '' }}">Home</a></li>
         <li><a href="/admin/restitusi_karyawan" class="{{ Request::is('restitusi-karyawan') ? 'active' : '' }}">Restitusi Karyawan</a></li>

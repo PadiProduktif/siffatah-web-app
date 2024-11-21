@@ -13,8 +13,8 @@ class DashboardController extends Controller
     // Registration
     public function index()
     {
-
-        return view('home');
+        $data = [];
+        return view('home', $data);
     }
 
 }

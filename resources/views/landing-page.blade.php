@@ -148,7 +148,7 @@
                 <div class="col-md-4">
                     <h3>SI FATAH <span class="fs-6">v.01</span></h3>
                     <p>Sistem Informasi Fasilitas dan Kesehatan</p>
-                    <p>Si Fatah (Sistem Informasi Fasilitas dan Kesehatan) adalah aplikasi yang dikembangkan untuk mendukung Unit Kerja Asuransi dan Kesejahteraan Pegawai dalam menjalankan tugas sehari-hari.</p>
+                    <p>Si Fatah adalah aplikasi yang dikembangkan untuk mendukung Unit Kerja Asuransi dan Kesejahteraan Pegawai dalam menjalankan tugas sehari-hari.</p>
                 </div>
                 <!-- Middle Section -->
                 <div class="col-md-4 text-center">
