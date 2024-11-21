@@ -16,15 +16,18 @@ class KlaimKecelakaanController extends Controller
     public function index()
     {
         try {
+            // dd(4498);
             // Retrieve all klaim_kecelakaan data
             $klaim = Klaim_kecelakaan::all();
+            return view('dashboard/pengajuan-klaim', compact('klaim'));
+            // return view('dashboard/pengajuan-klaim');
 
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully',
-                'data' => $klaim
-            ], 200);
+            // // Return success response
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data retrieved successfully',
+            //     'data' => $klaim
+            // ], 200);
 
         } catch (\Exception $e) {
             // Log error for debugging

@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard')
-
 @section('content')
 
     <!-- Table -->
@@ -37,6 +35,7 @@
                                     <button class="btn btn-sm btn-info" onclick="editKaryawan('{{ $k->id_karyawan }}')">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+                                    
                                     <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('{{ $k->id_karyawan }}')">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -50,6 +49,109 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    
+    <!-- Modal Edit -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Data Karyawan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="edit_id_badge" class="form-label">ID Badge</label>
+                                <input type="text" class="form-control" id="edit_id_badge" name="id_badge" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_nama_karyawan" class="form-label">Nama Karyawan</label>
+                                <input type="text" class="form-control" id="edit_nama_karyawan" name="nama_karyawan" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_gelar_depan" class="form-label">Gelar Depan</label>
+                                <input type="text" class="form-control" id="edit_gelar_depan" name="gelar_depan">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_nama_lengkap" class="form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" id="edit_nama_lengkap" name="nama_lengkap" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_gelar_belakang" class="form-label">Gelar Belakang</label>
+                                <input type="text" class="form-control" id="edit_gelar_belakang" name="gelar_belakang">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_pendidikan" class="form-label">Pendidikan</label>
+                                <select class="form-select" id="edit_pendidikan" name="pendidikan">
+                                    <option value="">Pilih Pendidikan</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA">SMA</option>
+                                    <option value="D3">D3</option>
+                                    <option value="S1">S1</option>
+                                    <option value="S2">S2</option>
+                                    <option value="S3">S3</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_agama" class="form-label">Agama</label>
+                                <select class="form-select" id="edit_agama" name="agama">
+                                    <option value="">Pilih Agama</option>
+                                    <option value="Islam">Islam</option>
+                                    <option value="Kristen">Kristen</option>
+                                    <option value="Katolik">Katolik</option>
+                                    <option value="Hindu">Hindu</option>
+                                    <option value="Buddha">Buddha</option>
+                                    <option value="Konghucu">Konghucu</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_status_pernikahan" class="form-label">Status Pernikahan</label>
+                                <select class="form-select" id="edit_status_pernikahan" name="status_pernikahan">
+                                    <option value="">Pilih Status</option>
+                                    <option value="Belum Menikah">Belum Menikah</option>
+                                    <option value="Menikah">Menikah</option>
+                                    <option value="Cerai">Cerai</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                                <select class="form-select" id="edit_jenis_kelamin" name="jenis_kelamin">
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_tempat_lahir" class="form-label">Tempat Lahir</label>
+                                <input type="text" class="form-control" id="edit_tempat_lahir" name="tempat_lahir">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="edit_tanggal_lahir" name="tanggal_lahir">
+                            </div>
+                            <div class="col-12">
+                                <label for="edit_alamat" class="form-label">Alamat</label>
+                                <textarea class="form-control" id="edit_alamat" name="alamat" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="edit_keluarga" class="form-label">Keluarga</label>
+                                <input type="text" class="form-control" id="edit_keluarga" name="keluarga">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
