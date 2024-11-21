@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/master_data_karyawan/tambah', [MasterDataKaryawanController::class, 'store']);
     Route::get('/admin/master_data_karyawan/edit/{id}', [MasterDataKaryawanController::class, 'edit']);
     Route::post('/admin/master_data_karyawan/update/{id}', [MasterDataKaryawanController::class, 'update']);
-    Route::get('/admin/master_data_karyawan/delete/{id}', [MasterDataKaryawanController::class, 'destroy']);
+    Route::delete('/admin/master_data_karyawan/delete/{id}', [MasterDataKaryawanController::class, 'destroy']);
  
     //Master Data Non Karyawan
     Route::get('/admin/master_data_non_karyawan', [MasterDataNonKaryawanController::class, 'index']);
