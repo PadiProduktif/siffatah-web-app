@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Master Data Karyawan
     Route::get('/admin/master_data_karyawan', [MasterDataKaryawanController::class, 'index']);
     Route::post('/admin/master_data_karyawan/tambah', [MasterDataKaryawanController::class, 'store']);
+    Route::get('/admin/master_data_karyawan/detail/{id}', [MasterDataKaryawanController::class, 'detail']);
     Route::get('/admin/master_data_karyawan/edit/{id}', [MasterDataKaryawanController::class, 'edit']);
     Route::post('/admin/master_data_karyawan/update/{id}', [MasterDataKaryawanController::class, 'update']);
     Route::delete('/admin/master_data_karyawan/delete/{id}', [MasterDataKaryawanController::class, 'destroy']);

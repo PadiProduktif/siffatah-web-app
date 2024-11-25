@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PengajuanKlaim\klaim_kecelakaan;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Support\Facades\Log;
 
 
@@ -16,10 +17,20 @@ class KlaimKecelakaanController extends Controller
     public function index()
     {
         try {
+            
+            $dataKaryawan = DataKaryawan::all(); // Ambil semua data karyawan
             // dd(4498);
             // Retrieve all klaim_kecelakaan data
-            $klaim = Klaim_kecelakaan::all();
-            return view('dashboard/pengajuan-klaim', compact('klaim'));
+            $dataKlaim = Klaim_kecelakaan::all();
+
+            $data = [
+                'dataKlaim' => $dataKlaim,
+                'dataKaryawan' => $dataKaryawan
+            ];
+            // dd($dataKaryawan);
+
+            // return view('dashboard/pengajuan-klaim', compact('klaim'));
+            return view('dashboard/pengajuan-klaim', $data);
             // return view('dashboard/pengajuan-klaim');
 
             // // Return success response

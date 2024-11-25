@@ -12,7 +12,6 @@ class klaim_kecelakaan extends Model
     protected $table = 'table_klaim_kecelakaan';
     protected $primaryKey = 'id_klaim_kecelakaan';
     protected $fillable = [
-        'id_klaim_kecelakaan',
         'id_badge',
         'nama_karyawan',
         'unit_kerja',

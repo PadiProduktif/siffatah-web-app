@@ -7,12 +7,75 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>PENGAJUAN KLAIM</h2>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary">
-                <i class="bi bi-filter"></i> Tambahkan Filter
+            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addKlaimModal">
+                <i class="bi bi-plus-lg"></i> Tambah Data
             </button>
-            <button class="btn btn-outline-danger">
+            <div class="modal fade" id="addKlaimModal" tabindex="-1" aria-labelledby="addKlaimModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addKlaimModalLabel">Tambah Pengajuan Klaim</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="addKlaimForm" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <select class="form-select" id="id_badge" name="id_badge" required>
+                                        <option value="" disabled selected>Pilih Karyawan</option>
+                                        @foreach($dataKaryawan as $karyawan) <!-- Pastikan $karyawans berisi data karyawan -->
+                                            <option value="{{ $karyawan->id_badge }}">{{ $karyawan->nama_karyawan }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="col-md-6">
+                                        <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
+                                        <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="unit_kerja" class="form-label">Unit Kerja</label>
+                                        <input type="text" class="form-control" id="unit_kerja" name="unit_kerja" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nama_asuransi" class="form-label">Nama Asuransi</label>
+                                        <input type="text" class="form-control" id="nama_asuransi" name="nama_asuransi" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="rs_klinik" class="form-label">Rumah Sakit/Klinik</label>
+                                        <input type="text" class="form-control" id="rs_klinik" name="rs_klinik" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="tanggal_kejadian" class="form-label">Tanggal Kejadian</label>
+                                        <input type="date" class="form-control" id="tanggal_kejadian" name="tanggal_kejadian" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nama_keluarga" class="form-label">Nama Keluarga</label>
+                                        <input type="text" class="form-control" id="nama_keluarga" name="nama_keluarga" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="hubungan_keluarga" class="form-label">Hubungan Keluarga</label>
+                                        <input type="text" class="form-control" id="hubungan_keluarga" name="hubungan_keluarga" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="deskripsi" class="form-label">Deskripsi</label>
+                                        <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="file" class="form-label">Upload File</label>
+                                        <input type="file" class="form-control" id="file" name="file_url" accept=".pdf,.jpg,.png" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- <button class="btn btn-outline-danger">
                 <i class="bi bi-trash"></i> Hapus Semua
-            </button>
+            </button> -->
         </div>
     </div>
 

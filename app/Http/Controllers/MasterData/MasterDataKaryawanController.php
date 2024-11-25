@@ -27,6 +27,17 @@ class MasterDataKaryawanController extends Controller
             ], 500);
         }
     }
+    public function detail($id=null)
+    {
+        // Cari data karyawan berdasarkan ID
+        $dataKaryawan = DataKaryawan::find($id);
+        $dataImages = [];
+        // dd(
+        //     $id,
+        //     $dataKaryawan,
+        // );
+        return view('extras/master-data-karyawan-detail', compact('dataKaryawan'));
+    }
 
     /**
      * Show the form for creating a new resource.
