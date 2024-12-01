@@ -49,7 +49,6 @@ class AuthController extends Controller
     // Login
     public function actionLogin(Request $request)
     {
-
         if (!Auth::attempt($request->only('username', 'password'))) {
         //     return response()->json(['message' => 'Unauthorized',
         //     'username' => $request->username,
@@ -60,12 +59,16 @@ class AuthController extends Controller
         }
 
         $user = User::where('username', $request->username)->firstOrFail();
+        // dd(
+        //     $request->only('username', 'password'),
+        //     $user
+        // );
 
-        if (!Hash::check($request->password, $user->password)) {
-            // return response()->json(['message' => 'Unauthorized'], 401);
-            Session::flash('error', 'password yang anda masukan salah');
-            return redirect('/login');
-        }
+        // if (!Hash::check($request->password, $user->password)) {
+        //     // return response()->json(['message' => 'Unauthorized'], 401);
+        //     Session::flash('error', 'password yang anda masukan salah');
+        //     return redirect('/login');
+        // }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

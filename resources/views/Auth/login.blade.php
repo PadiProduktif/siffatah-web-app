@@ -80,13 +80,13 @@
         </div>
         <h1>SI FATAH v0.01</h1>
         <p>Sistem Informasi Fasilitas dan Kesehatan</p>
-        @if(session('error'))
-            <div class="alert alert-danger">
-                <b>Opps!</b> {{session('error')}}
-            </div>
+            @if(session('error'))
+                <div class="alert alert-danger">
+                    <b>Opps!</b> {{session('error')}}
+                </div>
             @endif
         <h2>SELAMAT DATANG!</h2>
-        <form action="{{ route('actionLogin') }}" method="POST">
+        <form action="{{ url('/action_login') }}" method="POST">
             @csrf
             <input type="text" name="username" class="form-control" placeholder="Masukan Username Anda" required>
             <input type="password" name="password" class="form-control" placeholder="Masukan Password" required>

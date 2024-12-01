@@ -18,7 +18,6 @@ class MasterDataKaryawanController extends Controller
             return view('extras/master-data-karyawan', compact('karyawan'));
         } catch (\Exception $e) {
 
-
             // Return error response with 500 status code
             return response()->json([
                 'status' => 'error',
@@ -31,7 +30,37 @@ class MasterDataKaryawanController extends Controller
     {
         // Cari data karyawan berdasarkan ID
         $dataKaryawan = DataKaryawan::find($id);
+        $dataKeluarga = [
+            'pasangan' => [],
+            'anak' => [],
+        ];
+        $dataKeluarga['pasangan'][] = [
+            'nama' => 'Fulanah',
+            'NIK' => '12313112123',
+            'status' => 'istri',
+            'badge_parent' => $dataKaryawan['id_badge'],
+        ];
+        $dataKeluarga['anak'][] = [
+            'nama' => 'Fulanah',
+            'NIK' => '12313112123',
+            'status' => 'anak',
+            'badge_parent' => $dataKaryawan['id_badge'],
+        ];
+        $dataKeluarga['anak'][] = [
+            'nama' => 'Fulan',
+            'NIK' => '5645646456',
+            'status' => 'anak',
+            'badge_parent' => $dataKaryawan['id_badge'],
+        ];
+        $dataKaryawan['dataKeluarga'] = $dataKeluarga;
+
+        // dd(
+        //     $dataKaryawan,
+        //     $dataKeluarga,
+        // );
         $dataImages = [];
+
+        // dd($dataKaryawan);
         // dd(
         //     $id,
         //     $dataKaryawan,
@@ -54,9 +83,9 @@ class MasterDataKaryawanController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request
         $validatedData = $request->validate([
-            'id_badge' => 'required|string|max:255',
+            // Validasi untuk data karyawan
+            'id_badge' => 'required|string|max:255', // Gunakan 'integer' jika ID hanya berupa angka
             'nama_karyawan' => 'required|string|max:255',
             'gelar_depan' => 'nullable|string|max:255',
             'nama_lengkap' => 'required|string|max:255',
@@ -67,79 +96,38 @@ class MasterDataKaryawanController extends Controller
             'status_pernikahan' => 'nullable|string|max:255',
             'tempat_lahir' => 'nullable|string|max:255',
             'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|string|max:50',
+            'jenis_kelamin' => 'nullable|string|in:Pria,Wanita', // Validasi untuk pilihan terbatas
             'keluarga' => 'nullable|string|max:500',
-            // 'foto_diri' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
-            // 'file_ktp' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            // 'file_kk' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            // 'buku_nikah' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            // 'akta_kelahiran' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            // 'npwp' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048',
-            // 'lamaran_pekerjaan' => 'nullable|file|mimes:pdf|max:2048'
+        
+            // Validasi untuk file (aktifkan jika digunakan)
+            // 'foto_diri' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            // 'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'file_kk' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'buku_nikah' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'akta_kelahiran' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'npwp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'lamaran_pekerjaan' => 'nullable|file|mimes:pdf|max:2048',
         ]);
-
+        // Simpan data ke database
         try {
-            // Helper function for file upload
-            $uploadFile = function ($file, $directory) {
-                if ($file) {
-                    $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                    $file->move(public_path("uploads/karyawan/{$directory}/"), $fileName);
-                    return $fileName;
-                }
-                return null;
-            };
-
-            // Upload files
-            // $foto_diri_fileName = $uploadFile($request->file('foto_diri'), 'foto_diri');
-            // $file_ktp_fileName = $uploadFile($request->file('file_ktp'), 'file_ktp');
-            // $file_kk_fileName = $uploadFile($request->file('file_kk'), 'file_kk');
-            // $buku_nikah_fileName = $uploadFile($request->file('buku_nikah'), 'buku_nikah');
-            // $akta_kelahiran_fileName = $uploadFile($request->file('akta_kelahiran'), 'akta_kelahiran');
-            // $npwp_fileName = $uploadFile($request->file('npwp'), 'npwp');
-            // $lamaran_pekerjaan_fileName = $uploadFile($request->file('lamaran_pekerjaan'), 'lamaran_pekerjaan');
-
-            // Create new karyawan record
             $karyawan = DataKaryawan::create([
-                // 'id_karyawan' => rand(10, 99999999),
                 'id_badge' => $validatedData['id_badge'],
                 'nama_karyawan' => $validatedData['nama_karyawan'],
-                // 'gelar_depan' => $validatedData['gelar_depan'],
-                // 'nama_lengkap' => $validatedData['nama_lengkap'],
-                // 'gelar_belakang' => $validatedData['gelar_belakang'],
-                // 'pendidikan' => $validatedData['pendidikan'],
-                // 'alamat' => $validatedData['alamat'],
-                // 'agama' => $validatedData['agama'],
-                // 'status_pernikahan' => $validatedData['status_pernikahan'],
-                // 'tempat_lahir' => $validatedData['tempat_lahir'],
-                // 'tanggal_lahir' => $validatedData['tanggal_lahir'],
-                // 'jenis_kelamin' => $validatedData['jenis_kelamin'],
-                // 'keluarga' => $validatedData['keluarga'],
-
-                // 'url_foto_diri' => $foto_diri_fileName,
-                // 'url_file_ktp' => $file_ktp_fileName,
-                // 'url_file_kk' => $file_kk_fileName,
-                // 'url_file_buku_nikah' => $buku_nikah_fileName,
-                // 'url_file_akta_kelahiran' => $akta_kelahiran_fileName,
-                // 'url_npwp' => $npwp_fileName,
-                // 'url_lamaran_pekerjaan' => $lamaran_pekerjaan_fileName,
+                'gelar_depan' => $validatedData['gelar_depan'],
+                'gelar_belakang' => $validatedData['gelar_belakang'],
+                'pendidikan' => $validatedData['pendidikan'],
+                'alamat' => $validatedData['alamat'],
+                'agama' => $validatedData['agama'],
+                'status_pernikahan' => $validatedData['status_pernikahan'],
+                'tempat_lahir' => $validatedData['tempat_lahir'],
+                'tanggal_lahir' => $validatedData['tanggal_lahir'],
+                'jenis_kelamin' => $validatedData['jenis_kelamin'],
             ]);
 
-
-            // Return success response
-            // return response()->json([
-            //     'status' => 'success',
-            //     'message' => 'Data successfully created.',
-            //     'data' => $karyawan
-            // ], 201);
-
-            // Redirect ke halaman master data karyawan dengan pesan sukses
+            // Redirect dengan pesan sukses
             return redirect('/admin/master_data_karyawan')->with('success', 'Data berhasil disimpan.');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to store data.',
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect('/admin/master_data_karyawan')->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
     }
 

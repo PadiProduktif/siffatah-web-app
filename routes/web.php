@@ -27,9 +27,10 @@ Route::get('/', function () {
     return view('landing-page');
 });
 
-Route::post('/register', [AuthController::class, 'register']);
+// Route::post('/register', [AuthController:    :class, 'register']);
 Route::get('/roles', [AuthController::class, 'get_role']);
-Route::post('/action_login', [AuthController::class, 'actionLogin'])->name('actionLogin');
+Route::post('/action_login', [AuthController::class, 'actionLogin']);
+// Route::post('/action_login', [AuthController::class, 'actionLogin'])->name('actionLogin');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 
 
@@ -171,7 +172,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/master-data-karyawan', function () {
 //         return view('extras/master-data-karyawan');
 //     });
-//     Route::get('/set-profil', function () {
-//         return view('extras/set-profil');
-//     });
+    Route::get('set-profil', function () {
+        return view('extras/set-profil');
+    });
 // });

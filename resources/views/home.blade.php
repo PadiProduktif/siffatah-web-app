@@ -22,6 +22,18 @@
                 <p>Telah Diverifikasi</p>
             </div>
         </div>
+        <div class="col-md">
+            <div class="stat bg-light text-center p-3 rounded shadow">
+                <h2 class="text-success">{{$countDataKaryawanActive}}</h2>
+                <p>Karyawan Aktif</p>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="stat bg-light text-center p-3 rounded shadow">
+                <h2 class="text-success">{{$countDataKaryawanPensiun}}</h2>
+                <p>Karyawan Pensiun {{date('Y')}}</p>
+            </div>
+        </div>
     </div>
 
     <!-- Bar Chart -->

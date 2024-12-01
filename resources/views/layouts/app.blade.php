@@ -68,7 +68,7 @@
                     <span class="fw-bold"><strong>{{ auth()->user()->fullname }}</strong></span>
                 </div>
                 <!-- Settings Icon -->
-                <i class="bi bi-gear-fill" style="font-size: 2rem; color: #6b7280;"></i>
+                <!-- <i class="bi bi-gear-fill" style="font-size: 2rem; color: #6b7280;"></i> -->
             </div>
 
             @yield('content')
