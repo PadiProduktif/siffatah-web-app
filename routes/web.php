@@ -72,7 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/kelengkapan_kerja/wearpack/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
     Route::post('/admin/kelengkapan_kerja/wearpack/update/{id}', [KelengkapanKerjaController::class, 'update']);
     Route::get('/admin/kelengkapan_kerja/wearpack/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
-
+    Route::post('/admin/kelengkapan_kerja/upload', [KelengkapanKerjaController::class, 'uploadExcel'])->name('kelengkapan-kerja.upload');
     //Kelengkapan Kerja Wearpack
     Route::get('/admin/kelengkapan_kerja/wearpack', [KelengkapanKerjaController::class, 'index_wearpack']);
     Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);

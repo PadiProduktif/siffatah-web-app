@@ -5,9 +5,10 @@
 @section('content')
 
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Kelengkapan Kerja</h4>
-            <a href="" class="btn btn-primary">+ Masukan Data Baru</a>
+        <div class="d-flex justify-content-end align-items-center mb-4">
+            <h4 class="me-auto">Kelengkapan Kerja</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
+            <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
+            <a href="" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#modalDataExcel">+ Masukan Data Excel</a> <!-- Tambahkan kelas 'ms-2' untuk memberi margin kiri pada tombol kedua -->
         </div>
 
         <div class="mb-3">
@@ -80,6 +81,62 @@
             
         </div>
     </div>
+    <div class="modal fade" id="modalDataBaru" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDataBaruLabel">Masukan Data Baru</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="idBadge" class="form-label">ID Badge</label>
+                                <input type="text" class="form-control" id="idBadge" placeholder="Masukkan ID Badge">
+                            </div>
+                            <div class="mb-3">
+                                <label for="namaKaryawan" class="form-label">Nama Karyawan</label>
+                                <input type="text" class="form-control" id="namaKaryawan" placeholder="Masukkan Nama">
+                            </div>
+                            <!-- Tambahkan input lainnya sesuai kebutuhan -->
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal untuk Masukan Data Excel -->
+        <div class="modal fade" id="modalDataExcel" tabindex="-1" aria-labelledby="modalDataExcelLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDataExcelLabel">Masukan Data Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <form action="{{ route('kelengkapan-kerja.upload') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="file_excel" class="form-label">Upload File Excel</label>
+                            <input type="file" class="form-control" id="file_excel" name="file_excel" accept=".xlsx, .xls">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-success">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         function toggle(source) {
