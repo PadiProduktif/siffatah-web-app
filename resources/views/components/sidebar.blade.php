@@ -15,7 +15,8 @@
         <!-- <li><a href="/kepesertaan-anggota" class="{{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li> -->
         <li><a href="/admin/ekses" class="{{ Request::is('ekses') ? 'active' : '' }}">Ekses</a></li>
         <li><a href="/admin/berkas_pengobatan" class="{{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
-        <li class="nav-item dropdown">
+        <li><a href="/admin/kelengkapan_kerja" class="{{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Kelengkapan Kerja</a></li>
+        {{-- <li class="nav-item dropdown">
             <a href="#" 
                class="nav-link dropdown-toggle {{ Request::is('wearpack') || Request::is('sepatu') ? 'active' : '' }}" 
                id="kelengkapanKerjaDropdown" 
@@ -26,9 +27,14 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="kelengkapanKerjaDropdown">
                 <li><a href="/admin/kelengkapan_kerja/wearpack" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Wearpack</a></li>
-                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Sepatu</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Sepatu Safety</a></li>
+                <li><a href="/admin/kelengkapan_kerja/wearpack" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Sepatu Kantor</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Jaket Shift</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Seragam Olahraga</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Jaket Casual</a></li>
+                <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Seragam Dinas Harian</a></li>
             </ul>
-        </li>
+        </li> --}}
         
         @if(auth()->check() && auth()->user()->role === 'superadmin')
             <li><a href="/admin/master_data_karyawan" class="{{ Request::is('master-data-karyawan') ? 'active' : '' }}">Master Data Karyawan</a></li>

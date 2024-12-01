@@ -12,28 +12,16 @@ class KelengkapanKerjaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index_wearpack()
+    public function index()
     {
         $kelengkapan = KelengkapanKerja::all();
         $user = Auth::user();
         $data['user'] = $user->fullname;
+        $data['kelengkapan'] = $kelengkapan;
 
-        // Check if data exists
-        // if ($kelengkapan->isEmpty()) {
-        //     return response()->json([
-        //         'status' => 'success',
-        //         'message' => 'No data available',
-        //         'data' => []
-        //     ], 204); // 204 No Content
-        // }
 
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => 'Data retrieved successfully',
-        //     'data' => $kelengkapan
-        // ], 200); // 200 OK
 
-        return view('dashboard/kelengkapan-kerja/wearpack',compact('data'));
+        return view('dashboard/kelengkapan-kerja',$data);
     }
     public function index_sepatu()
     {
