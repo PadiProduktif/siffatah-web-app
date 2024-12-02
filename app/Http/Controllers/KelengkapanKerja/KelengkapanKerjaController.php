@@ -95,7 +95,7 @@ class KelengkapanKerjaController extends Controller
         ], 201); // 201 Created
     }
     
-    public function uploadEexcel(Request $request){
+    public function uploadExcel(Request $request){
             // Validasi file
         $validator = Validator::make($request->all(), [
             'file_excel' => 'required|mimes:xlsx,xls',
@@ -119,15 +119,20 @@ class KelengkapanKerjaController extends Controller
                     }
 
                     // Cek apakah semua kolom ada
-                    if (isset($row[0], $row[1], $row[2], $row[3], $row[4], $row[5], $row[6])) {
+                    if (isset($row[1], $row[2], $row[4], $row[5], $row[6], $row[7], $row[8], $row[9], $row[10], $row[11], $row[12])) {
                         KelengkapanKerja::create([
-                            'no_badge' => $row[0],
-                            'nama' => $row[1],
-                            'cost_center' => $row[2],
-                            'unit_kerja' => $row[3],
-                            'sepatu_kantor' => $row[4],
-                            'sepatu_safety' => $row[5],
-                            'wearpack_cover_all' => $row[6],
+                            'id_badge' => $row[1],
+                            'nama_karyawan' => $row[2],
+                            'cost_center' => $row[4],
+                            'jabatan_karyawan' => $row[5],
+                            'sepatu_kantor' => $row[6],
+                            'sepatu_safety' => $row[7],
+                            'wearpack_cover_all' => $row[8],
+                            'jaket_shift' => $row[9],
+                            'seragam_olahraga' => $row[10],
+                            'jaket_casual' => $row[11],
+                            'seragam_dinas_harian' => $row[12],
+                            
                             // Tambahkan kolom lain sesuai kebutuhan
                         ]);
                     }
