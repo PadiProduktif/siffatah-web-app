@@ -6,34 +6,25 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\KelengkapanKerja\KelengkapanKerja;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
+
 
 class KelengkapanKerjaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index_wearpack()
+    public function index()
     {
         $kelengkapan = KelengkapanKerja::all();
         $user = Auth::user();
         $data['user'] = $user->fullname;
+        $data['kelengkapan'] = $kelengkapan;
 
-        // Check if data exists
-        // if ($kelengkapan->isEmpty()) {
-        //     return response()->json([
-        //         'status' => 'success',
-        //         'message' => 'No data available',
-        //         'data' => []
-        //     ], 204); // 204 No Content
-        // }
 
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => 'Data retrieved successfully',
-        //     'data' => $kelengkapan
-        // ], 200); // 200 OK
 
-        return view('dashboard/kelengkapan-kerja/wearpack',compact('data'));
+        return view('dashboard/kelengkapan-kerja',$data);
     }
     public function index_sepatu()
     {
@@ -104,6 +95,50 @@ class KelengkapanKerjaController extends Controller
         ], 201); // 201 Created
     }
     
+    public function uploadEexcel(Request $request){
+            // Validasi file
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
+
+            // Validasi apakah data tidak kosong
+            if (!empty($data) && count($data[0]) > 0) {
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key == 0) {
+                        continue;
+                    }
+
+                    // Cek apakah semua kolom ada
+                    if (isset($row[0], $row[1], $row[2], $row[3], $row[4], $row[5], $row[6])) {
+                        KelengkapanKerja::create([
+                            'no_badge' => $row[0],
+                            'nama' => $row[1],
+                            'cost_center' => $row[2],
+                            'unit_kerja' => $row[3],
+                            'sepatu_kantor' => $row[4],
+                            'sepatu_safety' => $row[5],
+                            'wearpack_cover_all' => $row[6],
+                            // Tambahkan kolom lain sesuai kebutuhan
+                        ]);
+                    }
+                }
+            }
+
+            return redirect()->back()->with('success', 'Data berhasil diunggah!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal mengunggah file!');
+    }
 
     /**
      * Display the specified resource.
