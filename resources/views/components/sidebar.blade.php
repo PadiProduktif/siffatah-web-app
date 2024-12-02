@@ -16,7 +16,7 @@
         <li><a href="/admin/ekses" class="{{ Request::is('ekses') ? 'active' : '' }}">Ekses</a></li>
         <li><a href="/admin/berkas_pengobatan" class="{{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
         <li><a href="/admin/kelengkapan_kerja" class="{{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Kelengkapan Kerja</a></li>
-        {{-- <li class="nav-item dropdown">
+        <li class="nav-item dropdown">
             <a href="#" 
                class="nav-link dropdown-toggle {{ Request::is('wearpack') || Request::is('sepatu') ? 'active' : '' }}" 
                id="kelengkapanKerjaDropdown" 
@@ -53,11 +53,7 @@
                 <li><a href="/admin/kelengkapan_kerja/sepatu" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Seragam Dinas Harian</a></li>
             </ul>
 <<<<<<< HEAD
-        </li> -->
-=======
-        </li> --}}
->>>>>>> 8848f6d31fb14fdf2ded833f64f181690ea2c049
-        
+        </li> -->       
         @if(auth()->check() && auth()->user()->role === 'superadmin')
             <li><a href="/admin/master_data_karyawan" class="{{ Request::is('master-data-karyawan') ? 'active' : '' }}">Master Data Karyawan</a></li>
         @endif
