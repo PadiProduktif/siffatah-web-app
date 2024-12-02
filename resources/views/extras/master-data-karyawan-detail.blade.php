@@ -129,7 +129,7 @@
         <!-- DATA KELUARGA -->
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="accordion" id="accordionExample">
-                <!-- Accordion Item 1 -->
+                
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingOne">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -140,7 +140,7 @@
                         <div class="accordion-body">
                             
                             {{-- Menampilkan Pasangan --}}
-                            @foreach($dataKaryawan['dataKeluarga']['pasangan'] as $pasangan)
+                            @foreach($dataKaryawan['keluarga']['pasangan'] as $pasangan)
                                 <div class="col-lg-4 col-md-6 mb-4">
                                     <div class="card shadow-sm">
                                         <div class="card-header bg-primary text-white">
@@ -151,7 +151,6 @@
                                             <p class="card-text">
                                                 <strong>NIK:</strong> {{ $pasangan['NIK'] }}<br>
                                                 <strong>Status:</strong> {{ ucfirst($pasangan['status']) }}<br>
-                                                <!-- <strong>Badge Parent:</strong> {{ $pasangan['badge_parent'] }} -->
                                             </p>
                                         </div>
                                     </div>
@@ -161,7 +160,6 @@
                     </div>
                 </div>
 
-                <!-- Accordion Item 2 -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingTwo">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -173,7 +171,7 @@
                             {{-- Menampilkan Anak --}}
                             <div class="row">
 
-                                @foreach($dataKaryawan['dataKeluarga']['anak'] as $anak)
+                                @foreach($dataKaryawan['keluarga']['anak'] as $anak)
                                     <div class="col-lg-4 col-md-6 mb-4">
                                         <div class="card shadow-sm">
                                             <div class="card-header bg-success text-white">
@@ -184,7 +182,6 @@
                                                 <p class="card-text">
                                                     <strong>NIK:</strong> {{ $anak['NIK'] }}<br>
                                                     <strong>Status:</strong> {{ ucfirst($anak['status']) }}<br>
-                                                    <!-- <strong>Badge Parent:</strong> {{ $anak['badge_parent'] }} -->
                                                 </p>
                                             </div>
                                         </div>
@@ -194,20 +191,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Accordion Item 3 -->
-                <!-- <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            Accordion Item #3
-                        </button>
-                    </h2>
-                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <strong>This is the third item's accordion body.</strong> It is hidden by default and will only be shown when expanded.
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
 
@@ -221,32 +204,20 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <img src="https://picsum.photos/id/237/200/300" alt="Thumbnail 1" class="img-thumbnail custom-thumbnail">
-                                        <p class="text-center">Thumbnail 1</p>
+                                @foreach($dataKaryawan['files'] as $value)
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <img src="{{ $value['url'] }}" alt="Thumbnail 1" class="img-thumbnail custom-thumbnail">
+                                            <p class="text-center">{{ $value['name'] }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                
-                                        <img src="https://picsum.photos/id/237/200/300" alt="Thumbnail 1" class="img-thumbnail custom-thumbnail">
-                                        <p class="text-center">Thumbnail 1</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                
-                                        <img src="https://picsum.photos/id/237/200/300" alt="Thumbnail 1" class="img-thumbnail custom-thumbnail">
-                                        <p class="text-center">Thumbnail 1</p>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form action="/upload" method="POST" enctype="multipart/form-data">
+                                    <form id="upload-form" enctype="multipart/form-data">
                                         <div 
                                             id="drop-zone" 
                                             class="border border-primary rounded d-flex flex-column justify-content-center align-items-center p-5 text-center"
@@ -259,6 +230,8 @@
                                         </div>
                                         <button type="submit" class="btn btn-primary mt-3 w-100">Upload</button>
                                     </form>
+
+                                    <div id="message" class="mt-3"></div>
                                 </div>
                             </div>
                         </div>
@@ -271,51 +244,86 @@
 </div>
 @endsection
 
-
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-    const dropZone = document.getElementById("drop-zone");
-    const fileInput = document.getElementById("file-input");
-    const preview = document.getElementById("preview");
+    $(document).ready(function () {
+        const dropZone = $('#drop-zone');
+        const fileInput = $('#file-input');
+        const preview = $('#preview');
+        const messageDiv = $('#message');
 
-    // Handle click on drop zone
-    dropZone.addEventListener("click", () => {
-        fileInput.click();
+        // Trigger file input on drop-zone click
+        dropZone.on('click', function () {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.on('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.attr('src', e.target.result).removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle drag-and-drop
+        dropZone.on('dragover', function (e) {
+            e.preventDefault();
+            dropZone.addClass('border-success');
+        });
+
+        dropZone.on('dragleave', function () {
+            dropZone.removeClass('border-success');
+        });
+
+        dropZone.on('drop', function (e) {
+            e.preventDefault();
+            dropZone.removeClass('border-success');
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length) {
+                // Masukkan file ke dalam file input tanpa memicu event 'change'
+                const dataTransfer = new DataTransfer();
+                for (let i = 0; i < files.length; i++) {
+                    dataTransfer.items.add(files[i]);
+                }
+                fileInput[0].files = dataTransfer.files;
+
+                // Pratinjau gambar tanpa memanggil event 'change' lagi
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.attr('src', e.target.result).removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle form submission
+        $('#upload-form').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    messageDiv.html(
+                        `<div class="alert alert-success">File uploaded successfully! 
+                            <a href="/storage/${response.path}" target="_blank">View File</a>
+                        </div>`
+                    );
+                },
+                error: function (xhr) {
+                    const error = xhr.responseJSON.errors?.image?.[0] || 'File upload failed!';
+                    messageDiv.html(`<div class="alert alert-danger">${error}</div>`);
+                },
+            });
+        });
     });
-
-    // Handle file input change
-    fileInput.addEventListener("change", (event) => {
-        handleFiles(event.target.files);
-    });
-
-    // Handle drag and drop events
-    dropZone.addEventListener("dragover", (event) => {
-        event.preventDefault();
-        dropZone.classList.add("bg-light");
-    });
-
-    dropZone.addEventListener("dragleave", () => {
-        dropZone.classList.remove("bg-light");
-    });
-
-    dropZone.addEventListener("drop", (event) => {
-        event.preventDefault();
-        dropZone.classList.remove("bg-light");
-        const files = event.dataTransfer.files;
-        handleFiles(files);
-    });
-
-    // Function to handle files
-    function handleFiles(files) {
-        const file = files[0];
-        if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                preview.classList.remove("d-none");
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert("Please upload a valid image file.");
-        }
-    }
 </script>

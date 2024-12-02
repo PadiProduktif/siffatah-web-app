@@ -44,6 +44,7 @@ class MasterDataKaryawanController extends Controller
             'nama' => 'Fulanah',
             'NIK' => '12313112123',
             'status' => 'anak',
+            'tgl_lahir' => '14 Agustus',
             'badge_parent' => $dataKaryawan['id_badge'],
         ];
         $dataKeluarga['anak'][] = [
@@ -52,13 +53,18 @@ class MasterDataKaryawanController extends Controller
             'status' => 'anak',
             'badge_parent' => $dataKaryawan['id_badge'],
         ];
-        $dataKaryawan['dataKeluarga'] = $dataKeluarga;
-
-        // dd(
-        //     $dataKaryawan,
-        //     $dataKeluarga,
-        // );
-        $dataImages = [];
+        $dataKaryawan['keluarga'] = $dataKeluarga;
+        $dataImages = [
+            [
+                'name' => 'KTP',
+                'url' => 'https://picsum.photos/id/237/200/300'
+            ],
+            [
+                'name' => 'KK',
+                'url' => 'https://picsum.photos/id/237/200/300'
+            ],
+        ];
+        $dataKaryawan['files'] = $dataImages;
 
         // dd($dataKaryawan);
         // dd(
