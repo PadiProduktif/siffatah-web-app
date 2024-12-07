@@ -76,8 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/kelengkapan_kerja/upload', [KelengkapanKerjaController::class, 'uploadExcel'])->name('kelengkapan-kerja.upload');
     Route::post('/admin/kelengkapan_kerja/store', [KelengkapanKerjaController::class, 'store'])->name('kelengkapan-kerja.store');
     Route::post('/admin/kelengkapan_kerja/update/{id}', [KelengkapanKerjaController::class, 'update'])->name('kelengkapan-kerja.update');
-    Route::delete('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy'])->name('kelengkapan-kerja.destroy');
-
+    Route::get('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy'])->name('kelengkapan-kerja.destroy');
+    Route::post('/admin/kelengkapan_kerja/delete-multiple', [KelengkapanKerjaController::class, 'deleteMultiple'])->name('kelengkapan-kerja.delete-multiple');
+    
     //Kelengkapan Kerja Wearpack
     Route::get('/admin/kelengkapan_kerja/wearpack', [KelengkapanKerjaController::class, 'index_wearpack']);
     Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);

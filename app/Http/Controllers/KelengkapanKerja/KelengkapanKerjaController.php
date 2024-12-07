@@ -8,7 +8,9 @@ use App\Models\KelengkapanKerja\KelengkapanKerja;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
-
+// use Illuminate\Container\Attributes\Log;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class KelengkapanKerjaController extends Controller
 {
@@ -21,7 +23,29 @@ class KelengkapanKerjaController extends Controller
         $user = Auth::user();
         $data['user'] = $user->fullname;
         $data['kelengkapan'] = $kelengkapan;
-
+        $data['chartData'] = [
+            'sepatu_kantor' => KelengkapanKerja::select(DB::raw("IF(sepatu_kantor = '' OR sepatu_kantor = '-', 'Tidak Dapat', sepatu_kantor) as sepatu_kantor"), DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('sepatu_kantor')
+            ->get(),
+            'sepatu_safety' => KelengkapanKerja::select(DB::raw("IF(sepatu_safety = '' OR sepatu_safety = '-', 'Tidak Dapat', sepatu_safety) as sepatu_safety"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('sepatu_safety')
+                ->get(),
+            'wearpack_cover_all' => KelengkapanKerja::select(DB::raw("IF(wearpack_cover_all = '' OR wearpack_cover_all = '-', 'Tidak Dapat', wearpack_cover_all) as wearpack_cover_all"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('wearpack_cover_all')
+                ->get(),
+            'jaket_shift' => KelengkapanKerja::select(DB::raw("IF(jaket_shift = '' OR jaket_shift = '-', 'Tidak Dapat', jaket_shift) as jaket_shift"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('jaket_shift')
+                ->get(),
+            'seragam_olahraga' => KelengkapanKerja::select(DB::raw("IF(seragam_olahraga = '' OR seragam_olahraga = '-', 'Tidak Dapat', seragam_olahraga) as seragam_olahraga"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('seragam_olahraga')
+                ->get(),
+            'jaket_casual' => KelengkapanKerja::select(DB::raw("IF(jaket_casual = '' OR jaket_casual = '-', 'Tidak Dapat', jaket_casual) as jaket_casual"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('jaket_casual')
+                ->get(),
+            'seragam_dinas_harian' => KelengkapanKerja::select(DB::raw("IF(seragam_dinas_harian = '' OR seragam_dinas_harian = '-', 'Tidak Dapat', seragam_dinas_harian) as seragam_dinas_harian"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('seragam_dinas_harian')
+                ->get(),
+        ];
 
 
         return view('dashboard/kelengkapan-kerja',$data);
@@ -215,13 +239,45 @@ class KelengkapanKerjaController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy($id)
+{
+    try {
+        Log::info("Menghapus data dengan ID: {$id}"); // Log untuk debugging awal
+
+        $kelengkapan = KelengkapanKerja::findOrFail($id);
+        $kelengkapan->delete();
+
+        Log::info("Data dengan ID: {$id} berhasil dihapus.");
+
+        return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+    } catch (\Exception $e) {
+        // Log detail error ke file log
+        Log::error("Error saat menghapus data dengan ID: {$id}", [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        // Kembalikan respon error
+        return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+    }
+}
+
+
+    public function deleteMultiple(Request $request)
     {
         try {
-            $kelengkapan = KelengkapanKerja::findOrFail($id);
-            $kelengkapan->delete();
-    
+            $ids = $request->input('ids'); // Ambil array ID dari request
+            Log::info('IDs yang akan dihapus: ', $ids); // Log IDs yang diterima
+
+            KelengkapanKerja::whereIn('id_kelengkapan_kerja', $ids)->delete(); // Hapus data berdasarkan ID
+
             return response()->json(['message' => 'Data berhasil dihapus.'], 200);
         } catch (\Exception $e) {
+            // Log detail error
+            Log::error('Error saat menghapus data:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
     }

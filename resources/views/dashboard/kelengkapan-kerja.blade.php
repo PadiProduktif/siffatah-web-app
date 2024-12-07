@@ -3,7 +3,18 @@
 @section('title', 'Dashboard')
 
 @section('content')
+    <style>
+        .chart-container {
+            width: 100%;
+            max-width: 600px; /* Atur lebar maksimum */
+            max-height: 200px;
+            margin: auto;
+        }
 
+        #chartCanvas {
+            max-height: 100; /* Atur tinggi maksimum */
+        }
+    </style>
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
             <h4 class="me-auto">Kelengkapan Kerja</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
@@ -23,8 +34,27 @@
             @endif
         
     </div>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <div class="chart-container mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5>Chart Kelengkapan Kerja</h5>
+            <div>
+                <label for="chartSwitch">Pilih Item: </label>
+                <select id="chartSwitch" class="form-select form-select-sm">
+                    <option value="sepatu_kantor" selected>Sepatu Kantor</option>
+                    <option value="sepatu_safety">Sepatu Safety</option>
+                    <option value="wearpack_cover_all">Wearpack Cover All</option>
+                    <option value="jaket_shift">Jaket Shift</option>
+                    <option value="seragam_olahraga">Seragam Olahraga</option>
+                    <option value="jaket_casual">Jaket Casual</option>
+                    <option value="seragam_dinas_harian">Seragam Dinas Harian</option>
+                </select>
+            </div>
+        </div>
+        <canvas id="chartCanvas" width="100%" height="40"></canvas>
+    </div>
     <div class="container">
-    <button id="getSelected" class="btn btn-primary">Proses Data Terpilih</button>
+    <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
     <table id="kelengkapanKerjaTable" class="display">
         <thead>
             <tr>
@@ -47,7 +77,7 @@
             <!-- Data Dummy -->
             @foreach($kelengkapan as $item)
             <tr>
-                <td><input type="checkbox" value="{{ $item->id_badge }}" class="rowCheckbox"></td>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ $item->id_kelengkapan_kerja }}"></td>
                 <th>{{ $item->id_badge }}</th>
                 <th>{{ $item->nama_karyawan }}</th>
                 <th>{{ $item->cost_center }}</th>
@@ -549,7 +579,125 @@
         });
     });
 });
+$(document).ready(function () {
+    // Data awal (dari Laravel)
+    const chartData = @json($chartData);
+
+    // Fungsi untuk membuat dataset chart
+    function generateChartData(item) {
+        const labels = chartData[item].map(data => data[item]);
+        const data = chartData[item].map(data => data.jumlah);
+
+        return { labels, data };
+    }
+
+    // Inisialisasi Chart.js
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+    let currentChart;
+
+        function renderChart(item) {
+            const { labels, data } = generateChartData(item);
+
+            if (currentChart) currentChart.destroy(); // Hapus chart lama jika ada
+
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Jumlah per ukuran (${item.replace('_', ' ')})`,
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render chart pertama kali
+        renderChart('sepatu_kantor');
+
+        // Event listener untuk switch button
+        $('#chartSwitch').on('change', function () {
+            const selectedItem = $(this).val();
+            renderChart(selectedItem);
+        });
+    });
+
+        $(document).ready(function () {
+            // Pilih semua checkbox
+            $('#selectAll').on('click', function () {
+                $('.rowCheckbox').prop('checked', this.checked);
+            });
+
+            // Perbarui checkbox "Pilih Semua" jika ada perubahan pada baris
+            $('#kelengkapanKerjaTable').on('change', '.rowCheckbox', function () {
+                if (!this.checked) {
+                    $('#selectAll').prop('checked', false);
+                } else if ($('.rowCheckbox:checked').length === $('.rowCheckbox').length) {
+                    $('#selectAll').prop('checked', true);
+                }
+            });
+
+            // Hapus data terpilih
+            $('#deleteSelected').on('click', function () {
+                const selectedIds = $('.rowCheckbox:checked').map(function () {
+                    return $(this).val();
+                }).get(); // Ambil ID yang dipilih sebagai array
+
+                if (selectedIds.length === 0) {
+                    Swal.fire('Pilih Data!', 'Anda belum memilih data untuk dihapus.', 'warning');
+                    return;
+                }
+
+                // Konfirmasi sebelum menghapus
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: 'Data yang dipilih akan dihapus!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirim permintaan hapus melalui AJAX
+                        $.ajax({
+                            url: '/admin/kelengkapan_kerja/delete-multiple', // Endpoint untuk hapus data
+                            type: 'POST',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                ids: selectedIds
+                            },
+                            success: function (response) {
+                                Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
+                                location.reload(); // Reload halaman untuk memperbarui tabel
+                            },
+                            error: function () {
+                                Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus data.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
     </script>
+    
     
 
 @endsection
