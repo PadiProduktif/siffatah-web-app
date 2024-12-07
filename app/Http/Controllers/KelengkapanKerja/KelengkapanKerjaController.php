@@ -62,37 +62,27 @@ class KelengkapanKerjaController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation for required fields
-        $validatedData = $request->validate([
-            'id_badge' => 'required',
-            'nama_karyawan' => 'required',
-            'cost_center' => 'required',
-        ], [
-            'id_badge.required' => 'ID badge tidak boleh kosong.',
-            'nama_karyawan.required' => 'Nama karyawan tidak boleh kosong.',
-            'cost_center.required' => 'Cost center tidak boleh kosong.',
-        ]);
+        // Validasi input
+        try {
+            // Simpan data langsung ke database tanpa validasi Laravel
+            KelengkapanKerja::create([
+                'id_badge' => $request->id_badge,
+                'nama_karyawan' => $request->nama_karyawan,
+                'cost_center' => $request->cost_center,
+                'unit_kerja' => $request->unit_kerja,
+                'sepatu_kantor' => $request->sepatu_kantor,
+                'sepatu_safety' => $request->sepatu_safety,
+                'wearpack_cover_all' => $request->wearpack_cover_all,
+                'jaket_shift' => $request->jaket_shift,
+                'seragam_olahraga' => $request->seragam_olahraga,
+                'jaket_casual' => $request->jaket_casual,
+                'seragam_dinas_harian' => $request->seragam_dinas_harian,
+            ]);
     
-        // Create the record
-        $kelengkapan = KelengkapanKerja::create([
-            'id_badge' => $validatedData['id_badge'],
-            'nama_karyawan' => $validatedData['nama_karyawan'],
-            'cost_center' => $validatedData['cost_center'],
-            'jabatan_karyawan' => $request->jabatan_karyawan,
-            'grade' => $request->grade,
-            'jenis_pakaian' => $request->jenis_pakaian,
-            'jenis_kelengkapan_kantor' => $request->jenis_kelengkapan_kantor,
-            'tahun' => $request->tahun,
-            'warna' => $request->warna,
-            'gender' => $request->gender,
-            'ukuran' => $request->ukuran,
-        ]);
-    
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Berhasil Memasukan Data',
-            'data' => $kelengkapan
-        ], 201); // 201 Created
+            return redirect()->back()->with('success', 'Data berhasil ditambah!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
     }
     
     public function uploadExcel(Request $request){
@@ -114,30 +104,28 @@ class KelengkapanKerjaController extends Controller
             if (!empty($data) && count($data[0]) > 0) {
                 foreach ($data[0] as $key => $row) {
                     // Lewati baris pertama (header)
-                    if ($key == 0) {
+                    if ($key < 2) {
                         continue;
                     }
 
-                    // Cek apakah semua kolom ada
-                    if (isset($row[1], $row[2], $row[4], $row[5], $row[6], $row[7], $row[8], $row[9], $row[10], $row[11], $row[12])) {
-                        KelengkapanKerja::create([
-                            'id_badge' => $row[1],
-                            'nama_karyawan' => $row[2],
-                            'cost_center' => $row[4],
-                            'jabatan_karyawan' => $row[5],
-                            'sepatu_kantor' => $row[6],
-                            'sepatu_safety' => $row[7],
-                            'wearpack_cover_all' => $row[8],
-                            'jaket_shift' => $row[9],
-                            'seragam_olahraga' => $row[10],
-                            'jaket_casual' => $row[11],
-                            'seragam_dinas_harian' => $row[12],
-                            
-                            // Tambahkan kolom lain sesuai kebutuhan
-                        ]);
-                    }
+                    // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
+                    KelengkapanKerja::create([
+                        'id_badge' => substr($row[1] ?? '', 0, 50), // Pastikan panjang data sesuai tipe di database
+                        'nama_karyawan' => substr($row[2] ?? '', 0, 1000),
+                        'cost_center' => substr($row[4] ?? '', 0, 1000),
+                        'unit_kerja' => substr($row[5] ?? '', 0, 1000), // Perhatikan panjang maksimal
+                        'sepatu_kantor' => $row[6] ?? null,
+                        'sepatu_safety' => $row[7] ?? null,
+                        'wearpack_cover_all' => $row[8] ?? null,
+                        'jaket_shift' => $row[9],
+                        'seragam_olahraga' => $row[10],
+                        'jaket_casual' => $row[11],
+                        'seragam_dinas_harian' => $row[12],
+                        // Tambahkan kolom lainnya
+                    ]);
                 }
             }
+            
 
             return redirect()->back()->with('success', 'Data berhasil diunggah!');
         }
@@ -182,10 +170,11 @@ class KelengkapanKerjaController extends Controller
     {
         // Check required fields
         if (empty($request->id_badge) || empty($request->nama_karyawan) || empty($request->cost_center)) {
-            return response()->json([
-                'status' => 'Failed',
-                'message' => 'ID badge, nama karyawan, dan cost center tidak boleh kosong',
-            ], 400); // 400 Bad Request
+            // return response()->json([
+            //     'status' => 'Failed',
+            //     'message' => 'ID badge, nama karyawan, dan cost center tidak boleh kosong',
+            // ], 400); // 400 Bad Request
+            return redirect()->back()->with('failed', 'Data gagal diperbarui! ID badge, nama karyawan, dan cost center tidak boleh kosong');
         }
 
         // Find the record
@@ -195,52 +184,46 @@ class KelengkapanKerjaController extends Controller
                 'status' => 'Failed',
                 'message' => 'Data tidak ditemukan',
             ], 404); // 404 Not Found
+            return redirect()->back()->with('failed', 'Data gagal diperbarui! Data tidak ditemukan');
         }
 
         // Update fields
         $kelengkapan->id_badge = $request->input('id_badge');
         $kelengkapan->nama_karyawan = $request->input('nama_karyawan');
         $kelengkapan->cost_center = $request->input('cost_center');
-        $kelengkapan->jabatan_karyawan = $request->input('jabatan_karyawan');
-        $kelengkapan->grade = $request->input('grade');
-        $kelengkapan->jenis_pakaian = $request->input('jenis_pakaian');
-        $kelengkapan->jenis_kelengkapan_kantor = $request->input('jenis_kelengkapan_kantor');
-        $kelengkapan->tahun = $request->input('tahun');
-        $kelengkapan->warna = $request->input('warna');
-        $kelengkapan->gender = $request->input('gender');
-        $kelengkapan->ukuran = $request->input('ukuran');
+        $kelengkapan->unit_kerja = $request->input('unit_kerja');
+        $kelengkapan->sepatu_kantor = $request->input('sepatu_kantor');
+        $kelengkapan->sepatu_safety = $request->input('sepatu_safety');
+        $kelengkapan->wearpack_cover_all = $request->input('wearpack_cover_all');
+        $kelengkapan->jaket_shift = $request->input('jaket_shift');
+        $kelengkapan->seragam_olahraga = $request->input('seragam_olahraga');
+        $kelengkapan->jaket_casual = $request->input('jaket_casual');
+        $kelengkapan->seragam_dinas_harian = $request->input('seragam_dinas_harian');
 
         // Save updated record
         $kelengkapan->save();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data berhasil diperbarui',
-            'data' => $kelengkapan
-        ], 200); // 200 OK
+        return redirect()->back()->with('success', 'Data berhasil di perbarui!');
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Data berhasil diperbarui',
+        //     'data' => $kelengkapan
+        // ], 200); // 200 OK
     }
 
     
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $kelengkapan = KelengkapanKerja::where('id_kelengkapan_kerja', $id)->first();
-
-        if (!$kelengkapan) {
-            return response()->json([
-                'status' => 'Failed',
-                'message' => 'Data tidak ditemukan',
-            ], 404); // 404 Not Found
+        try {
+            $kelengkapan = KelengkapanKerja::findOrFail($id);
+            $kelengkapan->delete();
+    
+            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
-
-        $kelengkapan->delete();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data berhasil dihapus',
-        ], 200); // 200 OK
     }
 
 }

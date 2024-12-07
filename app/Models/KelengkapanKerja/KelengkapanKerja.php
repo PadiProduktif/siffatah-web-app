@@ -15,7 +15,7 @@ class KelengkapanKerja extends Model
         'id_badge',
         'nama_karyawan',
         'cost_center',
-        'jabatan_karyawan',
+        'unit_kerja',
         'grade',
         'sepatu_kantor',
         'sepatu_safety',

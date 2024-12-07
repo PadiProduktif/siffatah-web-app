@@ -74,6 +74,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/kelengkapan_kerja/wearpack/update/{id}', [KelengkapanKerjaController::class, 'update']);
     Route::get('/admin/kelengkapan_kerja/wearpack/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
     Route::post('/admin/kelengkapan_kerja/upload', [KelengkapanKerjaController::class, 'uploadExcel'])->name('kelengkapan-kerja.upload');
+    Route::post('/admin/kelengkapan_kerja/store', [KelengkapanKerjaController::class, 'store'])->name('kelengkapan-kerja.store');
+    Route::post('/admin/kelengkapan_kerja/update/{id}', [KelengkapanKerjaController::class, 'update'])->name('kelengkapan-kerja.update');
+    Route::delete('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy'])->name('kelengkapan-kerja.destroy');
+
     //Kelengkapan Kerja Wearpack
     Route::get('/admin/kelengkapan_kerja/wearpack', [KelengkapanKerjaController::class, 'index_wearpack']);
     Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);
@@ -141,44 +145,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-// Route::get('admin/dashboard', [DashboardController::class, 'index']);
 
-// Route::middleware('auth:sanctum')->group(function () {
-//     //Home Dashboard admin
-//     // Admin dashboard
-//     Route::get('admin/dashboard', [DashboardController::class, 'index']);
-//     // Route::get('/home', function () {
-//     //     return view('home');
-//     // });
-//     // FITUR UTAMA
-//     Route::get('/restitusi-karyawan', function () {
-//         return view('dashboard/restitusi-karyawan');
-//     });
-//     Route::get('/pengajuan-klaim', function () {
-//         return view('dashboard/pengajuan-klaim');
-//     });
-//     Route::get('/kepesertaan-anggota', function () {
-//         return view('dashboard/kepesertaan-anggota');
-//     });
-//     Route::get('/ekses', function () {
-//         return view('dashboard/ekses');
-//     });
-//     Route::get('/berkas-pengobatan', function () {
-//         return view('dashboard/berkas-pengobatan');
-//     });
-
-//     Route::get('/wearpack', function () {
-//         return view('dashboard/wearpack');
-//     });
-//     Route::get('/sepatu', function () {
-//         return view('dashboard/sepatu');
-//     });
-//     Route::get('/logout', [AuthController::class, 'logout']);
-
-//     // EXTRAS
-//     Route::get('/master-data-karyawan', function () {
-//         return view('extras/master-data-karyawan');
-//     });
     Route::get('set-profil', function () {
         return view('extras/set-profil');
     });
