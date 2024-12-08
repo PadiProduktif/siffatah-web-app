@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Models\Ekses\Ekses;
+use Carbon\Carbon;
 
 class EksesController extends Controller
 {
@@ -86,11 +87,36 @@ class EksesController extends Controller
     }
 
     public function uploadExcel(Request $request){
+
+        function convertIndonesianDate($tanggal)
+        {
+            $bulan = [
+                'Januari' => 'January',
+                'Februari' => 'February',
+                'Maret' => 'March',
+                'April' => 'April',
+                'Mei' => 'May',
+                'Juni' => 'June',
+                'Juli' => 'July',
+                'Agustus' => 'August',
+                'September' => 'September',
+                'Oktober' => 'October',
+                'November' => 'November',
+                'Desember' => 'December'
+            ];
+
+            foreach ($bulan as $indo => $eng) {
+                $tanggal = str_replace($indo, $eng, $tanggal);
+            }
+
+            return $tanggal;
+        }
+
             // Validasi file
         $validator = Validator::make($request->all(), [
             'file_excel' => 'required|mimes:xlsx,xls',
         ]);
-
+        Carbon::setLocale('id');
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
@@ -107,7 +133,10 @@ class EksesController extends Controller
                     if ($key < 1) {
                         continue;
                     }
-
+                    $tanggal = convertIndonesianDate(($row[7]));
+                    $tanggal_pengajuan = Carbon::createFromFormat('d F Y', $tanggal)->format('Y-m-d');
+                    $cleanedValue = str_replace(['Rp.', '.'], '', $row[8]);
+                    $floatValue = floatval($cleanedValue);
                     // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
                     Ekses::create([
                         'id_ekses' => rand(10, 99999999),
@@ -117,9 +146,8 @@ class EksesController extends Controller
                         'unit_kerja' => substr($row[4] ?? '', 0, 1000), // Perhatikan panjang maksimal
                         'nama_pasien' => $row[5] ?? null,
                         'deskripsi' => $row[6] ?? null,
-                        'tanggal_pengajuan' => $row[7] ?? null,
-                        'jumlah_ekses' => $row[8]?? null,
-                        // Tambahkan kolom lainnya
+                        'tanggal_pengajuan' => $tanggal_pengajuan,
+                        'jumlah_ekses' => $floatValue
                     ]);
                 }
             }
@@ -131,6 +159,7 @@ class EksesController extends Controller
         return redirect()->back()->with('error', 'Gagal mengunggah file!');
     }
 
+    
     /**
      * Display the specified resource.
      */

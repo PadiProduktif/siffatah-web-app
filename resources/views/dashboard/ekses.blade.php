@@ -6,7 +6,7 @@
    
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
-            <h4 class="me-auto">Kelengkapan Kerja</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
+            <h4 class="me-auto">Ekses</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
             <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
             <a href="" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#modalDataExcel">+ Masukan Data Excel</a> <!-- Tambahkan kelas 'ms-2' untuk memberi margin kiri pada tombol kedua -->
         </div>
@@ -53,8 +53,15 @@
                 <th>{{ $item->unit_kerja }}</th>
                 <td>{{ $item->nama_pasien }}</td>
                 <td>{{ $item->deskripsi }}</td>
-                <td>{{ $item->tanggal_pengajuan }}</td>
-                <td>{{ $item->jumlah_ekses }}</td>
+                @php
+                    setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
+                    $tanggal_formatted = strftime('%d %B %Y', strtotime($item->tanggal_pengajuan));
+                @endphp
+                <td>{{ $tanggal_formatted }}</td>
+                @php
+                    $formatted_jumlah = 'Rp.' . number_format($item->jumlah_ekses, 0, ',', '.');
+                @endphp
+                <td>{{ $formatted_jumlah }}</td>
 
                 <td>
                     <button type="button" class="btn btn-warning btn-sm editBtn"
@@ -90,136 +97,38 @@
                         <div class="row g-3">
                             <!-- Informasi Dasar -->
                             <div class="col-md-2">
-                                <label for="id_badge" class="form-label">ID Badge</label>
+                                <label for="id_badge" class="form-label">Member ID</label>
                                 <input type="text" class="form-control" id="id_badge" name="id_badge" required>
                             </div>
 
-                            <div class="col-md-4">
-                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
+                            <div class="col-md-2">
+                                <label for="gelar_depan" class="form-label">ID Badge</label>
                                 <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan">
                             </div>
-                            <div class="col-md-3">
-                                <label for="nama_karyawan" class="form-label">Cost Center</label>
+                            <div class="col-md-5">
+                                <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
                                 <input type="text" class="form-control" id="cost_center" name="cost_center" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="gelar_belakang" class="form-label">Unit Kerja</label>
                                 <input type="text" class="form-control" id="unit_kerja" name="unit_kerja">
                             </div>
-                            <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Sepatu Kantor</label>
-                                <select class="form-select" id="sepatu_kantor" name="sepatu_kantor" required>
-                                    <option value="">Pilih Ukuran Sepatu</option>
-                                    <option value="34">34</option>
-                                    <option value="35">35</option>
-                                    <option value="36">36</option>
-                                    <option value="37">37</option>
-                                    <option value="38">38</option>
-                                    <option value="39">39</option>
-                                    <option value="40">40</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="45">45</option>
-                                    <option value="45">45</option>
-                                </select>
+                            <div class="col-md-5">
+                                <label for="gelar_belakang" class="form-label">Nama Pasien</label>
+                                <input type="text" class="form-control" id="unit_kerja" name="unit_kerja">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
+                                <input type="date" class="form-control" id="unit_kerja" name="unit_kerja">
                             </div>
                             <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Sepatu Safety</label>
-                                <select class="form-select" id="sepatu_safety" name="sepatu_safety" required>
-                                    <option value="">Pilih Ukuran Sepatu</option>
-                                    <option value="34">34</option>
-                                    <option value="35">35</option>
-                                    <option value="36">36</option>
-                                    <option value="37">37</option>
-                                    <option value="38">38</option>
-                                    <option value="39">39</option>
-                                    <option value="40">40</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="45">45</option>
-                                    <option value="45">45</option>
-                                </select>
+                                <label for="gelar_belakang" class="form-label">Jumlah Pengajuan</label>
+                                <input type="text" id="nominal" class="form-control">
                             </div>
-                           
-                            <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Wearpack Cover All</label>
-                                <select class="form-select" id="wearpack_cover_all" name="wearpack_cover_all" required>
-                                    <option value="">Pilih Jenis Ukuran</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
+                            <div class="col-12">
+                                <label for="alamat" class="form-label">Deskripsi</label>
+                                <textarea class="form-control" id="alamat" name="alamat" rows="3" required></textarea>
                             </div>
-
-                            <!-- Dropdown Selections -->
-                            <div class="col-md-4">
-                                <label for="pendidikan" class="form-label">Jaket Shift</label>
-                                <select class="form-select" id="jaket_shift" name="jaket_shift" required>
-                                    <option value="">Pilih Pendidikan</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="agama" class="form-label">Seragam Olahraga</label>
-                                <select class="form-select" id="seragam_olahraga" name="seragam_olahraga" required>
-                                    <option value="">Pilih Ukuran</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="status_pernikahan" class="form-label">Jaket Casual</label>
-                                <select class="form-select" id="jaket_casual" name="jaket_casual" required>
-                                    <option value="">Pilih Ukuran Jaket</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-                           
-                            <!-- Alamat -->
-                            <div class="col-md-4">
-                                <label for="status_pernikahan" class="form-label">Seragam Dinas Harian</label>
-                                <select class="form-select" id="seragam_dinas_harian" name="seragam_dinas_harian" required>
-                                    <option value="">Pilih Ukuran Seragam</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-
                            
                         </div>
                     </div>
@@ -266,120 +175,7 @@
                                 <label for="gelar_belakang" class="form-label">Unit Kerja</label>
                                 <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja">
                             </div>
-                            <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Sepatu Kantor</label>
-                                <select class="form-select" id="editSepatuKantor" name="sepatu_kantor" required>
-                                    <option value="">Pilih Ukuran Sepatu</option>
-                                    <option value="34">34</option>
-                                    <option value="35">35</option>
-                                    <option value="36">36</option>
-                                    <option value="37">37</option>
-                                    <option value="38">38</option>
-                                    <option value="39">39</option>
-                                    <option value="40">40</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="45">45</option>
-                                    <option value="45">45</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Sepatu Safety</label>
-                                <select class="form-select" id="editSepatuSafety" name="sepatu_safety" required>
-                                    <option value="">Pilih Ukuran Sepatu</option>
-                                    <option value="34">34</option>
-                                    <option value="35">35</option>
-                                    <option value="36">36</option>
-                                    <option value="37">37</option>
-                                    <option value="38">38</option>
-                                    <option value="39">39</option>
-                                    <option value="40">40</option>
-                                    <option value="41">41</option>
-                                    <option value="42">42</option>
-                                    <option value="43">43</option>
-                                    <option value="44">44</option>
-                                    <option value="45">45</option>
-                                    <option value="45">45</option>
-                                </select>
-                            </div>
-                           
-                            <div class="col-md-4">
-                                <label for="jenis_kelamin" class="form-label">Wearpack Cover All</label>
-                                <select class="form-select" id="editWearpackCoverAll" name="wearpack_cover_all" required>
-                                    <option value="">Pilih Jenis Ukuran</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-
-                            <!-- Dropdown Selections -->
-                            <div class="col-md-4">
-                                <label for="pendidikan" class="form-label">Jaket Shift</label>
-                                <select class="form-select" id="editJaketShift" name="jaket_shift" required>
-                                    <option value="">Pilih Pendidikan</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="agama" class="form-label">Seragam Olahraga</label>
-                                <select class="form-select" id="editSeragamOlahraga" name="seragam_olahraga" required>
-                                    <option value="">Pilih Ukuran</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="status_pernikahan" class="form-label">Jaket Casual</label>
-                                <select class="form-select" id="editJaketCasual" name="jaket_casual" required>
-                                    <option value="">Pilih Ukuran Jaket</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
                             
-
-                            <!-- Alamat -->
-                            <div class="col-md-4">
-                                <label for="status_pernikahan" class="form-label">Seragam Dinas Harian</label>
-                                <select class="form-select" id="editSeragamDinasHarian" name="seragam_dinas_harian" required>
-                                    <option value="">Pilih Ukuran Seragam</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="XL">XL</option>
-                                    <option value="2XL">2XL</option>
-                                    <option value="3XL">3XL</option>
-                                    <option value="4XL">4XL</option>
-                                    <option value="5XL">5XL</option>
-                                    <option value="6XL">6XL</option>
-                                </select>
-                            </div>
 
                            
                         </div>
@@ -421,7 +217,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+    <script>
+        new Cleave('#nominal', {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand',
+            prefix: 'Rp ',
+            rawValueTrimPrefix: true
+        });
+    </script>
+ 
     <script>
         function toggle(source) {
             checkboxes = document.querySelectorAll('input[type="checkbox"]');
