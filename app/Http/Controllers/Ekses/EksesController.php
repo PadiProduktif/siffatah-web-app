@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Ekses;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Models\Ekses\Ekses;
 
@@ -15,15 +17,10 @@ class EksesController extends Controller
     {
         try {
             
-            $ekses = Ekses::all();
-
+            $data['ekses'] = Ekses::all();
             
-            // return response()->json([
-            //     'status' => 'success',
-            //     'message' => 'Data retrieved successfully.',
-            //     'data' => $ekses
-            // ], 200);
-            return view('dashboard/ekses'); 
+            
+            return view('dashboard/ekses' ,$data); 
 
         } catch (\Exception $e) {
             
@@ -88,6 +85,51 @@ class EksesController extends Controller
         ], 201); // 201 Created
     }
 
+    public function uploadExcel(Request $request){
+            // Validasi file
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
+
+            // Validasi apakah data tidak kosong
+            if (!empty($data) && count($data[0]) > 0) {
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key < 1) {
+                        continue;
+                    }
+
+                    // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
+                    Ekses::create([
+                        'id_ekses' => rand(10, 99999999),
+                        'id_member' => substr($row[1] ?? '', 0, 50), // Pastikan panjang data sesuai tipe di database
+                        'id_badge' => substr($row[2] ?? '', 0, 1000),
+                        'nama_karyawan' => substr($row[3] ?? '', 0, 1000),
+                        'unit_kerja' => substr($row[4] ?? '', 0, 1000), // Perhatikan panjang maksimal
+                        'nama_pasien' => $row[5] ?? null,
+                        'deskripsi' => $row[6] ?? null,
+                        'tanggal_pengajuan' => $row[7] ?? null,
+                        'jumlah_ekses' => $row[8]?? null,
+                        // Tambahkan kolom lainnya
+                    ]);
+                }
+            }
+            
+
+            return redirect()->back()->with('success', 'Data berhasil diunggah!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal mengunggah file!');
+    }
 
     /**
      * Display the specified resource.

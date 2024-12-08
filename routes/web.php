@@ -63,28 +63,19 @@ Route::middleware('auth:sanctum')->group(function () {
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
     Route::post('/admin/ekses/tambah', [EksesController::class, 'store']);
+    Route::post('/admin/ekses/upload', [EksesController::class, 'uploadExcel'])->name('ekses.upload');
     Route::get('/admin/ekses/edit/{id}', [EksesController::class, 'edit']);
     Route::post('/admin/ekses/update/{id}', [EksesController::class, 'update']);
     Route::get('/admin/ekses/delete/{id}', [EksesController::class, 'destroy']);
     
     //Kelengkapan Kerja
     Route::get('/admin/kelengkapan_kerja/', [KelengkapanKerjaController::class, 'index']);
-    Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);
-    Route::get('/admin/kelengkapan_kerja/wearpack/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
-    Route::post('/admin/kelengkapan_kerja/wearpack/update/{id}', [KelengkapanKerjaController::class, 'update']);
-    Route::get('/admin/kelengkapan_kerja/wearpack/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
     Route::post('/admin/kelengkapan_kerja/upload', [KelengkapanKerjaController::class, 'uploadExcel'])->name('kelengkapan-kerja.upload');
     Route::post('/admin/kelengkapan_kerja/store', [KelengkapanKerjaController::class, 'store'])->name('kelengkapan-kerja.store');
     Route::post('/admin/kelengkapan_kerja/update/{id}', [KelengkapanKerjaController::class, 'update'])->name('kelengkapan-kerja.update');
     Route::get('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy'])->name('kelengkapan-kerja.destroy');
     Route::post('/admin/kelengkapan_kerja/delete-multiple', [KelengkapanKerjaController::class, 'deleteMultiple'])->name('kelengkapan-kerja.delete-multiple');
-    
-    //Kelengkapan Kerja Wearpack
-    Route::get('/admin/kelengkapan_kerja/wearpack', [KelengkapanKerjaController::class, 'index_wearpack']);
-    Route::post('/admin/kelengkapan_kerja/wearpack/tambah', [KelengkapanKerjaController::class, 'store']);
-    Route::get('/admin/kelengkapan_kerja/wearpack/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
-    Route::post('/admin/kelengkapan_kerja/wearpack/update/{id}', [KelengkapanKerjaController::class, 'update']);
-    Route::get('/admin/kelengkapan_kerja/wearpack/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
+
 
     //Kelengkapan Kerja Sepatu
     Route::get('/admin/kelengkapan_kerja/sepatu', [KelengkapanKerjaController::class, 'index_sepatu']);

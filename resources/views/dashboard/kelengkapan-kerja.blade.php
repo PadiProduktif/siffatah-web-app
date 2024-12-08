@@ -7,7 +7,7 @@
         .chart-container {
             width: 100%;
             max-width: 600px; /* Atur lebar maksimum */
-            max-height: 200px;
+            max-height: 500px;
             margin: auto;
         }
 
@@ -51,7 +51,7 @@
                 </select>
             </div>
         </div>
-        <canvas id="chartCanvas" width="100%" height="40"></canvas>
+        <canvas id="chartCanvas" width="500" height="300"></canvas>
     </div>
     <div class="container">
     <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
@@ -579,24 +579,30 @@
         });
     });
 });
-$(document).ready(function () {
-    // Data awal (dari Laravel)
-    const chartData = @json($chartData);
 
-    // Fungsi untuk membuat dataset chart
-    function generateChartData(item) {
-        const labels = chartData[item].map(data => data[item]);
-        const data = chartData[item].map(data => data.jumlah);
+    $(document).ready(function () {
+        // Data awal (dari Laravel)
+        const chartData = @json($chartData);
 
-        return { labels, data };
-    }
+        // Registrasi plugin Data Labels
+        // Chart.register(ChartDataLabels);
 
-    // Inisialisasi Chart.js
-    const ctx = document.getElementById('chartCanvas').getContext('2d');
-    let currentChart;
+        // Fungsi untuk membuat dataset chart
+        function generateChartData(item) {
+            const labels = chartData[item].map(data => data[item]);
+            const dataValues = chartData[item].map(data => data.jumlah);
+            // if (labels = 'Tidak Dapat') {
+            //     dataValues
+            // }
+            return { labels, dataValues };
+        }
+
+        // Inisialisasi Chart.js
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        let currentChart;
 
         function renderChart(item) {
-            const { labels, data } = generateChartData(item);
+            const { labels, dataValues } = generateChartData(item);
 
             if (currentChart) currentChart.destroy(); // Hapus chart lama jika ada
 
@@ -606,7 +612,7 @@ $(document).ready(function () {
                     labels: labels,
                     datasets: [{
                         label: `Jumlah per ukuran (${item.replace('_', ' ')})`,
-                        data: data,
+                        data: dataValues,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
@@ -617,6 +623,16 @@ $(document).ready(function () {
                     plugins: {
                         legend: {
                             display: true
+                        },
+                        datalabels: {
+                            color: '#000', // Warna label
+                            anchor: 'end',
+                            align: 'top',
+                            font: {
+                                size: 12,
+                                
+                            },
+                            formatter: (value) => value // Menampilkan nilai data
                         }
                     },
                     scales: {
@@ -625,6 +641,7 @@ $(document).ready(function () {
                         }
                     }
                 }
+                // Tidak perlu menambahkan 'plugins' di sini karena plugin sudah diregistrasi
             });
         }
 
@@ -637,6 +654,7 @@ $(document).ready(function () {
             renderChart(selectedItem);
         });
     });
+
 
         $(document).ready(function () {
             // Pilih semua checkbox

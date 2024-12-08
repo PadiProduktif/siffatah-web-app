@@ -24,25 +24,25 @@ class KelengkapanKerjaController extends Controller
         $data['user'] = $user->fullname;
         $data['kelengkapan'] = $kelengkapan;
         $data['chartData'] = [
-            'sepatu_kantor' => KelengkapanKerja::select(DB::raw("IF(sepatu_kantor = '' OR sepatu_kantor = '-', 'Tidak Dapat', sepatu_kantor) as sepatu_kantor"), DB::raw('COUNT(*) as jumlah'))
-            ->groupBy('sepatu_kantor')
-            ->get(),
-            'sepatu_safety' => KelengkapanKerja::select(DB::raw("IF(sepatu_safety = '' OR sepatu_safety = '-', 'Tidak Dapat', sepatu_safety) as sepatu_safety"), DB::raw('COUNT(*) as jumlah'))
+            'sepatu_kantor' => KelengkapanKerja::select(DB::raw("IF(sepatu_kantor IS NULL OR sepatu_kantor = '' OR sepatu_kantor = '-' OR sepatu_kantor = null, 'Tidak Dapat', sepatu_kantor) as sepatu_kantor"), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('sepatu_kantor')
+                ->get(),
+            'sepatu_safety' => KelengkapanKerja::select(DB::raw("IF(sepatu_safety IS NULL OR sepatu_safety = null OR sepatu_safety = '' OR sepatu_safety = '-', 'Tidak Dapat', sepatu_safety) as sepatu_safety"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('sepatu_safety')
                 ->get(),
-            'wearpack_cover_all' => KelengkapanKerja::select(DB::raw("IF(wearpack_cover_all = '' OR wearpack_cover_all = '-', 'Tidak Dapat', wearpack_cover_all) as wearpack_cover_all"), DB::raw('COUNT(*) as jumlah'))
+            'wearpack_cover_all' => KelengkapanKerja::select(DB::raw("IF(wearpack_cover_all IS NULL OR wearpack_cover_all = null OR wearpack_cover_all = '' OR wearpack_cover_all = '-', 'Tidak Dapat', wearpack_cover_all) as wearpack_cover_all"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('wearpack_cover_all')
                 ->get(),
-            'jaket_shift' => KelengkapanKerja::select(DB::raw("IF(jaket_shift = '' OR jaket_shift = '-', 'Tidak Dapat', jaket_shift) as jaket_shift"), DB::raw('COUNT(*) as jumlah'))
+            'jaket_shift' => KelengkapanKerja::select(DB::raw("IF(jaket_shift IS NULL OR jaket_shift = null OR jaket_shift = '' OR jaket_shift = '-', 'Tidak Dapat', jaket_shift) as jaket_shift"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('jaket_shift')
                 ->get(),
-            'seragam_olahraga' => KelengkapanKerja::select(DB::raw("IF(seragam_olahraga = '' OR seragam_olahraga = '-', 'Tidak Dapat', seragam_olahraga) as seragam_olahraga"), DB::raw('COUNT(*) as jumlah'))
+            'seragam_olahraga' => KelengkapanKerja::select(DB::raw("IF(seragam_olahraga IS NULL OR seragam_olahraga = null OR seragam_olahraga = '' OR seragam_olahraga = '-', 'Tidak Dapat', seragam_olahraga) as seragam_olahraga"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('seragam_olahraga')
                 ->get(),
-            'jaket_casual' => KelengkapanKerja::select(DB::raw("IF(jaket_casual = '' OR jaket_casual = '-', 'Tidak Dapat', jaket_casual) as jaket_casual"), DB::raw('COUNT(*) as jumlah'))
+            'jaket_casual' => KelengkapanKerja::select(DB::raw("IF(jaket_casual IS NULL OR jaket_casual = null OR jaket_casual = '' OR jaket_casual = '-', 'Tidak Dapat', jaket_casual) as jaket_casual"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('jaket_casual')
                 ->get(),
-            'seragam_dinas_harian' => KelengkapanKerja::select(DB::raw("IF(seragam_dinas_harian = '' OR seragam_dinas_harian = '-', 'Tidak Dapat', seragam_dinas_harian) as seragam_dinas_harian"), DB::raw('COUNT(*) as jumlah'))
+            'seragam_dinas_harian' => KelengkapanKerja::select(DB::raw("IF(seragam_dinas_harian IS NULL OR seragam_dinas_harian = null OR seragam_dinas_harian = '' OR seragam_dinas_harian = '-', 'Tidak Dapat', seragam_dinas_harian) as seragam_dinas_harian"), DB::raw('COUNT(*) as jumlah'))
                 ->groupBy('seragam_dinas_harian')
                 ->get(),
         ];
