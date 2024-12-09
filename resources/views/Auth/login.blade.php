@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SI FATAH Login</title>
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f9fafb;
@@ -74,25 +75,43 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-        <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN">
-        <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="Logo Pupuk Kujang">
-        <img src="{{ asset('img/Logo Pupuk Indonesia png 2.png') }}" alt="Logo Pupuk Indonesia">
+            <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN">
+            <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="Logo Pupuk Kujang">
+            <img src="{{ asset('img/Logo Pupuk Indonesia png 2.png') }}" alt="Logo Pupuk Indonesia">
         </div>
         <h1>SI FATAH v0.01</h1>
         <p>Sistem Informasi Fasilitas dan Kesehatan</p>
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    <b>Opps!</b> {{session('error')}}
-                </div>
-            @endif
-        <h2>SELAMAT DATANG!</h2>
         <form action="{{ url('/action_login') }}" method="POST">
             @csrf
             <input type="text" name="username" class="form-control" placeholder="Masukan Username Anda" required>
             <input type="password" name="password" class="form-control" placeholder="Masukan Password" required>
-            <!-- <a href="#" class="forgot-password">Lupa Password?</a> -->
             <button type="submit" class="btn">Masuk</button>
         </form>
     </div>
+
+    <!-- Toast -->
+    @if(session('error'))
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <b>Opps!</b> {{ session('error') }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    @endif
+    
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show toast if error exists
+        @if(session('error'))
+        const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+        toast.show();
+        @endif
+    </script>
 </body>
 </html>
