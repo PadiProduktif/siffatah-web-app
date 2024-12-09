@@ -62,11 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
-    Route::post('/admin/ekses/tambah', [EksesController::class, 'store']);
+    Route::post('/admin/ekses/tambah', [EksesController::class, 'store'])->name('ekses.store');
     Route::post('/admin/ekses/upload', [EksesController::class, 'uploadExcel'])->name('ekses.upload');
     Route::get('/admin/ekses/edit/{id}', [EksesController::class, 'edit']);
-    Route::post('/admin/ekses/update/{id}', [EksesController::class, 'update']);
-    Route::get('/admin/ekses/delete/{id}', [EksesController::class, 'destroy']);
+    Route::post('/admin/ekses/update/{id}', [EksesController::class, 'update'])->name('ekses.update');
+    Route::get('/admin/ekses/delete/{id}', [EksesController::class, 'destroy'])->name('ekses.destroy');
     
     //Kelengkapan Kerja
     Route::get('/admin/kelengkapan_kerja/', [KelengkapanKerjaController::class, 'index']);

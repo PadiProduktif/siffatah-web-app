@@ -46,6 +46,8 @@ class EksesController extends Controller
      */
     public function store(Request $request)
     {
+        $cleanedValue = str_replace(['Rp', ',', ' '], '', $request->jumlah_pengajuan);
+
         // Validation
         $request->validate([
             'id_badge' => 'required',
@@ -53,37 +55,29 @@ class EksesController extends Controller
             'id_member' => 'required',
             'unit_kerja' => 'required',
             'nama_pasien' => 'required',
-            'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048', // Optional file validation
+            // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048', // Optional file validation
         ]);
 
-        // Handle file upload if present
-        $fileName = null;
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/Ekses/'), $fileName);
+
+        try {
+            $ekses = Ekses::create([
+                'id_ekses' => rand(10, 99999999), // Use auto-incremented ID if possible
+                'id_member' => $request->id_member,
+                'id_badge' => $request->id_badge,
+                'nama_karyawan' => $request->nama_karyawan,
+                'unit_kerja' => $request->unit_kerja,
+                'nama_pasien' => $request->nama_pasien,
+                'deskripsi' => $request->deskripsi,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'jumlah_ekses' => $cleanedValue,
+                // 'file_url' => $fileName,
+            ]);
+            return redirect()->back()->with('success', 'Data berhasil ditambah!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
+        
 
-        // Create the record in the database
-        $ekses = Ekses::create([
-            'id_ekses' => rand(10, 99999999), // Use auto-incremented ID if possible
-            'id_member' => $request->id_member,
-            'id_badge' => $request->id_badge,
-            'nama_karyawan' => $request->nama_karyawan,
-            'unit_kerja' => $request->unit_kerja,
-            'nama_pasien' => $request->nama_pasien,
-            'deskripsi' => $request->deskripsi,
-            'tanggal_pengajuan' => $request->tanggal_pengajuan,
-            'jumlah_ekses' => $request->jumlah_ekses,
-            'file_url' => $fileName,
-        ]);
-
-        // Success response
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data successfully added.',
-            'data' => $ekses
-        ], 201); // 201 Created
     }
 
     public function uploadExcel(Request $request){
@@ -198,61 +192,74 @@ class EksesController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $cleanedValue = str_replace(['Rp', '.', ' '], '', $request->jumlah_pengajuan);
         // Validate the request input
-        $request->validate([
-            'id_member' => 'required',
-            'id_badge' => 'required',
-            'nama_karyawan' => 'required',
-            'unit_kerja' => 'required',
-            'nama_pasien' => 'required',
-            'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
-        ]);
+        // $request->validate([
+        //     'id_member' => 'required',
+        //     'id_badge' => 'required',
+        //     'nama_karyawan' => 'required',
+        //     'unit_kerja' => 'required',
+        //     'nama_pasien' => 'required',
+        //     // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
+        // ]);
 
-        // Find the record by ID
-        $ekses = Ekses::where('id_ekses', $id)->first();
-
-        if (!$ekses) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found.'
-            ], 404); // 404 Not Found
-        }
-
-        // Handle file upload
-        if ($request->hasFile('file')) {
-            // Delete old file if it exists
-            if ($ekses->file_url) {
-                $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
-                if (file_exists($oldFilePath)) {
-                    unlink($oldFilePath);
-                }
-            }
-
-            // Save new file
-            $file = $request->file('file');
-            $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/Ekses/'), $fileName);
-            $ekses->file_url = $fileName;
-        }
-
-        // Update record fields
-        $ekses->id_member = $request->input('id_member');
-        $ekses->id_badge = $request->input('id_badge');
-        $ekses->nama_karyawan = $request->input('nama_karyawan');
-        $ekses->unit_kerja = $request->input('unit_kerja');
-        $ekses->nama_pasien = $request->input('nama_pasien');
-        $ekses->deskripsi = $request->input('deskripsi');
-        $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
-        $ekses->jumlah_ekses = $request->input('jumlah_ekses');
-
-        // Save changes
-        $ekses->save();
-
+        $data=[
+            'id_member' => $request->id_member,
+            'id_badge' => $request->id_badge,
+            'nama_karyawan' => $request->nama_karyawan,
+            'unit_kerja' => $request->unit_kerja,
+            'nama_pasien' => $request->nama_pasien,
+            'deskripsi' => $request->deskripsi,
+            'tanggal_pengajuan' => $request->tanggal_pengajuan,
+            'jumlah_ekses' => $cleanedValue,
+        ];
         return response()->json([
             'status' => 'success',
             'message' => 'Data updated successfully.',
-            'data' => $ekses
+            'data' => $data
         ], 200); // 200 OK
+
+        // Find the record by ID
+        // $ekses = Ekses::where('id_ekses', $id)->first();
+
+        // if (!$ekses) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Data not found.'
+        //     ], 404); // 404 Not Found
+        // }
+
+        // // Handle file upload
+        // if ($request->hasFile('file')) {
+        //     // Delete old file if it exists
+        //     if ($ekses->file_url) {
+        //         $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
+        //         if (file_exists($oldFilePath)) {
+        //             unlink($oldFilePath);
+        //         }
+        //     }
+
+        //     // Save new file
+        //     $file = $request->file('file');
+        //     $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+        //     $file->move(public_path('uploads/Ekses/'), $fileName);
+        //     $ekses->file_url = $fileName;
+        // }
+
+        // Update record fields
+        // $ekses->id_member = $request->input('id_member');
+        // $ekses->id_badge = $request->input('id_badge');
+        // $ekses->nama_karyawan = $request->input('nama_karyawan');
+        // $ekses->unit_kerja = $request->input('unit_kerja');
+        // $ekses->nama_pasien = $request->input('nama_pasien');
+        // $ekses->deskripsi = $request->input('deskripsi');
+        // $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
+        // $ekses->jumlah_ekses = $cleanedValue;
+
+        // // Save changes
+        // $ekses->save();
+
+        
     }
 
 

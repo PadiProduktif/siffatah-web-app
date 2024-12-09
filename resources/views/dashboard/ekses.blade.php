@@ -27,7 +27,7 @@
     
     <div class="container">
     <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
-    <table id="kelengkapanKerjaTable" class="display">
+    <table id="tableAdmin" class="display">
         <thead>
             <tr>
                 <th><input type="checkbox" id="selectAll"></th> <!-- Checkbox untuk Select All -->
@@ -66,13 +66,14 @@
                 <td>
                     <button type="button" class="btn btn-warning btn-sm editBtn"
                     data-id="{{ $item->id_ekses }}"
+                    data-id_member="{{ $item->id_member }}"
                     data-id_badge="{{ $item->id_badge }}"
                     data-nama_karyawan="{{ $item->nama_karyawan }}"
                     data-unit_kerja="{{ $item->unit_kerja }}"
                     data-nama_pasien="{{ $item->nama_pasien }}"
                     data-deskripsi="{{ $item->deskripsi }}"
                     data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
-                    data-jumlah_ekses="{{ $item->jumlah_ekses }}"
+                    data-jumlah_ekses="{{ $formatted_jumlah }}"
 
                     data-bs-toggle="modal" data-bs-target="#modalEditData">
                 Edit
@@ -91,23 +92,23 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form  action="{{ route('kelengkapan-kerja.store') }}" method="POST">
+                <form  action="{{ route('ekses.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <!-- Informasi Dasar -->
                             <div class="col-md-2">
                                 <label for="id_badge" class="form-label">Member ID</label>
-                                <input type="text" class="form-control" id="id_badge" name="id_badge" required>
+                                <input type="text" class="form-control" id="id_member" name="id_member" required>
                             </div>
 
                             <div class="col-md-2">
                                 <label for="gelar_depan" class="form-label">ID Badge</label>
-                                <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan">
+                                <input type="text" class="form-control" id="id_badge" name="id_badge">
                             </div>
                             <div class="col-md-5">
                                 <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="cost_center" name="cost_center" required>
+                                <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="gelar_belakang" class="form-label">Unit Kerja</label>
@@ -115,19 +116,19 @@
                             </div>
                             <div class="col-md-5">
                                 <label for="gelar_belakang" class="form-label">Nama Pasien</label>
-                                <input type="text" class="form-control" id="unit_kerja" name="unit_kerja">
+                                <input type="text" class="form-control" id="nama_pasien" name="nama_pasien">
                             </div>
                             <div class="col-md-3">
                                 <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
-                                <input type="date" class="form-control" id="unit_kerja" name="unit_kerja">
+                                <input type="date" class="form-control" id="tanggal_pengajuan" name="tanggal_pengajuan">
                             </div>
                             <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Jumlah Pengajuan</label>
-                                <input type="text" id="nominal" class="form-control">
+                                <input type="text" id="nominal" class="form-control" name="jumlah_pengajuan">
                             </div>
                             <div class="col-12">
                                 <label for="alamat" class="form-label">Deskripsi</label>
-                                <textarea class="form-control" id="alamat" name="alamat" rows="3" required></textarea>
+                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
                            
                         </div>
@@ -155,25 +156,37 @@
                         <div class="row g-3">
                             <!-- Informasi Dasar -->
                             <div class="col-md-2">
-                                <label for="id_badge" class="form-label">ID</label>
-                                <input type="text" class="form-control" id="editId" name="id_kelengkapan_kerja" >
-                            </div>
-                            <div class="col-md-2">
-                                <label for="id_badge" class="form-label">ID Badge</label>
-                                <input type="text" class="form-control" id="editIdBadge" name="id_badge" required>
+                                <label for="id_badge" class="form-label">Member ID</label>
+                                <input type="text" class="form-control" id="editIdMember" name="id_member" required>
                             </div>
 
-                            <div class="col-md-4">
-                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan">
+                            <div class="col-md-2">
+                                <label for="gelar_depan" class="form-label">ID Badge</label>
+                                <input type="text" class="form-control" id="editIdBadge" name="id_badge">
                             </div>
-                            <div class="col-md-3">
-                                <label for="nama_karyawan" class="form-label">Cost Center</label>
-                                <input type="text" class="form-control" id="editCostCenter" name="cost_center" required>
+                            <div class="col-md-5">
+                                <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
+                                <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="gelar_belakang" class="form-label">Unit Kerja</label>
                                 <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="gelar_belakang" class="form-label">Nama Pasien</label>
+                                <input type="text" class="form-control" id="editNamaPasien" name="nama_pasien">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
+                                <input type="date" class="form-control" id="editTanggalPengajuan" name="tanggal_pengajuan">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Jumlah Pengajuan</label>
+                                <input type="text" id="editJumlahPengajuan" class="form-control" name="jumlah_pengajuan">
+                            </div>
+                            <div class="col-12">
+                                <label for="alamat" class="form-label">Deskripsi</label>
+                                <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
                             
 
@@ -238,7 +251,7 @@
     <script>
         $(document).ready(function () {
             // Inisialisasi DataTables
-            var table = $('#kelengkapanKerjaTable').DataTable({
+            var table = $('#tableAdmin').DataTable({
                 paging: true,
                 searching: true,
                 ordering: true,
@@ -252,7 +265,7 @@
             });
     
             // Event untuk mengontrol Select All Checkbox jika checkbox baris diubah
-            $('#kelengkapanKerjaTable tbody').on('change', 'input[type="checkbox"].rowCheckbox', function () {
+            $('#tableAdmin tbody').on('change', 'input[type="checkbox"].rowCheckbox', function () {
                 if (!this.checked) {
                     var el = $('#selectAll').get(0);
                     if (el && el.checked && ('indeterminate' in el)) {
@@ -275,49 +288,43 @@
     <script>
     $(document).ready(function () {
         // Inisialisasi DataTables
-        var table = $('#kelengkapanKerjaTable').DataTable();
+        var table = $('#tableAdmin').DataTable();
 
         // Event delegation untuk tombol Edit
-        $('#kelengkapanKerjaTable').on('click', '.editBtn', function () {
+        $('#tableAdmin').on('click', '.editBtn', function () {
             // Ambil data dari atribut tombol
             const id = $(this).data('id');
+            const id_member = $(this).data('id_member');
             const id_badge = $(this).data('id_badge');
             const nama_karyawan = $(this).data('nama_karyawan');
-            const cost_center = $(this).data('cost_center');
             const unit_kerja = $(this).data('unit_kerja');
-            const sepatu_kantor = $(this).data('sepatu_kantor');
-            const sepatu_safety = $(this).data('sepatu_safety');
-            const wearpack_cover_all = $(this).data('wearpack_cover_all');
-            const jaket_shift = $(this).data('jaket_shift');
-            const seragam_olahraga = $(this).data('seragam_olahraga');
-            const jaket_casual = $(this).data('jaket_casual');
-            const seragam_dinas_harian = $(this).data('seragam_dinas_harian');
+            const nama_pasien = $(this).data('nama_pasien');
+            const deskripsi = $(this).data('deskripsi');
+            const tanggal_pengajuan = $(this).data('tanggal_pengajuan');
+            const jumlah_ekses = $(this).data('jumlah_ekses');
 
             // Isi data di dalam form modal
             $('#editId').val(id);
+            $('#editIdMember').val(id_member);
             $('#editIdBadge').val(id_badge);
             $('#editNamaKaryawan').val(nama_karyawan);
-            $('#editCostCenter').val(cost_center);
             $('#editUnitKerja').val(unit_kerja);
-            $('#editSepatuKantor').val(sepatu_kantor);
-            $('#editSepatuSafety').val(sepatu_safety);
-            $('#editWearpackCoverAll').val(wearpack_cover_all);
-            $('#editJaketShift').val(jaket_shift);
-            $('#editSeragamOlahraga').val(seragam_olahraga);
-            $('#editJaketCasual').val(jaket_casual);
-            $('#editSeragamDinasHarian').val(seragam_dinas_harian);
+            $('#editNamaPasien').val(nama_pasien);
+            $('#editDeskripsi').val(deskripsi);
+            $('#editTanggalPengajuan').val(tanggal_pengajuan);
+            $('#editJumlahPengajuan').val(jumlah_ekses);
 
             // Ubah action form agar mengarah ke endpoint update
             // $('#editForm').attr('action', '/kelengkapan_kerja/update/' + id);
             // let baseUrl = window.location.origin;
             // $('#editForm').attr('action', baseUrl + '/kelengkapan_kerja/update/' + id);
-            $('#editForm').attr('action', '/admin/kelengkapan_kerja/update/' + id);
+            $('#editForm').attr('action', '/admin/ekses/update/' + id);
         });
     });
 
     $(document).ready(function () {
     // Event delegation untuk tombol Hapus
-    $('#kelengkapanKerjaTable').on('click', '.deleteBtn', function () {
+    $('#tableAdmin').on('click', '.deleteBtn', function () {
         const id = $(this).data('id'); // Ambil ID data
 
         // Tampilkan konfirmasi dengan SweetAlert2
@@ -334,7 +341,7 @@
             if (result.isConfirmed) {
                 // Jika dikonfirmasi, kirim permintaan hapus ke server
                 $.ajax({
-                url: '/admin/kelengkapan_kerja/delete/' + id,
+                url: '/admin/ekses/delete/' + id,
                 type: 'GET', // Ubah dari DELETE ke GET
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
@@ -359,7 +366,7 @@
             });
 
             // Perbarui checkbox "Pilih Semua" jika ada perubahan pada baris
-            $('#kelengkapanKerjaTable').on('change', '.rowCheckbox', function () {
+            $('#tableAdmin').on('change', '.rowCheckbox', function () {
                 if (!this.checked) {
                     $('#selectAll').prop('checked', false);
                 } else if ($('.rowCheckbox:checked').length === $('.rowCheckbox').length) {
