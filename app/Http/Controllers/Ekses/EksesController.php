@@ -194,33 +194,33 @@ class EksesController extends Controller
     {
         $cleanedValue = str_replace(['Rp', '.', ' '], '', $request->jumlah_pengajuan);
         // Validate the request input
-        // $request->validate([
-        //     'id_member' => 'required',
-        //     'id_badge' => 'required',
-        //     'nama_karyawan' => 'required',
-        //     'unit_kerja' => 'required',
-        //     'nama_pasien' => 'required',
-        //     // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
-        // ]);
+        $request->validate([
+            'id_member' => 'required',
+            'id_badge' => 'required',
+            'nama_karyawan' => 'required',
+            'unit_kerja' => 'required',
+            'nama_pasien' => 'required',
+            // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
+        ]);
 
-        $data=[
-            'id_member' => $request->id_member,
-            'id_badge' => $request->id_badge,
-            'nama_karyawan' => $request->nama_karyawan,
-            'unit_kerja' => $request->unit_kerja,
-            'nama_pasien' => $request->nama_pasien,
-            'deskripsi' => $request->deskripsi,
-            'tanggal_pengajuan' => $request->tanggal_pengajuan,
-            'jumlah_ekses' => $cleanedValue,
-        ];
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data updated successfully.',
-            'data' => $data
-        ], 200); // 200 OK
+        // $data=[
+        //     'id_member' => $request->id_member,
+        //     'id_badge' => $request->id_badge,
+        //     'nama_karyawan' => $request->nama_karyawan,
+        //     'unit_kerja' => $request->unit_kerja,
+        //     'nama_pasien' => $request->nama_pasien,
+        //     'deskripsi' => $request->deskripsi,
+        //     'tanggal_pengajuan' => $request->tanggal_pengajuan,
+        //     'jumlah_ekses' => $cleanedValue,
+        // ];
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Data updated successfully.',
+        //     'data' => $data
+        // ], 200); // 200 OK
 
         // Find the record by ID
-        // $ekses = Ekses::where('id_ekses', $id)->first();
+        $ekses = Ekses::where('id_ekses', $id)->first();
 
         // if (!$ekses) {
         //     return response()->json([
@@ -247,17 +247,17 @@ class EksesController extends Controller
         // }
 
         // Update record fields
-        // $ekses->id_member = $request->input('id_member');
-        // $ekses->id_badge = $request->input('id_badge');
-        // $ekses->nama_karyawan = $request->input('nama_karyawan');
-        // $ekses->unit_kerja = $request->input('unit_kerja');
-        // $ekses->nama_pasien = $request->input('nama_pasien');
-        // $ekses->deskripsi = $request->input('deskripsi');
-        // $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
-        // $ekses->jumlah_ekses = $cleanedValue;
+        $ekses->id_member = $request->input('id_member');
+        $ekses->id_badge = $request->input('id_badge');
+        $ekses->nama_karyawan = $request->input('nama_karyawan');
+        $ekses->unit_kerja = $request->input('unit_kerja');
+        $ekses->nama_pasien = $request->input('nama_pasien');
+        $ekses->deskripsi = $request->input('deskripsi');
+        $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
+        $ekses->jumlah_ekses = $cleanedValue;
 
         // // Save changes
-        // $ekses->save();
+        $ekses->save();
 
         
     }
