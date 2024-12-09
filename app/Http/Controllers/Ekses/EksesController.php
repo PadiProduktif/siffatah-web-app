@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Models\Ekses\Ekses;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class EksesController extends Controller
 {
@@ -202,32 +203,21 @@ class EksesController extends Controller
             'nama_pasien' => 'required',
             // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
         ]);
+        if (empty($request->id_badge) || empty($request->id_member) || empty($request->nama_karyawan || empty($request->unit_kerja)) || empty($request->nama_pasien)) {
 
-        // $data=[
-        //     'id_member' => $request->id_member,
-        //     'id_badge' => $request->id_badge,
-        //     'nama_karyawan' => $request->nama_karyawan,
-        //     'unit_kerja' => $request->unit_kerja,
-        //     'nama_pasien' => $request->nama_pasien,
-        //     'deskripsi' => $request->deskripsi,
-        //     'tanggal_pengajuan' => $request->tanggal_pengajuan,
-        //     'jumlah_ekses' => $cleanedValue,
-        // ];
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => 'Data updated successfully.',
-        //     'data' => $data
-        // ], 200); // 200 OK
+            return redirect()->back()->with('failed', 'Data gagal diperbarui! ID badge, nama karyawan, dan cost center tidak boleh kosong');
+        }
 
         // Find the record by ID
         $ekses = Ekses::where('id_ekses', $id)->first();
 
-        // if (!$ekses) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Data not found.'
-        //     ], 404); // 404 Not Found
-        // }
+        if (!$ekses) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found.'
+            ], 404); // 404 Not Found
+            return redirect()->back()->with('failed', 'Data gagal diperbarui! Data tidak ditemukan');
+        }
 
         // // Handle file upload
         // if ($request->hasFile('file')) {
@@ -255,10 +245,10 @@ class EksesController extends Controller
         $ekses->deskripsi = $request->input('deskripsi');
         $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
         $ekses->jumlah_ekses = $cleanedValue;
-
+        
         // // Save changes
         $ekses->save();
-
+        return redirect()->back()->with('success', 'Data berhasil di perbarui!');
         
     }
 
@@ -268,32 +258,47 @@ class EksesController extends Controller
      */
     public function destroy(string $id)
     {
-        // Find the record by ID
-        $ekses = Ekses::where('id_ekses', $id)->first();
 
-        // Check if the record exists
-        if (!$ekses) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found.'
-            ], 404); // 404 Not Found
+        try {
+            Log::info("Menghapus data dengan ID: {$id}"); // Log untuk debugging awal
+    
+            $ekses = Ekses::findOrFail($id);
+            $ekses->delete();
+    
+            Log::info("Data dengan ID: {$id} berhasil dihapus.");
+    
+            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            // Log detail error ke file log
+            Log::error("Error saat menghapus data dengan ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+    
+            // Kembalikan respon error
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
+        
+    }
 
-        // If file exists, delete it
-        if ($ekses->file_url) {
-            $filePath = public_path("uploads/Ekses/{$ekses->file_url}");
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
+    public function deleteMultiple(Request $request)
+    {
+        try {
+            $ids = $request->input('ids'); // Ambil array ID dari request
+            Log::info('IDs yang akan dihapus: ', $ids); // Log IDs yang diterima
+
+            Ekses::whereIn('id_ekses', $ids)->delete(); // Hapus data berdasarkan ID
+
+            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            // Log detail error
+            Log::error('Error saat menghapus data:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
-
-        // Delete the record from the database
-        $ekses->delete();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data deleted successfully.'
-        ], 200); // 200 OK
     }
 
 }

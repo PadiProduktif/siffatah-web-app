@@ -67,7 +67,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/ekses/edit/{id}', [EksesController::class, 'edit']);
     Route::post('/admin/ekses/update/{id}', [EksesController::class, 'update'])->name('ekses.update');
     Route::get('/admin/ekses/delete/{id}', [EksesController::class, 'destroy'])->name('ekses.destroy');
-    
+    Route::post('/admin/ekses/delete-multiple', [EksesController::class, 'deleteMultiple'])->name('ekses.delete-multiple');
+
+
     //Kelengkapan Kerja
     Route::get('/admin/kelengkapan_kerja/', [KelengkapanKerjaController::class, 'index']);
     Route::post('/admin/kelengkapan_kerja/upload', [KelengkapanKerjaController::class, 'uploadExcel'])->name('kelengkapan-kerja.upload');

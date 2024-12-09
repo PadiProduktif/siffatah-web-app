@@ -399,7 +399,7 @@
                     if (result.isConfirmed) {
                         // Kirim permintaan hapus melalui AJAX
                         $.ajax({
-                            url: '/admin/kelengkapan_kerja/delete-multiple', // Endpoint untuk hapus data
+                            url: '/admin/ekses/delete-multiple', // Endpoint untuk hapus data
                             type: 'POST',
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content'),
