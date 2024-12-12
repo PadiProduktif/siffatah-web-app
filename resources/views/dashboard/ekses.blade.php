@@ -3,7 +3,39 @@
 @section('title', 'Dashboard')
 
 @section('content')
-   
+
+<style>
+.uploaded-file {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+}
+
+.uploaded-file img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.uploaded-file p {
+    margin-top: 5px;
+    font-size: 14px;
+}
+/* .dropzone {
+    border: 2px dashed #007bff;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 10px;
+}
+.dz-message {
+    color: #007bff;
+    font-size: 16px;
+} */
+</style>
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
             <h4 class="me-auto">Ekses</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
@@ -92,7 +124,7 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form  action="{{ route('ekses.store') }}" method="POST">
+                <form    action="{{ route('ekses.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -130,12 +162,20 @@
                                 <label for="alamat" class="form-label">Deskripsi</label>
                                 <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
-                           
+                            
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+                <!-- Form Dropzone -->
+                <form id="uploadForm" class="dropzone" action="/upload" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="dz-message">
+                        <p>Drag & Drop your image here</p>
+                        <p>or click to browse</p>
                     </div>
                 </form>
             </div>
@@ -231,6 +271,7 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <script>
         new Cleave('#nominal', {
             numeral: true,
@@ -416,6 +457,17 @@
                     }
                 });
             });
+        });
+
+        Dropzone.autoDiscover = false;
+
+        const dropzone = new Dropzone("#uploadForm", {
+            url: "/upload", // Ganti dengan endpoint Anda
+            maxFiles: 2,
+            maxFilesize: 5, // Dalam MB
+            acceptedFiles: "image/*", // Hanya file gambar
+            dictDefaultMessage: "Drag & Drop your image here or click to browse",
+            addRemoveLinks: true,
         });
     </script>
     
