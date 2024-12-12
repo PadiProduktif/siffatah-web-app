@@ -9,114 +9,164 @@ use Illuminate\Support\Facades\Log;
 
 class RestitusiKaryawanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
-    {
-        try {
-            // Retrieve all restitusi data
-            $restitusi = RestitusiKaryawan::all();
+{
+    $restitusi = RestitusiKaryawan::select(
+        'table_pengajuan_reimburse.*',
+        'table_karyawan.nama_karyawan', // Kolom dari tabel karyawan
+    )
+    ->leftJoin('table_karyawan', 'table_pengajuan_reimburse.id_badge', '=', 'table_karyawan.id_badge')
+    ->get();
     
-            // Return success response
-            // return response()->json([
-            //     'status' => 'success',
-            //     'message' => 'Data retrieved successfully',
-            //     'data' => $restitusi
-            // ], 200);
-            return view('dashboard/restitusi-karyawan');
-    
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Error retrieving data: " . $e->getMessage());
-    
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to retrieve data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
+    return view('dashboard/restitusi-karyawan', compact('restitusi'));
+}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
+    
+    // public function store(Request $request)
+    // {
+    //     // Validate the request data
+    //     $validatedData = $request->validate([
+    //         'id_badge' => 'required|string|max:255',
+    //         'nama_karyawan' => 'required|string|max:255',
+    //         'jabatan_karyawan' => 'nullable|string|max:255',
+    //         'nama_anggota_keluarga' => 'nullable|string|max:255',
+    //         'hubungan_keluarga' => 'nullable|string|max:255',
+    //         'deskripsi' => 'nullable|string',
+    //         'nominal' => 'nullable|numeric',
+    //         'rumah_sakit' => 'nullable|string|max:255',
+    //         'urgensi' => 'nullable|string|max:255',
+    //         'no_surat_rs' => 'nullable|string|max:255',
+    //         'tanggal_pengobatan' => 'nullable|date',
+    //         'keterangan_pengajuan' => 'nullable|string',
+    //         'status_pengajuan' => 'nullable|string',
+    //         'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+    //     ]);
+    
+    //     try {
+    //         // Handle file upload if present
+    //         $fileName = null;
+    //         if ($request->hasFile('file')) {
+    //             $file = $request->file('file');
+    //             $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+    //             $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
+    //         }
+    
+    //         // Create new RestitusiKaryawan record
+    //         $restitusi = RestitusiKaryawan::create([
+    //             'id_pengajuan' => rand(10, 99999999),
+    //             'id_badge' => $validatedData['id_badge'],
+    //             'nama_karyawan' => $validatedData['nama_karyawan'],
+    //             'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
+    //             'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
+    //             'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
+    //             'deskripsi' => $validatedData['deskripsi'],
+    //             'nominal' => $validatedData['nominal'],
+    //             'rumah_sakit' => $validatedData['rumah_sakit'],
+    //             'urgensi' => $validatedData['urgensi'],
+    //             'no_surat_rs' => $validatedData['no_surat_rs'],
+    //             'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
+    //             'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
+    //             'url_file' => $fileName,
+    //             'status_pengajuan' => $validatedData['status_pengajuan'],
+    //         ]);
+    
+    //         // // Return success response
+    //         // return response()->json([
+    //         //     'status' => 'success',
+    //         //     'message' => 'Data successfully created',
+    //         //     'data' => $restitusi
+    //         // ], 201);
+    
+    //     } catch (\Exception $e) {
+    //         // Log the error for debugging
+    //         Log::error("Error creating data: " . $e->getMessage());
+    
+    //         // Return error response
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Failed to create data',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
         
-    }
+    //     return redirect("/admin/restitusi_karyawan/$id")
+    //     ->with('toast_success', 'Data karyawan berhasil diperbarui.');
+    // }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validate the request data
+        // dd(4498);
         $validatedData = $request->validate([
             'id_badge' => 'required|string|max:255',
-            'nama_karyawan' => 'required|string|max:255',
-            'jabatan_karyawan' => 'nullable|string|max:255',
-            'nama_anggota_keluarga' => 'nullable|string|max:255',
-            'hubungan_keluarga' => 'nullable|string|max:255',
+            // 'nama_karyawan' => 'required|string|max:255',
+            // 'jabatan_karyawan' => 'nullable|string|max:255',
+            // 'nama_anggota_keluarga' => 'nullable|string|max:255',
+            // 'hubungan_keluarga' => 'nullable|string|max:255',
+            'tanggal_pengobatan' => 'nullable|date',
+            'urgensi' => 'nullable|string|in:Low,Medium,High',
             'deskripsi' => 'nullable|string',
             'nominal' => 'nullable|numeric',
             'rumah_sakit' => 'nullable|string|max:255',
-            'urgensi' => 'nullable|string|max:255',
             'no_surat_rs' => 'nullable|string|max:255',
-            'tanggal_pengobatan' => 'nullable|date',
             'keterangan_pengajuan' => 'nullable|string',
-            'status_pengajuan' => 'nullable|string',
-            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+            'status_pengajuan' => 'nullable|numeric',
+            // 'status_pengajuan' => 'nullable|string',
+            // 'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
         ]);
+        // dd($validatedData);
+
+        
+        // Create new RestitusiKaryawan record
+        $restitusi = RestitusiKaryawan::create([
+            'id_pengajuan' => rand(10, 99999999),
+            'id_badge' => $validatedData['id_badge'],
+            // 'nama_karyawan' => $validatedData['nama_karyawan'],
+            // 'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
+            // 'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
+            // 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
+            'deskripsi' => $validatedData['deskripsi'],
+            // 'nominal' => $validatedData['nominal'],
+            'nominal' => 0,
+            'rumah_sakit' => $validatedData['rumah_sakit'],
+            'urgensi' => $validatedData['urgensi'],
+            'no_surat_rs' => $validatedData['no_surat_rs'],
+            'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
+            'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
+            // 'url_file' => $fileName,
+            'status_pengajuan' => '1',
+        ]);
+
+        // dd($validatedData);
     
-        try {
-            // Handle file upload if present
-            $fileName = null;
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
-            }
+        return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+        // try {
+        //     // Handle file upload if present
+        //     $fileName = null;
+        //     if ($request->hasFile('file')) {
+        //         $file = $request->file('file');
+        //         $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+        //         $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
+        //     }
     
-            // Create new RestitusiKaryawan record
-            $restitusi = RestitusiKaryawan::create([
-                'id_pengajuan' => rand(10, 99999999),
-                'id_badge' => $validatedData['id_badge'],
-                'nama_karyawan' => $validatedData['nama_karyawan'],
-                'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
-                'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
-                'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
-                'deskripsi' => $validatedData['deskripsi'],
-                'nominal' => $validatedData['nominal'],
-                'rumah_sakit' => $validatedData['rumah_sakit'],
-                'urgensi' => $validatedData['urgensi'],
-                'no_surat_rs' => $validatedData['no_surat_rs'],
-                'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
-                'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
-                'url_file' => $fileName,
-                'status_pengajuan' => $validatedData['status_pengajuan'],
-            ]);
     
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully created',
-                'data' => $restitusi
-            ], 201);
+        //     // Return success response
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'message' => 'Data successfully created',
+        //         'data' => $restitusi
+        //     ], 201);
     
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Error creating data: " . $e->getMessage());
+        // } catch (\Exception $e) {
+        //     // Log the error for debugging
+        //     Log::error("Error creating data: " . $e->getMessage());
     
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to create data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        //     // Return error response
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Failed to create data',
+        //         'error' => $e->getMessage()
+        //     ], 500);
+        // }
     }
     
 

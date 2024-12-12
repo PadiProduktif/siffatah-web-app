@@ -4,13 +4,11 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 class MasterDataKaryawanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         try {
@@ -74,23 +72,9 @@ class MasterDataKaryawanController extends Controller
         return view('extras/master-data-karyawan-detail', compact('dataKaryawan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-
-        dd(4498);
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            // Validasi untuk data karyawan
             'id_badge' => 'required|string|max:255', // Gunakan 'integer' jika ID hanya berupa angka
             'nama_karyawan' => 'required|string|max:255',
             'gelar_depan' => 'nullable|string|max:255',
@@ -135,6 +119,58 @@ class MasterDataKaryawanController extends Controller
         } catch (\Exception $e) {
             return redirect('/admin/master_data_karyawan')->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
+    }
+    
+    public function uploadExcel(Request $request){
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+
+        if ($validator->fails()) {
+        }
+        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
+        
+        dd(
+            123,
+            4498,
+        );
+
+        // // Proses unggah file
+        // if ($request->hasFile('file_excel')) {
+        //     $path = $request->file('file_excel')->getRealPath();
+        //     $data = Excel::toArray([], $request->file('file_excel'));
+
+        //     // Validasi apakah data tidak kosong
+        //     if (!empty($data) && count($data[0]) > 0) {
+        //         foreach ($data[0] as $key => $row) {
+        //             // Lewati baris pertama (header)
+        //             if ($key < 2) {
+        //                 continue;
+        //             }
+
+        //             // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
+        //             KelengkapanKerja::create([
+        //                 'id_badge' => substr($row[1] ?? '', 0, 50), // Pastikan panjang data sesuai tipe di database
+        //                 'nama_karyawan' => substr($row[2] ?? '', 0, 1000),
+        //                 'cost_center' => substr($row[4] ?? '', 0, 1000),
+        //                 'unit_kerja' => substr($row[5] ?? '', 0, 1000), // Perhatikan panjang maksimal
+        //                 'sepatu_kantor' => $row[6] ?? null,
+        //                 'sepatu_safety' => $row[7] ?? null,
+        //                 'wearpack_cover_all' => $row[8] ?? null,
+        //                 'jaket_shift' => $row[9],
+        //                 'seragam_olahraga' => $row[10],
+        //                 'jaket_casual' => $row[11],
+        //                 'seragam_dinas_harian' => $row[12],
+        //                 // Tambahkan kolom lainnya
+        //             ]);
+        //         }
+        //     }
+            
+
+        //     return redirect()->back()->with('success', 'Data berhasil diunggah!');
+        // }
+
+        // return redirect()->back()->with('error', 'Gagal mengunggah file!');
     }
 
 
@@ -197,55 +233,57 @@ class MasterDataKaryawanController extends Controller
             'lamaran_pekerjaan' => 'nullable|file|mimes:pdf|max:2048'
         ]);
 
-        try {
-            $karyawan = DataKaryawan::findOrFail($id); // Fetch or fail if not found
+        return redirect("/admin/master_data_karyawan/detail/$id")
+        ->with('toast_success', 'Data karyawan berhasil diperbarui.');
+        // try {
+        //     $karyawan = DataKaryawan::findOrFail($id); // Fetch or fail if not found
 
-            // Helper function to handle file update
-            $updateFile = function ($file, $oldFilePath, $directory) {
-                if ($file) {
-                    if ($oldFilePath) {
-                        $oldFile = public_path("uploads/karyawan/{$directory}/{$oldFilePath}");
-                        if (file_exists($oldFile)) {
-                            unlink($oldFile); // Delete old file if exists
-                        }
-                    }
-                    $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                    $file->move(public_path("uploads/karyawan/{$directory}/"), $fileName);
-                    return $fileName;
-                }
-                return $oldFilePath;
-            };
+        //     // Helper function to handle file update
+        //     $updateFile = function ($file, $oldFilePath, $directory) {
+        //         if ($file) {
+        //             if ($oldFilePath) {
+        //                 $oldFile = public_path("uploads/karyawan/{$directory}/{$oldFilePath}");
+        //                 if (file_exists($oldFile)) {
+        //                     unlink($oldFile); // Delete old file if exists
+        //                 }
+        //             }
+        //             $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+        //             $file->move(public_path("uploads/karyawan/{$directory}/"), $fileName);
+        //             return $fileName;
+        //         }
+        //         return $oldFilePath;
+        //     };
 
-            // Update file fields with helper function
-            $karyawan->url_foto_diri = $updateFile($request->file('foto_diri'), $karyawan->url_foto_diri, 'foto_diri');
-            $karyawan->url_file_ktp = $updateFile($request->file('file_ktp'), $karyawan->url_file_ktp, 'file_ktp');
-            $karyawan->url_file_kk = $updateFile($request->file('file_kk'), $karyawan->url_file_kk, 'file_kk');
-            $karyawan->url_file_buku_nikah = $updateFile($request->file('buku_nikah'), $karyawan->url_file_buku_nikah, 'buku_nikah');
-            $karyawan->url_file_akta_kelahiran = $updateFile($request->file('akta_kelahiran'), $karyawan->url_file_akta_kelahiran, 'akta_kelahiran');
-            $karyawan->url_npwp = $updateFile($request->file('npwp'), $karyawan->url_npwp, 'npwp');
-            $karyawan->url_lamaran_pekerjaan = $updateFile($request->file('lamaran_pekerjaan'), $karyawan->url_lamaran_pekerjaan, 'lamaran_pekerjaan');
+        //     // Update file fields with helper function
+        //     $karyawan->url_foto_diri = $updateFile($request->file('foto_diri'), $karyawan->url_foto_diri, 'foto_diri');
+        //     $karyawan->url_file_ktp = $updateFile($request->file('file_ktp'), $karyawan->url_file_ktp, 'file_ktp');
+        //     $karyawan->url_file_kk = $updateFile($request->file('file_kk'), $karyawan->url_file_kk, 'file_kk');
+        //     $karyawan->url_file_buku_nikah = $updateFile($request->file('buku_nikah'), $karyawan->url_file_buku_nikah, 'buku_nikah');
+        //     $karyawan->url_file_akta_kelahiran = $updateFile($request->file('akta_kelahiran'), $karyawan->url_file_akta_kelahiran, 'akta_kelahiran');
+        //     $karyawan->url_npwp = $updateFile($request->file('npwp'), $karyawan->url_npwp, 'npwp');
+        //     $karyawan->url_lamaran_pekerjaan = $updateFile($request->file('lamaran_pekerjaan'), $karyawan->url_lamaran_pekerjaan, 'lamaran_pekerjaan');
 
-            // Update other fields
-            $karyawan->fill($validatedData);
-            $karyawan->save();
+        //     // Update other fields
+        //     $karyawan->fill($validatedData);
+        //     $karyawan->save();
 
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data updated successfully.',
-                'data' => $karyawan
-            ], 200);
+        //     // Return success response
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'message' => 'Data updated successfully.',
+        //         'data' => $karyawan
+        //     ], 200);
 
-        } catch (\Exception $e) {
+        // } catch (\Exception $e) {
             
 
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to update data.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        //     // Return error response
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Failed to update data.',
+        //         'error' => $e->getMessage()
+        //     ], 500);
+        // }
     }
 
     /**
