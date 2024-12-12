@@ -6,9 +6,41 @@
     <div class="table-container bg-white p-3 rounded shadow">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>MASTER DATA KARYAWAN</h2>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
-                <i class="bi bi-plus-lg"></i> Tambah Karyawan
-            </button>
+            <span>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importKaryawanModal">
+                    <i class="bi bi-plus-lg"></i> Import
+                </button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
+                    <i class="bi bi-plus-lg"></i> Tambah
+                </button>
+
+                
+                <div class="modal fade" id="importKaryawanModal" tabindex="-1" aria-labelledby="modalDataExcelLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalDataExcelLabel">Masukan Data Excel</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            <form action="{{ route('master-data-karyawan.upload') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="file_excel" class="form-label">Upload File Excel</label>
+                                    <input type="file" class="form-control" id="file_excel" name="file_excel" accept=".xlsx, .xls">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                            </form>
+                            </div>
+                            {{-- <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="button" class="btn btn-success">Upload</button>
+                            </div> --}}
+                        </div>
+                    </div>
+                </div>
+
+            </span>
         </div>
         <div class="table-responsive">
             <table id="klaimTable" class="table">
