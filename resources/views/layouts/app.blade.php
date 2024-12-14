@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-+" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,9 +52,6 @@
         .status.verified { background-color: #10b981; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.rejected { background-color: #ef4444; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.processing { background-color: #3b82f6; color: #fff; padding: 5px 10px; border-radius: 5px; }
-
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9fafb; } .sidebar { background-color: #f3f4f6; min-height: 100vh; } .sidebar h1 { font-size: 24px; font-weight: bold; } .sidebar a { color: #6b7280; text-decoration: none; display: block; padding: 10px; border-radius: 8px; } .sidebar a:hover, .sidebar a.active { background-color: #d1fae5; color: #047857; } .header img { height: 50px; width: 50px; object-fit: cover; } .status { padding: 5px 10px; border-radius: 5px; color: #ffffff; font-size: 14px; } .status.new { background-color: #f59e0b; color: #fff; } .status.verified { background-color: #10b981; color: #fff; } .status.rejected { background-color: #ef4444; color: #fff; } .status.processing { background-color: #3b82f6; color: #fff; }
     </style>
     @stack('styles')
 </head>
@@ -95,10 +94,16 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></
     {{-- <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </body>
 </html>
