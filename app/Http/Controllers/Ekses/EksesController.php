@@ -42,25 +42,14 @@ class EksesController extends Controller
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        $cleanedValue = str_replace(['Rp', ',', ' '], '', $request->jumlah_pengajuan);
-
-        // Validation
-        $request->validate([
-            'id_badge' => 'required',
-            'nama_karyawan' => 'required',
-            'id_member' => 'required',
-            'unit_kerja' => 'required',
-            'nama_pasien' => 'required',
-            // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048', // Optional file validation
-        ]);
-
+        // Membersihkan input angka untuk jumlah pengajuan
+        $cleanedValue = str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan);
 
         try {
+            // Simpan Data Utama
             $ekses = Ekses::create([
                 'id_ekses' => rand(10, 99999999), // Use auto-incremented ID if possible
                 'id_member' => $request->id_member,
@@ -71,15 +60,112 @@ class EksesController extends Controller
                 'deskripsi' => $request->deskripsi,
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'jumlah_ekses' => $cleanedValue,
-                // 'file_url' => $fileName,
+                'file_url' => json_encode($request->uploaded_files), // Simpan nama file dalam JSON
             ]);
+
+            // if ($request->has('uploaded_files')) {
+            // // Delete old file if it exists
+            //     if ($ekses->file_url) {
+            //         $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
+            //         if (file_exists($oldFilePath)) {
+            //             unlink($oldFilePath);
+            //         }
+            //     }
+
+            // // Save new file
+            //     $file = $request->file('file');
+            //     $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+            //     $file->move(public_path('uploads/Ekses/'), $fileName);
+            //     $ekses->file_url = $fileName;
+            // }
+
+            // Pindahkan file dari folder sementara ke folder final
+            if ($request->hasFile('uploaded_files')) {
+                $uploadedFiles = [];
+                foreach ($request->file('uploaded_files') as $file) {
+                    $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/Ekses/'), $fileName);
+                    $uploadedFiles[] = $fileName;
+                }
+    
+                // Simpan file ke kolom file_url sebagai JSON
+                $ekses->file_url = json_encode($uploadedFiles);
+                $ekses->save();
+            }    
+
             return redirect()->back()->with('success', 'Data berhasil ditambah!');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
+    }
+
+    public function uploadTemp(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120',
+        ]);
+    
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/temp', $filename);
+    
+            return response()->json(['fileName' => $filename]);
+        }
+    
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
+    }
+    /**
+     * Store a newly created resource in storage.
+     */
+    // public function store(Request $request)
+    // {
+    //     $cleanedValue = str_replace(['Rp', ',', ' '], '', $request->jumlah_pengajuan);
+
+    //     // Validation
+    //     $request->validate([
+    //         'id_badge' => 'required',
+    //         'nama_karyawan' => 'required',
+    //         'id_member' => 'required',
+    //         'unit_kerja' => 'required',
+    //         'nama_pasien' => 'required',
+    //         // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048', // Optional file validation
+    //     ]);
+
+
+    //     try {
+    //         $ekses = Ekses::create([
+    //             'id_ekses' => rand(10, 99999999), // Use auto-incremented ID if possible
+    //             'id_member' => $request->id_member,
+    //             'id_badge' => $request->id_badge,
+    //             'nama_karyawan' => $request->nama_karyawan,
+    //             'unit_kerja' => $request->unit_kerja,
+    //             'nama_pasien' => $request->nama_pasien,
+    //             'deskripsi' => $request->deskripsi,
+    //             'tanggal_pengajuan' => $request->tanggal_pengajuan,
+    //             'jumlah_ekses' => $cleanedValue,
+    //             // 'file_url' => $fileName,
+    //         ]);
+    //         return redirect()->back()->with('success', 'Data berhasil ditambah!');
+    //     } catch (\Throwable $th) {
+    //         return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
+    //     }
         
 
-    }
+    // }
 
     public function uploadExcel(Request $request){
 
@@ -154,7 +240,7 @@ class EksesController extends Controller
         return redirect()->back()->with('error', 'Gagal mengunggah file!');
     }
 
-    
+       
     /**
      * Display the specified resource.
      */

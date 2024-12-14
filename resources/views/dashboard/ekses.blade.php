@@ -124,7 +124,7 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form    action="{{ route('ekses.store') }}" method="POST">
+                <form id="dataForm" action="{{ route('ekses.store') }}" method="POST" enctype="multipart/form-data" >
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -162,7 +162,14 @@
                                 <label for="alamat" class="form-label">Deskripsi</label>
                                 <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
-                            
+                            <div class="col-md-12">
+                                <label for="dropzone" class="form-label">Attachment</label>
+                                <div class="dropzone" id="attachmentDropzone">
+                                    <div class="dz-message">
+                                        Drag & Drop your files here or click to upload
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -170,14 +177,8 @@
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
-                <!-- Form Dropzone -->
-                <form id="uploadForm" class="dropzone" action="/upload" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="dz-message">
-                        <p>Drag & Drop your image here</p>
-                        <p>or click to browse</p>
-                    </div>
-                </form>
+             
+               
             </div>
         </div>
     </div>
@@ -461,14 +462,39 @@
 
         Dropzone.autoDiscover = false;
 
-        const dropzone = new Dropzone("#uploadForm", {
-            url: "/upload", // Ganti dengan endpoint Anda
-            maxFiles: 2,
-            maxFilesize: 5, // Dalam MB
-            acceptedFiles: "image/*", // Hanya file gambar
-            dictDefaultMessage: "Drag & Drop your image here or click to browse",
-            addRemoveLinks: true,
-        });
+            const uploadedFiles = []; // Array untuk menyimpan file yang berhasil diunggah
+
+            // Inisialisasi Dropzone
+            const attachmentDropzone = new Dropzone("#attachmentDropzone", {
+                url: "/upload-temp", // Endpoint untuk menyimpan file sementara
+                maxFiles: 5,
+                maxFilesize: 5, // Maksimal 5MB per file
+                acceptedFiles: "image/*,.pdf", // File gambar dan PDF
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drag & Drop your files here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        uploadedFiles.push(response.fileName);
+
+                        // Tambahkan file ke input hidden
+                        const hiddenInput = document.createElement("input");
+                        hiddenInput.type = "hidden";
+                        hiddenInput.name = "uploaded_files[]";
+                        hiddenInput.value = response.fileName;
+                        document.getElementById("dataForm").appendChild(hiddenInput);
+                    });
+
+                    this.on("removedfile", function (file) {
+                        // Hapus file dari array uploadedFiles
+                        const index = uploadedFiles.indexOf(file.name);
+                        if (index > -1) {
+                            uploadedFiles.splice(index, 1);
+                            // Hapus file dari server jika perlu
+                            $.post("/delete-temp", { fileName: file.name });
+                        }
+                    });
+                },
+            });
     </script>
     
     
