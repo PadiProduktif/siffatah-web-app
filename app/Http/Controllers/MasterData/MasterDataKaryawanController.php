@@ -5,6 +5,9 @@ namespace App\Http\Controllers\MasterData;
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
+use \DateTime;
 use Illuminate\Http\Request;
 
 class MasterDataKaryawanController extends Controller
@@ -75,30 +78,21 @@ class MasterDataKaryawanController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'id_badge' => 'required|string|max:255', // Gunakan 'integer' jika ID hanya berupa angka
+            'id_badge' => 'required|string|max:255',
             'nama_karyawan' => 'required|string|max:255',
             'gelar_depan' => 'nullable|string|max:255',
             'nama_lengkap' => 'required|string|max:255',
             'gelar_belakang' => 'nullable|string|max:255',
             'pendidikan' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:500',
-            'agama' => 'nullable|string|max:255',
+            'agama' => 'nullable|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu', // Validasi nilai tertentu
             'status_pernikahan' => 'nullable|string|max:255',
             'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|string|in:Pria,Wanita', // Validasi untuk pilihan terbatas
-            'keluarga' => 'nullable|string|max:500',
-        
-            // Validasi untuk file (aktifkan jika digunakan)
-            // 'foto_diri' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            // 'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            // 'file_kk' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            // 'buku_nikah' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            // 'akta_kelahiran' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            // 'npwp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            // 'lamaran_pekerjaan' => 'nullable|file|mimes:pdf|max:2048',
+            'tanggal_lahir' => 'nullable|date|before:today', // Pastikan tanggal lahir sebelum hari ini
+            'jenis_kelamin' => 'nullable|string|in:Laki-laki,Perempuan',
         ]);
-        // Simpan data ke database
+
+        dd($validatedData);
         try {
             $karyawan = DataKaryawan::create([
                 'id_badge' => $validatedData['id_badge'],
@@ -120,6 +114,88 @@ class MasterDataKaryawanController extends Controller
             return redirect('/admin/master_data_karyawan')->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
     }
+
+//     public function uploadExcel(Request $request)
+// {
+//     // Validasi file unggahan
+//     $validator = Validator::make($request->all(), [
+//         'file_excel' => 'required|mimes:xlsx,xls',
+//     ]);
+
+//     if ($validator->fails()) {
+//         return redirect()
+//             ->back()
+//             ->withErrors($validator)
+//             ->withInput()
+//             ->with('toast_error', 'Validasi gagal. Silakan periksa kembali input Anda.');
+//     }
+
+//     if ($request->hasFile('file_excel')) {
+//         $path = $request->file('file_excel')->getRealPath();
+//         $data = Excel::toArray([], $request->file('file_excel'));
+
+//         if (!empty($data) && count($data[0]) > 0) {
+//             foreach ($data[0] as $key => $row) {
+//                 // Lewati header (baris pertama)
+//                 if ($key < 1) {
+//                     continue;
+//                 }
+
+//                 $badge = substr($row[0] ?? '', 0, 50);
+
+//                 // Cek jika data karyawan dengan ID badge sudah ada
+//                 $dataKaryawan = DataKaryawan::where('id_badge', $badge)->first();
+//                 if ($dataKaryawan) {
+//                     continue;
+//                 }
+
+//                 $birthday = date('Y-m-d', strtotime("1900-01-01") + ((substr($row[23] ?? '', 0, 50) - 2) * 86400));
+                
+//                 // dd(
+//                 //     substr($row[23] ?? '', 0, 50),
+//                 //     date('Y-m-d', strtotime("1900-01-01") + ((substr($row[23] ?? '', 0, 50) - 2) * 86400))
+//                 // );
+//                 // Buat data karyawan baru
+//                 DataKaryawan::create([
+//                     'id_badge' => $badge,
+//                     'nama_karyawan' => substr($row[1] ?? '', 0, 100),
+//                     'gelar_depan' => substr($row[2] ?? '', 0, 50),
+//                     'nama_lengkap' => substr($row[3] ?? '', 0, 100),
+//                     'gelar_belakang' => substr($row[4] ?? '', 0, 50),
+//                     'pendidikan' => '',
+//                     'alamat' => '',
+//                     'agama' => substr($row[26] ?? '', 0, 50),
+//                     'status_pernikahan' => substr($row[25] ?? '', 0, 50),
+//                     'tempat_lahir' => substr($row[22] ?? '', 0, 50),
+//                     'tanggal_lahir' => $birthday,
+//                     // 'tanggal_lahir' => !empty($row[23]) 
+//                     //     ? Carbon::createFromFormat('d/m/Y', $row[23])->format('Y-m-d') 
+//                     //     : null,
+//                     'jenis_kelamin' => 'Laki-laki',
+//                     // 'jenis_kelamin' => $row[24] === 'Male' 
+//                     //     ? 'Laki-laki' 
+//                     //     : ($row[24] === 'Female' ? 'Perempuan' : null),
+//                     'cost_center' => substr($row[31] ?? '', 0, 50),
+//                     'unit_kerja' => substr($row[32] ?? '', 0, 50),
+//                     'rek' => substr($row[28] ?? '', 0, 50),
+//                     'rek_loc' => substr($row[27] ?? '', 0, 50),
+//                     'files' => [],
+//                 ]);
+//             }
+//         }
+
+//         // Berhasil
+//         return redirect()
+//             ->back()
+//             ->with('toast_success', 'Data berhasil diunggah!');
+//     }
+
+//     // Jika file tidak ditemukan
+//     return redirect()
+//         ->back()
+//         ->with('toast_error', 'File tidak ditemukan. Silakan unggah file yang benar.');
+// }
+
     
     public function uploadExcel(Request $request){
         $validator = Validator::make($request->all(), [
@@ -127,50 +203,65 @@ class MasterDataKaryawanController extends Controller
         ]);
 
         if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
         }
-        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
-        
-        dd(
-            123,
-            4498,
-        );
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
 
-        // // Proses unggah file
-        // if ($request->hasFile('file_excel')) {
-        //     $path = $request->file('file_excel')->getRealPath();
-        //     $data = Excel::toArray([], $request->file('file_excel'));
+            if (!empty($data) && count($data[0]) > 0) {
+                $totalProcessed = 0; // Total data yang diproses
+                $successCount = 0;   // Data yang berhasil ditambahkan
 
-        //     // Validasi apakah data tidak kosong
-        //     if (!empty($data) && count($data[0]) > 0) {
-        //         foreach ($data[0] as $key => $row) {
-        //             // Lewati baris pertama (header)
-        //             if ($key < 2) {
-        //                 continue;
-        //             }
-
-        //             // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
-        //             KelengkapanKerja::create([
-        //                 'id_badge' => substr($row[1] ?? '', 0, 50), // Pastikan panjang data sesuai tipe di database
-        //                 'nama_karyawan' => substr($row[2] ?? '', 0, 1000),
-        //                 'cost_center' => substr($row[4] ?? '', 0, 1000),
-        //                 'unit_kerja' => substr($row[5] ?? '', 0, 1000), // Perhatikan panjang maksimal
-        //                 'sepatu_kantor' => $row[6] ?? null,
-        //                 'sepatu_safety' => $row[7] ?? null,
-        //                 'wearpack_cover_all' => $row[8] ?? null,
-        //                 'jaket_shift' => $row[9],
-        //                 'seragam_olahraga' => $row[10],
-        //                 'jaket_casual' => $row[11],
-        //                 'seragam_dinas_harian' => $row[12],
-        //                 // Tambahkan kolom lainnya
-        //             ]);
-        //         }
-        //     }
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key < 1) continue;
             
+                    $totalProcessed++; // Tambahkan ke total data yang diproses
+                    
+                    $badge = substr($row[0] ?? '', 0, 50);
+                    $dataKaryawan = DataKaryawan::where('id_badge', $badge)->first();
+                    if ($dataKaryawan) continue;
 
-        //     return redirect()->back()->with('success', 'Data berhasil diunggah!');
-        // }
+                    try {
+                        $dataImp = [
+                            'id_badge' => substr($row[0] ?? '', 0, 50),
+                            'nama_karyawan' => substr($row[1] ?? '', 0, 100),
+                            'gelar_depan' => substr($row[2] ?? '', 0, 50),
+                            'nama_lengkap' => substr($row[3] ?? '', 0, 100),
+                            'gelar_belakang' => substr($row[4] ?? '', 0, 50),
+                            'cost_center' => substr($row[31] ?? '', 0, 50),
+                            'agama' => substr($row[26] ?? '', 0, 50),
+                            'status_pernikahan' => substr($row[25] ?? '', 0, 50),
+                            'tempat_lahir' => substr($row[22] ?? '', 0, 50),
+                            'tanggal_lahir' => !empty($row[23]) ? Carbon::parse($row[23])->format('Y-m-d') : null,
+                            'jenis_kelamin' => $row[24] === 'Male' ? 'Laki-laki' : ($row[24] === 'Female' ? 'Perempuan' : null),
+                            'rek' => substr($row[28] ?? '', 0, 50),
+                            'rek_loc' => substr($row[27] ?? '', 0, 50),
+                            'files' => '',
+                            'updated_at' => now(),
+                            'updated_by' => auth()->user()->role,
+                            'created_at' => now(),
+                            'created_by' => auth()->user()->role,
+                        ];
+            
+                        DataKaryawan::create($dataImp);
+                        $successCount++; // Tambahkan ke jumlah sukses
+                    } catch (\Exception $e) {
+                        // Log error atau abaikan jika terjadi kesalahan
+                        \Log::error('Error adding data: ' . $e->getMessage());
+                    }
+                }
+            }
+            // Redirect dengan pesan jumlah sukses dan total
+            return redirect()->back()->with('toast_message', 'success')->with(
+                'toast_success',
+                "$successCount dari $totalProcessed data berhasil diunggah!"
+            );
+        }
 
-        // return redirect()->back()->with('error', 'Gagal mengunggah file!');
+        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
 
