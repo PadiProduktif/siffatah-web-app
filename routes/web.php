@@ -18,14 +18,21 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
-
-
 Route::get('/', function () {
+    // Jika user sudah login
+    if (Auth::check()) {
+        // Logout user dan hapus session
+        Auth::logout();
+        Session::flush();
+
+        // Opsional: Kirim pesan flash (jika diperlukan)
+        Session::flash('info', 'Anda telah logout untuk mengakses halaman ini.');
+    }
+
+    // Tampilkan halaman landing-page
     return view('landing-page');
 });
+
 
 // Route::post('/register', [AuthController:    :class, 'register']);
 Route::get('/roles', [AuthController::class, 'get_role']);
