@@ -45,13 +45,12 @@ class EksesController extends Controller
 
     public function store(Request $request)
     {
-        // Membersihkan input angka untuk jumlah pengajuan
         $cleanedValue = str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan);
-
+    
         try {
             // Simpan Data Utama
             $ekses = Ekses::create([
-                'id_ekses' => rand(10, 99999999), // Use auto-incremented ID if possible
+                'id_ekses' => rand(10, 99999999),
                 'id_member' => $request->id_member,
                 'id_badge' => $request->id_badge,
                 'nama_karyawan' => $request->nama_karyawan,
@@ -60,39 +59,35 @@ class EksesController extends Controller
                 'deskripsi' => $request->deskripsi,
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'jumlah_ekses' => $cleanedValue,
-                'file_url' => json_encode($request->uploaded_files), // Simpan nama file dalam JSON
+                'file_url' => json_encode($request->uploaded_files),
+
             ]);
-
-            // if ($request->has('uploaded_files')) {
-            // // Delete old file if it exists
-            //     if ($ekses->file_url) {
-            //         $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
-            //         if (file_exists($oldFilePath)) {
-            //             unlink($oldFilePath);
-            //         }
-            //     }
-
-            // // Save new file
-            //     $file = $request->file('file');
-            //     $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-            //     $file->move(public_path('uploads/Ekses/'), $fileName);
-            //     $ekses->file_url = $fileName;
-            // }
-
-            // Pindahkan file dari folder sementara ke folder final
-            if ($request->hasFile('uploaded_files')) {
-                $uploadedFiles = [];
-                foreach ($request->file('uploaded_files') as $file) {
-                    $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                    $file->move(public_path('uploads/Ekses/'), $fileName);
-                    $uploadedFiles[] = $fileName;
-                }
     
-                // Simpan file ke kolom file_url sebagai JSON
-                $ekses->file_url = json_encode($uploadedFiles);
-                $ekses->save();
-            }    
+            // Pindahkan file dari folder sementara ke folder final
+            if ($request->uploaded_files) {
+                $uploadedFiles = [];
+                foreach ($request->uploaded_files as $fileName) {
+                    $tempPath = storage_path("app/public/temp/{$fileName}");
+                    $finalPath = public_path("uploads/Ekses/{$fileName}");
 
+                    if (file_exists($tempPath)) {
+                        if (!file_exists(public_path('uploads/Ekses'))) {
+                            mkdir(public_path('uploads/Ekses'), 0755, true);
+                        }
+                        rename($tempPath, $finalPath);
+                        $uploadedFiles[] = $fileName;
+                    }
+                }
+
+                // Debug to ensure filenames are collected
+                Log::info("Uploaded files: " . json_encode($uploadedFiles));
+
+                if (!empty($uploadedFiles)) {
+                    $ekses->file_url = json_encode($uploadedFiles); // Simpan file sebagai JSON
+                    $ekses->save(); // Simpan model ke database
+                }
+            }
+    
             return redirect()->back()->with('success', 'Data berhasil ditambah!');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');

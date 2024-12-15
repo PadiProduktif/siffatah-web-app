@@ -23,6 +23,12 @@
     margin-top: 5px;
     font-size: 14px;
 }
+.detailRow {
+        cursor: pointer; /* Pointer berubah menjadi tangan */
+    }
+.detailRow:hover {
+        background-color: #f8f9fa; /* Highlight baris ketika dihover */
+    }
 /* .dropzone {
     border: 2px dashed #007bff;
     padding: 20px;
@@ -75,7 +81,7 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Data Dummy -->
+            <!-- Data Dummy
             @foreach($ekses as $item)
             <tr>
                 <td><input type="checkbox" class="rowCheckbox" value="{{ $item->id_ekses }}"></td>
@@ -113,10 +119,88 @@
                 <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $item->id_ekses }}">Hapus</button>
                 </td>
             </tr>
-            @endforeach
+            @endforeach -->
+            @foreach($ekses as $item)
+        <tr class="detailRow"
+            data-id="{{ $item->id_ekses }}"
+            data-id_member="{{ $item->id_member }}"
+            data-id_badge="{{ $item->id_badge }}"
+            data-nama_karyawan="{{ $item->nama_karyawan }}"
+            data-unit_kerja="{{ $item->unit_kerja }}"
+            data-nama_pasien="{{ $item->nama_pasien }}"
+            data-deskripsi="{{ $item->deskripsi }}"
+            data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
+            data-jumlah_ekses="{{ $formatted_jumlah }}"
+            data-file_url="{{ $item->file_url }}"> <!-- Tambahkan file_url -->
+            <td><input type="checkbox" class="rowCheckbox" value="{{ $item->id_ekses }}"></td>
+            <th>{{ $item->id_member }}</th>
+            <th>{{ $item->id_badge }}</th>
+            <th>{{ $item->nama_karyawan }}</th>
+            <th>{{ $item->unit_kerja }}</th>
+            <td>{{ $item->nama_pasien }}</td>
+            <td>{{ $item->deskripsi }}</td>
+            @php
+                    setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
+                    $tanggal_formatted = strftime('%d %B %Y', strtotime($item->tanggal_pengajuan));
+            @endphp
+            <td>{{ $tanggal_formatted }}</td>
+            @php
+                $formatted_jumlah = 'Rp.' . number_format($item->jumlah_ekses, 0, ',', '.');
+            @endphp
+            <td>{{ $formatted_jumlah }}</td>
+            <td>
+                <!-- <button type="button" class="btn btn-warning btn-sm editBtn" data-bs-toggle="modal" data-bs-target="#modalEditData">
+                    Edit
+                </button> -->
+                <button type="button" class="btn btn-warning btn-sm editBtn"
+                    data-id="{{ $item->id_ekses }}"
+                    data-id_member="{{ $item->id_member }}"
+                    data-id_badge="{{ $item->id_badge }}"
+                    data-nama_karyawan="{{ $item->nama_karyawan }}"
+                    data-unit_kerja="{{ $item->unit_kerja }}"
+                    data-nama_pasien="{{ $item->nama_pasien }}"
+                    data-deskripsi="{{ $item->deskripsi }}"
+                    data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
+                    data-jumlah_ekses="{{ $formatted_jumlah }}"
+                    data-file_url="{{ $item->file_url }}">
+                    Edit
+                </button>
+
+                <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $item->id_ekses }}">Hapus</button>
+            </td>
+        </tr>
+        @endforeach
+
             <!-- Tambahkan Data lainnya -->
         </tbody>
     </table>
+    <!-- Modal Detail Data -->
+    <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDetailLabel">Detail Informasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Member ID:</strong> <span id="detailMemberID"></span></p>
+                    <p><strong>ID Badge:</strong> <span id="detailIDBadge"></span></p>
+                    <p><strong>Nama Karyawan:</strong> <span id="detailNamaKaryawan"></span></p>
+                    <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
+                    <p><strong>Nama Pasien:</strong> <span id="detailNamaPasien"></span></p>
+                    <p><strong>Deskripsi:</strong> <span id="detailDeskripsi"></span></p>
+                    <p><strong>Tanggal Pengajuan:</strong> <span id="detailTanggalPengajuan"></span></p>
+                    <p><strong>Jumlah Pengajuan:</strong> <span id="detailJumlahEkses"></span></p>
+                    <p><strong>Attachments:</strong></p>
+                    <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalDataBaru" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -272,7 +356,6 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
-    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <script>
         new Cleave('#nominal', {
             numeral: true,
@@ -327,6 +410,72 @@
             });
         });
     </script>
+    <script>
+    $(document).ready(function () {
+        // Event listener untuk klik baris tabel
+        $('#tableAdmin tbody').on('click', 'tr', function () {
+            const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
+            const rowData = button.data(); // Ambil semua data attributes dari tombol
+
+            console.log("Debug Row Data:", rowData); // Debug data row di console
+
+            // Set data ke dalam modal
+            $('#detailMemberID').text(rowData.id_member || '-');
+            $('#detailIDBadge').text(rowData.id_badge || '-');
+            $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
+            $('#detailUnitKerja').text(rowData.unit_kerja || '-');
+            $('#detailNamaPasien').text(rowData.nama_pasien || '-');
+            $('#detailDeskripsi').text(rowData.deskripsi || '-');
+            $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
+            $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
+
+            // Parsing dan menampilkan file_url jika ada
+            let attachmentHtml = 'Tidak ada file';
+
+            if (rowData.file_url) {
+                console.log("Raw file_url:", rowData.file_url); // Debugging
+                let files = [];
+
+                // Jika file_url sudah berupa array, langsung gunakan
+                if (Array.isArray(rowData.file_url)) {
+                    files = rowData.file_url;
+                } else {
+                    // Jika file_url berupa string, parse terlebih dahulu
+                    try {
+                        files = JSON.parse(rowData.file_url);
+                    } catch (error) {
+                        console.error("Error Parsing JSON:", error.message);
+                    }
+                }
+
+                // Tampilkan file sebagai gambar atau link
+                if (files.length > 0) {
+                    attachmentHtml = files.map(file => {
+                        const fileExtension = file.split('.').pop().toLowerCase();
+                        const filePath = `/uploads/Ekses/${file}`;
+
+                        // Periksa ekstensi file
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                            // Jika file adalah gambar, tampilkan sebagai img tag
+                            return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
+                        } else {
+                            // Jika file bukan gambar, tampilkan sebagai link
+                            return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
+                        }
+                    }).join('');
+                }
+            }
+
+            // Tampilkan hasil pada modal
+            $('#detailAttachment').html(attachmentHtml);
+
+            // Tampilkan modal
+            $('#modalDetail').modal('show');
+        });
+    });
+    </script>
+
+
     <script>
     $(document).ready(function () {
         // Inisialisasi DataTables
@@ -462,39 +611,42 @@
 
         Dropzone.autoDiscover = false;
 
-            const uploadedFiles = []; // Array untuk menyimpan file yang berhasil diunggah
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Inisialisasi Dropzone
-            const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/upload-temp", // Endpoint untuk menyimpan file sementara
-                maxFiles: 5,
-                maxFilesize: 5, // Maksimal 5MB per file
-                acceptedFiles: "image/*,.pdf", // File gambar dan PDF
-                addRemoveLinks: true,
-                dictDefaultMessage: "Drag & Drop your files here or click to upload",
-                init: function () {
-                    this.on("success", function (file, response) {
-                        uploadedFiles.push(response.fileName);
+        const attachmentDropzone = new Dropzone("#attachmentDropzone", {
+            url: "/upload-temp",
+            paramName: "file",
+            headers: {
+                'X-CSRF-TOKEN': token // Kirim CSRF token di header
+            },
+            maxFiles: 5,
+            maxFilesize: 5, // 5MB
+            acceptedFiles: "image/*,.pdf",
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drag & Drop your files here or click to upload",
 
-                        // Tambahkan file ke input hidden
-                        const hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "uploaded_files[]";
-                        hiddenInput.value = response.fileName;
-                        document.getElementById("dataForm").appendChild(hiddenInput);
-                    });
+            init: function () {
+                this.on("success", function (file, response) {
+                    console.log("File uploaded:", response);
 
-                    this.on("removedfile", function (file) {
-                        // Hapus file dari array uploadedFiles
-                        const index = uploadedFiles.indexOf(file.name);
-                        if (index > -1) {
-                            uploadedFiles.splice(index, 1);
-                            // Hapus file dari server jika perlu
-                            $.post("/delete-temp", { fileName: file.name });
-                        }
-                    });
-                },
-            });
+                    // Tambahkan file ke input hidden
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "uploaded_files[]";
+                    hiddenInput.value = response.fileName;
+                    document.getElementById("dataForm").appendChild(hiddenInput);
+                });
+            }
+        });
+
+        document.getElementById("dataForm").addEventListener("submit", function (event) {
+            console.log("Form Data:");
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+        });
+
     </script>
     
     
