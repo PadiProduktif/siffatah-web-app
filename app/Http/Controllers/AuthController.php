@@ -49,37 +49,34 @@ class AuthController extends Controller
     // Login
     public function actionLogin(Request $request)
     {
+        // Cek apakah username dan password cocok
         if (!Auth::attempt($request->only('username', 'password'))) {
-        //     return response()->json(['message' => 'Unauthorized',
-        //     'username' => $request->username,
-        //     'password' => $request->password,   
-        // ], 401);
-            Session::flash('error', 'User anda tidak ditemukan');
+            Session::flash('error', 'User atau password Anda salah');
             return redirect('/login');
         }
-
+    
+        // Ambil data user berdasarkan username
         $user = User::where('username', $request->username)->firstOrFail();
-        // dd(
-        //     $request->only('username', 'password'),
-        //     $user
-        // );
-
-        // if (!Hash::check($request->password, $user->password)) {
-        //     // return response()->json(['message' => 'Unauthorized'], 401);
-        //     Session::flash('error', 'password yang anda masukan salah');
-        //     return redirect('/login');
-        // }
-
+    
+        // Buat token (opsional, hanya jika digunakan untuk API)
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // return response()->json([
-        //     'success' => true,
-        //     'access_token' => $token,
-        //     'token_type' => 'Bearer',
-        // ],200);
+        // Mapping role ke URL dashboard dan pesan notifikasi
+        $roleRoutes = [
+            'superadmin' => ['url' => 'admin/dashboard', 'message' => 'Berhasil login sebagai Superadmin'],
+            'dr_hph' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai dr_hph'],
+            'vp_osdm' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai VP OSDM'],
+            'tko' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai TKO'],
+        ];
 
-        Session::flash('success', 'berhasil login');
-        return redirect('admin/dashboard');
+        // Periksa apakah role user sesuai dengan yang ada di mapping
+        if (array_key_exists($user->role, $roleRoutes)) {
+            $route = $roleRoutes[$user->role];
+            return redirect($route['url'])->with('toast_success', $route['message']);;
+        }
+
+        // Role tidak dikenali
+        return redirect('/login')->with('error', 'Role Anda tidak diizinkan');
     }
 
     // Logout

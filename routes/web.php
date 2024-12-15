@@ -36,6 +36,7 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::get('dashboard', [DashboardController::class, 'index']);
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
     //Master Data Karyawan
