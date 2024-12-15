@@ -29,11 +29,9 @@
                                         <label for="file_excel" class="form-label">Upload File Excel</label>
                                         <input type="file" class="form-control" id="file_excel" name="file_excel" accept=".xlsx, .xls">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Upload</button>
+                                    <button type="submit" class="btn btn btn-success">Upload</button>
                                 </form>
                             </div>
-                                <button type="button" class="btn btn-success">Upload</button>
-                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -253,10 +251,6 @@
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
     function confirmDelete(id) {
@@ -295,7 +289,6 @@
         });
     @endif
 
-    
     // Setup - add a text input to each footer cell
     $('#klaimTable thead tr')
         .clone(true)
@@ -305,22 +298,22 @@
     var table = $('#klaimTable').DataTable({
         orderCellsTop: true,
         fixedHeader: true,
-        pageLength: 10,           // Menampilkan 15 data per halaman
+        pageLength: 10, // Menampilkan 10 data per halaman
         lengthMenu: [
             [10, 25, 50, -1], 
             [10, 25, 50, 'Semua']
         ],
-        processing: true,         // Menampilkan pesan saat memproses
+        processing: true, // Menampilkan pesan saat memproses
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-             "<'row'<'col-sm-12'tr>>" +
-             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
         initComplete: function () {
             var api = this.api();
 
             // For each column
             api.columns().eq(0).each(function (colIdx) {
-                // Skip checkbox and action columns
-                if (colIdx == 0 || colIdx == 9) return;
+                // Skip action columns (if applicable)
+                if (colIdx == 9) return;
 
                 // Add input field
                 var cell = $('.filters th').eq(colIdx);
