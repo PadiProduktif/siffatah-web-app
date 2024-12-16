@@ -123,6 +123,7 @@ class EksesController extends Controller
     
         return response()->json(['error' => 'File not found'], 404);
     }
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -272,114 +273,195 @@ class EksesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    // public function update(Request $request, string $id)
+    // {
+    //     $cleanedValue = str_replace(['Rp', '.', ' '], '', $request->jumlah_pengajuan);
+    //     // Validate the request input
+    //     $request->validate([
+    //         'id_member' => 'required',
+    //         'id_badge' => 'required',
+    //         'nama_karyawan' => 'required',
+    //         'unit_kerja' => 'required',
+    //         'nama_pasien' => 'required',
+    //         // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
+    //     ]);
+    //     if (empty($request->id_badge) || empty($request->id_member) || empty($request->nama_karyawan || empty($request->unit_kerja)) || empty($request->nama_pasien)) {
+
+    //         return redirect()->back()->with('failed', 'Data gagal diperbarui! ID badge, nama karyawan, dan cost center tidak boleh kosong');
+    //     }
+
+    //     // Find the record by ID
+    //     $ekses = Ekses::where('id_ekses', $id)->first();
+
+    //     if (!$ekses) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Data not found.'
+    //         ], 404); // 404 Not Found
+    //         return redirect()->back()->with('failed', 'Data gagal diperbarui! Data tidak ditemukan');
+    //     }
+
+    //     // // Handle file upload
+    //     // if ($request->hasFile('file')) {
+    //     //     // Delete old file if it exists
+    //     //     if ($ekses->file_url) {
+    //     //         $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
+    //     //         if (file_exists($oldFilePath)) {
+    //     //             unlink($oldFilePath);
+    //     //         }
+    //     //     }
+
+    //     //     // Save new file
+    //     //     $file = $request->file('file');
+    //     //     $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
+    //     //     $file->move(public_path('uploads/Ekses/'), $fileName);
+    //     //     $ekses->file_url = $fileName;
+    //     // }
+
+    //     // Update record fields
+    //     $ekses->id_member = $request->input('id_member');
+    //     $ekses->id_badge = $request->input('id_badge');
+    //     $ekses->nama_karyawan = $request->input('nama_karyawan');
+    //     $ekses->unit_kerja = $request->input('unit_kerja');
+    //     $ekses->nama_pasien = $request->input('nama_pasien');
+    //     $ekses->deskripsi = $request->input('deskripsi');
+    //     $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
+    //     $ekses->jumlah_ekses = $cleanedValue;
+        
+    //     // // Save changes
+    //     $ekses->save();
+    //     return redirect()->back()->with('success', 'Data berhasil di perbarui!');
+        
+    // }
+
+    public function update(Request $request, $id)
     {
-        $cleanedValue = str_replace(['Rp', '.', ' '], '', $request->jumlah_pengajuan);
-        // Validate the request input
-        $request->validate([
-            'id_member' => 'required',
-            'id_badge' => 'required',
-            'nama_karyawan' => 'required',
-            'unit_kerja' => 'required',
-            'nama_pasien' => 'required',
-            // 'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048'
-        ]);
-        if (empty($request->id_badge) || empty($request->id_member) || empty($request->nama_karyawan || empty($request->unit_kerja)) || empty($request->nama_pasien)) {
+        $ekses = Ekses::findOrFail($id);
+    
 
-            return redirect()->back()->with('failed', 'Data gagal diperbarui! ID badge, nama karyawan, dan cost center tidak boleh kosong');
+
+    
+        try {
+            // Logika Update Field Lainnya
+            $ekses->update([
+                'id_member' => $request->id_member,
+                'id_badge' => $request->id_badge,
+                'nama_karyawan' => $request->nama_karyawan,
+                'unit_kerja' => $request->unit_kerja,
+                'nama_pasien' => $request->nama_pasien,
+                'deskripsi' => $request->deskripsi,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'jumlah_ekses' => str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan),
+            ]);
+    
+            // Proses File Attachment
+            if ($request->hasFile('uploaded_files')) {
+                // Hapus file lama
+                if ($ekses->file_url) {
+                    foreach (json_decode($ekses->file_url) as $file) {
+                        $filePath = public_path("uploads/Ekses/{$file}");
+                        if (file_exists($filePath)) unlink($filePath);
+                    }
+                }
+    
+                // Simpan file baru
+                $uploadedFiles = [];
+                foreach ($request->file('uploaded_files') as $file) {
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/Ekses/'), $fileName);
+                    $uploadedFiles[] = $fileName;
+                }
+    
+                // Update kolom file_url dengan file baru
+                $ekses->file_url = json_encode($uploadedFiles);
+                $ekses->save();
+            }
+    
+            return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data.');
         }
-
-        // Find the record by ID
-        $ekses = Ekses::where('id_ekses', $id)->first();
-
-        if (!$ekses) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found.'
-            ], 404); // 404 Not Found
-            return redirect()->back()->with('failed', 'Data gagal diperbarui! Data tidak ditemukan');
-        }
-
-        // // Handle file upload
-        // if ($request->hasFile('file')) {
-        //     // Delete old file if it exists
-        //     if ($ekses->file_url) {
-        //         $oldFilePath = public_path("uploads/Ekses/{$ekses->file_url}");
-        //         if (file_exists($oldFilePath)) {
-        //             unlink($oldFilePath);
-        //         }
-        //     }
-
-        //     // Save new file
-        //     $file = $request->file('file');
-        //     $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-        //     $file->move(public_path('uploads/Ekses/'), $fileName);
-        //     $ekses->file_url = $fileName;
-        // }
-
-        // Update record fields
-        $ekses->id_member = $request->input('id_member');
-        $ekses->id_badge = $request->input('id_badge');
-        $ekses->nama_karyawan = $request->input('nama_karyawan');
-        $ekses->unit_kerja = $request->input('unit_kerja');
-        $ekses->nama_pasien = $request->input('nama_pasien');
-        $ekses->deskripsi = $request->input('deskripsi');
-        $ekses->tanggal_pengajuan = $request->input('tanggal_pengajuan');
-        $ekses->jumlah_ekses = $cleanedValue;
-        
-        // // Save changes
-        $ekses->save();
-        return redirect()->back()->with('success', 'Data berhasil di perbarui!');
-        
     }
-
-
+    
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-
         try {
             Log::info("Menghapus data dengan ID: {$id}"); // Log untuk debugging awal
-    
+            
+            // Ambil data berdasarkan ID
             $ekses = Ekses::findOrFail($id);
-            $ekses->delete();
     
+            // Hapus file attachment jika ada
+            if ($ekses->file_url) {
+                $fileUrls = json_decode($ekses->file_url, true); // Decode JSON ke array
+                if (is_array($fileUrls)) {
+                    foreach ($fileUrls as $file) {
+                        $filePath = public_path("uploads/Ekses/{$file}");
+                        if (file_exists($filePath)) {
+                            unlink($filePath); // Hapus file dari direktori
+                            Log::info("File dihapus: {$filePath}");
+                        }
+                    }
+                }
+            }
+    
+            // Hapus data dari database
+            $ekses->delete();
             Log::info("Data dengan ID: {$id} berhasil dihapus.");
     
-            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
-            // Log detail error ke file log
             Log::error("Error saat menghapus data dengan ID: {$id}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
     
-            // Kembalikan respon error
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
-        
     }
+    
 
     public function deleteMultiple(Request $request)
     {
         try {
             $ids = $request->input('ids'); // Ambil array ID dari request
-            Log::info('IDs yang akan dihapus: ', $ids); // Log IDs yang diterima
-
-            Ekses::whereIn('id_ekses', $ids)->delete(); // Hapus data berdasarkan ID
-
-            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+            Log::info('IDs yang akan dihapus: ', $ids);
+    
+            // Ambil semua data berdasarkan ID
+            $eksesList = Ekses::whereIn('id_ekses', $ids)->get();
+    
+            // Hapus semua file attachment yang terkait
+            foreach ($eksesList as $ekses) {
+                if ($ekses->file_url) {
+                    $fileUrls = json_decode($ekses->file_url, true);
+                    if (is_array($fileUrls)) {
+                        foreach ($fileUrls as $file) {
+                            $filePath = public_path("uploads/Ekses/{$file}");
+                            if (file_exists($filePath)) {
+                                unlink($filePath); // Hapus file
+                                Log::info("File dihapus: {$filePath}");
+                            }
+                        }
+                    }
+                }
+            }
+    
+            // Hapus data dari database
+            Ekses::whereIn('id_ekses', $ids)->delete();
+    
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
-            // Log detail error
             Log::error('Error saat menghapus data:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-
+    
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
     }
+    
 
 }

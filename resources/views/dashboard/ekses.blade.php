@@ -275,7 +275,7 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Edit Data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form  id="editForm" method="POST">
+                <form  id="editForm" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -313,8 +313,20 @@
                                 <label for="alamat" class="form-label">Deskripsi</label>
                                 <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
-                            
+                            <div class="col-md-12">
+                                <label for="editAttachment" class="form-label">Attachment</label>
+                                <!-- Tempat menampilkan file lama -->
+                                <div id="editAttachmentList">
+                                    <!-- Akan diisi file lama menggunakan JavaScript -->
+                                </div>
+                                <!-- Input file baru -->
+                                <div class="dropzone" id="editAttachmentDropzone">
+                                    <div class="dz-message">Drag & Drop file baru di sini atau klik untuk upload</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="removed_files[]" id="removedFiles">
 
+    
                            
                         </div>
                     </div>
@@ -410,68 +422,83 @@
             });
         });
     </script>
+
+    <script>
+        // Simpan file yang dihapus di input hidden
+        $('#editAttachmentList').on('click', '.remove-old-file', function () {
+            const fileToRemove = $(this).data('file');
+
+            let removedFiles = $('#removedFiles').val() ? JSON.parse($('#removedFiles').val()) : [];
+            removedFiles.push(fileToRemove);
+            $('#removedFiles').val(JSON.stringify(removedFiles));
+        });
+    </script>
     <script>
     $(document).ready(function () {
         // Event listener untuk klik baris tabel
         $('#tableAdmin tbody').on('click', 'tr', function () {
-            const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
-            const rowData = button.data(); // Ambil semua data attributes dari tombol
+        // Cegah klik pada tombol Edit agar tidak memicu modal detail
+        if ($(event.target).closest('.editBtn, .deleteBtn').length) return;
 
-            console.log("Debug Row Data:", rowData); // Debug data row di console
+        const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
+        const rowData = button.data(); // Ambil semua data attributes dari tombol
 
-            // Set data ke dalam modal
-            $('#detailMemberID').text(rowData.id_member || '-');
-            $('#detailIDBadge').text(rowData.id_badge || '-');
-            $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
-            $('#detailUnitKerja').text(rowData.unit_kerja || '-');
-            $('#detailNamaPasien').text(rowData.nama_pasien || '-');
-            $('#detailDeskripsi').text(rowData.deskripsi || '-');
-            $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
-            $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
+        console.log("Debug Row Data:", rowData); // Debug data row di console
 
-            // Parsing dan menampilkan file_url jika ada
-            let attachmentHtml = 'Tidak ada file';
+        // Set data ke dalam modal
+        $('#detailMemberID').text(rowData.id_member || '-');
+        $('#detailIDBadge').text(rowData.id_badge || '-');
+        $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
+        $('#detailUnitKerja').text(rowData.unit_kerja || '-');
+        $('#detailNamaPasien').text(rowData.nama_pasien || '-');
+        $('#detailDeskripsi').text(rowData.deskripsi || '-');
+        $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
+        $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
 
-            if (rowData.file_url) {
-                console.log("Raw file_url:", rowData.file_url); // Debugging
-                let files = [];
+        // Parsing dan menampilkan file_url jika ada
+        let attachmentHtml = 'Tidak ada file';
 
-                // Jika file_url sudah berupa array, langsung gunakan
-                if (Array.isArray(rowData.file_url)) {
-                    files = rowData.file_url;
-                } else {
-                    // Jika file_url berupa string, parse terlebih dahulu
-                    try {
-                        files = JSON.parse(rowData.file_url);
-                    } catch (error) {
-                        console.error("Error Parsing JSON:", error.message);
-                    }
-                }
+        if (rowData.file_url) {
+            console.log("Raw file_url:", rowData.file_url); // Debugging
+            let files = [];
 
-                // Tampilkan file sebagai gambar atau link
-                if (files.length > 0) {
-                    attachmentHtml = files.map(file => {
-                        const fileExtension = file.split('.').pop().toLowerCase();
-                        const filePath = `/uploads/Ekses/${file}`;
-
-                        // Periksa ekstensi file
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-                            // Jika file adalah gambar, tampilkan sebagai img tag
-                            return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
-                        } else {
-                            // Jika file bukan gambar, tampilkan sebagai link
-                            return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
-                        }
-                    }).join('');
+            // Jika file_url sudah berupa array, langsung gunakan
+            if (Array.isArray(rowData.file_url)) {
+                files = rowData.file_url;
+            } else {
+                // Jika file_url berupa string, parse terlebih dahulu
+                try {
+                    files = JSON.parse(rowData.file_url);
+                } catch (error) {
+                    console.error("Error Parsing JSON:", error.message);
                 }
             }
 
-            // Tampilkan hasil pada modal
-            $('#detailAttachment').html(attachmentHtml);
+            // Tampilkan file sebagai gambar atau link
+            if (files.length > 0) {
+                attachmentHtml = files.map(file => {
+                    const fileExtension = file.split('.').pop().toLowerCase();
+                    const filePath = `/uploads/Ekses/${file}`;
 
-            // Tampilkan modal
-            $('#modalDetail').modal('show');
-        });
+                    // Periksa ekstensi file
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                        // Jika file adalah gambar, tampilkan sebagai img tag
+                        return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
+                    } else {
+                        // Jika file bukan gambar, tampilkan sebagai link
+                        return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
+                    }
+                }).join('');
+            }
+        }
+
+        // Tampilkan hasil pada modal
+        $('#detailAttachment').html(attachmentHtml);
+
+        // Tampilkan modal
+        $('#modalDetail').modal('show');
+    });
+
     });
     </script>
 
@@ -482,7 +509,9 @@
         var table = $('#tableAdmin').DataTable();
 
         // Event delegation untuk tombol Edit
-        $('#tableAdmin').on('click', '.editBtn', function () {
+        $('#tableAdmin').on('click', '.editBtn', function (event) {
+            event.stopPropagation(); // Hentikan event klik dari propagasi ke elemen parent (baris)
+            
             // Ambil data dari atribut tombol
             const id = $(this).data('id');
             const id_member = $(this).data('id_member');
@@ -495,7 +524,6 @@
             const jumlah_ekses = $(this).data('jumlah_ekses');
 
             // Isi data di dalam form modal
-            $('#editId').val(id);
             $('#editIdMember').val(id_member);
             $('#editIdBadge').val(id_badge);
             $('#editNamaKaryawan').val(nama_karyawan);
@@ -505,12 +533,13 @@
             $('#editTanggalPengajuan').val(tanggal_pengajuan);
             $('#editJumlahPengajuan').val(jumlah_ekses);
 
-            // Ubah action form agar mengarah ke endpoint update
-            // $('#editForm').attr('action', '/kelengkapan_kerja/update/' + id);
-            // let baseUrl = window.location.origin;
-            // $('#editForm').attr('action', baseUrl + '/kelengkapan_kerja/update/' + id);
+            // Set action form update
             $('#editForm').attr('action', '/admin/ekses/update/' + id);
+
+            // Tampilkan modal edit
+            $('#modalEditData').modal('show');
         });
+
     });
 
     $(document).ready(function () {
@@ -617,11 +646,11 @@
             url: "/upload-temp",
             paramName: "file",
             headers: {
-                'X-CSRF-TOKEN': token // Kirim CSRF token di header
+                'X-CSRF-TOKEN': token
             },
             maxFiles: 5,
             maxFilesize: 5, // 5MB
-            acceptedFiles: "image/*,.pdf",
+            acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
             addRemoveLinks: true,
             dictDefaultMessage: "Drag & Drop your files here or click to upload",
 
@@ -634,17 +663,125 @@
                     hiddenInput.type = "hidden";
                     hiddenInput.name = "uploaded_files[]";
                     hiddenInput.value = response.fileName;
+                    hiddenInput.classList.add("hidden-upload-file"); // Tambahkan class untuk identifikasi
+                    file.uploadedFileName = response.fileName; // Simpan nama file di dalam objek file
                     document.getElementById("dataForm").appendChild(hiddenInput);
+                });
+
+                this.on("removedfile", function (file) {
+                    console.log("File removed:", file);
+
+                    // Kirim permintaan AJAX ke server untuk menghapus file sementara
+                    if (file.uploadedFileName) {
+                        $.ajax({
+                            url: "/delete-temp",
+                            type: "POST",
+                            data: {
+                                _token: token,
+                                fileName: file.uploadedFileName
+                            },
+                            success: function (response) {
+                                console.log("File deleted:", response);
+                            },
+                            error: function () {
+                                console.error("Failed to delete file.");
+                            }
+                        });
+
+                        // Hapus input hidden yang terkait dengan file
+                        document.querySelectorAll('.hidden-upload-file').forEach(input => {
+                            if (input.value === file.uploadedFileName) {
+                                input.remove();
+                            }
+                        });
+                    }
                 });
             }
         });
 
-        document.getElementById("dataForm").addEventListener("submit", function (event) {
-            console.log("Form Data:");
-            const formData = new FormData(this);
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
+        Dropzone.autoDiscover = false;
+
+        let oldFiles = []; // Array untuk menyimpan file lama
+
+        // Inisialisasi Dropzone untuk form edit
+        const editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
+            url: "/upload-temp", // Endpoint untuk upload file sementara
+            paramName: "file",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+            maxFiles: 5,
+            maxFilesize: 5, // 5MB
+            acceptedFiles: "image/*,.pdf",
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drag & Drop file baru di sini atau klik untuk upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    console.log("File uploaded:", response);
+
+                    // Tambahkan file baru ke input hidden
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "uploaded_files[]";
+                    hiddenInput.value = response.fileName;
+                    document.getElementById("editForm").appendChild(hiddenInput);
+                });
             }
+        });
+
+        // Event untuk menampilkan file lama pada modal edit
+        $('#tableAdmin').on('click', '.editBtn', function () {
+            const fileUrl = $(this).data('file_url'); // Ambil file lama dari data attribute
+
+            $('#editAttachmentList').empty(); // Kosongkan list sebelumnya
+            oldFiles = []; // Reset array file lama
+
+            if (fileUrl) {
+                try {
+                    const files = JSON.parse(fileUrl); // Decode JSON file_url
+
+                    files.forEach((file, index) => {
+                        const filePath = `/uploads/Ekses/${file}`;
+                        const fileExtension = file.split('.').pop().toLowerCase();
+
+                        // Tampilkan file lama sebagai gambar atau link
+                        let fileHtml = '';
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                            fileHtml = `
+                                <div class="uploaded-file" id="file-${index}">
+                                    <img src="${filePath}" alt="${file}">
+                                    <p>${file}</p>
+                                    <button type="button" class="btn btn-danger btn-sm remove-old-file" 
+                                        data-file="${file}" data-index="${index}">Hapus</button>
+                                </div>`;
+                        } else {
+                            fileHtml = `
+                                <div id="file-${index}">
+                                    <a href="${filePath}" target="_blank">${file}</a>
+                                    <button type="button" class="btn btn-danger btn-sm remove-old-file" 
+                                        data-file="${file}" data-index="${index}">Hapus</button>
+                                </div>`;
+                        }
+
+                        $('#editAttachmentList').append(fileHtml);
+                        oldFiles.push(file); // Simpan file lama di array
+                    });
+                } catch (error) {
+                    console.error("Error parsing file_url:", error);
+                }
+            }
+
+            // Event untuk menghapus file lama dari list
+            $('#editAttachmentList').on('click', '.remove-old-file', function () {
+                const fileToRemove = $(this).data('file');
+                const indexToRemove = $(this).data('index');
+
+                // Hapus file dari tampilan dan array
+                $(`#file-${indexToRemove}`).remove();
+                oldFiles = oldFiles.filter(file => file !== fileToRemove);
+
+                console.log("File lama setelah dihapus:", oldFiles);
+            });
         });
 
     </script>
