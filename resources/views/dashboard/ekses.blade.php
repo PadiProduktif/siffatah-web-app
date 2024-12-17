@@ -284,6 +284,7 @@
                             <div class="col-md-2">
                                 <label for="id_badge" class="form-label">Member ID</label>
                                 <input type="text" class="form-control" id="editIdMember" name="id_member" required>
+                                <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="">
                             </div>
 
                             <div class="col-md-2">
@@ -324,9 +325,13 @@
                                     <!-- File lama akan dimuat melalui JavaScript -->
                                 </div>
                                 <!-- Input hidden untuk menyimpan file yang dihapus -->
-                                <input type="hidden" name="removed_files" id="removedFilesInput" value="">
+                                <input type="hidden" name="removed_files" id="removedFilesInput" value="[]">
+                                <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
+
                             </div>
-                            
+                            <input type="hidden" name="removed_files" id="removedFilesInput" value="">
+                            <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="">
+
 
     
                            
@@ -425,16 +430,6 @@
         });
     </script>
 
-    <script>
-        // Simpan file yang dihapus di input hidden
-        $('#editAttachmentList').on('click', '.remove-old-file', function () {
-            const fileToRemove = $(this).data('file');
-
-            let removedFiles = $('#removedFiles').val() ? JSON.parse($('#removedFiles').val()) : [];
-            removedFiles.push(fileToRemove);
-            $('#removedFiles').val(JSON.stringify(removedFiles));
-        });
-    </script>
     <script>
     $(document).ready(function () {
         // Event listener untuk klik baris tabel
@@ -645,66 +640,6 @@
         let removedFiles = [];
         let existingFiles = [];
 
-        // Inisialisasi Dropzone
-        let editDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/upload-temp",
-            paramName: "file",
-            maxFilesize: 5,
-            acceptedFiles: "image/*,.pdf,.doc,.docx",
-            addRemoveLinks: true,
-
-            init: function () {
-                // Load file lama
-                existingFiles.forEach(file => {
-                    const mockFile = { name: file, size: 12345 };
-                    this.emit("addedfile", mockFile);
-                    this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
-                    this.emit("complete", mockFile);
-                });
-
-                // Hapus file lama
-                this.on("removedfile", function (file) {
-                    removedFiles.push(file.name);
-                    $('#removedFilesInput').val(JSON.stringify(removedFiles));
-                });
-
-                // Tambahkan file baru
-                this.on("success", function (file, response) {
-                    file.name = response.fileName;
-                });
-            }
-        });
-
-        // Event untuk menampilkan file lama
-        $('#tableAdmin').on('click', '.editBtn', function () {
-            const fileUrl = $(this).data('file_url');
-            $('#editAttachmentList').empty();
-            removedFiles = [];
-
-            if (fileUrl) {
-                existingFiles = JSON.parse(fileUrl);
-                existingFiles.forEach(file => {
-                    const filePath = `/uploads/Ekses/${file}`;
-                    $('#editAttachmentList').append(`
-                        <div>
-                            <a href="${filePath}" target="_blank">${file}</a>
-                            <button type="button" class="btn btn-sm btn-danger remove-old-file" data-file="${file}">Hapus</button>
-                        </div>
-                    `);
-                });
-            }
-        });
-
-        // Handle tombol hapus file lama
-        $('#editAttachmentList').on('click', '.remove-old-file', function () {
-            const fileToRemove = $(this).data('file');
-            removedFiles.push(fileToRemove);
-            $('#removedFilesInput').val(JSON.stringify(removedFiles));
-            $(this).parent().remove();
-        });
-
-
-        Dropzone.autoDiscover = false;
 
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -765,55 +700,73 @@
             }
         });
 
-        Dropzone.autoDiscover = false;
 
         let oldFiles = []; // Array untuk menyimpan file lama
 
 
         // Inisialisasi Dropzone Edit
+
         let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/upload-temp", // Endpoint sementara
+            url: "/upload-temp", // Endpoint upload file sementara
             paramName: "file",
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             maxFilesize: 5, // 5MB
             acceptedFiles: "image/*,.pdf",
             addRemoveLinks: true,
-            dictRemoveFile: "Remove file",
+            dictRemoveFile: "Hapus File",
 
             init: function () {
-                // Tambahkan file lama ke Dropzone
-                let existingFiles = JSON.parse($('#editAttachmentDropzone').attr('data-files')) || [];
-                existingFiles.forEach(file => {
-                    let mockFile = { name: file, size: 12345 };
-                    this.emit("addedfile", mockFile);
-                    this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
-                    this.emit("complete", mockFile);
+                this.on("success", function (file, response) {
+                    console.log("File uploaded:", response.fileName);
                 });
-
-                // Event saat file dihapus
                 this.on("removedfile", function (file) {
-                    removedFiles.push(file.name); // Tambahkan file ke array removedFiles
-                    console.log("Removed Files:", removedFiles);
-
-                    // Set nilai ke input hidden
-                    $('#removedFilesInput').val(JSON.stringify(removedFiles));
+                    console.log("File removed:", file.name);
                 });
             }
         });
+
 
 
         // Event untuk menampilkan file lama pada modal edit
         $('#tableAdmin').on('click', '.editBtn', function () {
             const fileUrl = $(this).data('file_url'); // Ambil file lama dari data attribute
 
+            let files = [];
+
+            if (Array.isArray(fileUrl)) {
+                files = fileUrl;
+            } else if (typeof fileUrl === 'string') {
+                try {
+                    files = JSON.parse(fileUrl.trim());
+                } catch (error) {
+                    console.error("Error parsing file_url:", error.message);
+                }
+            }
+
+            console.log("Processed files:", files); // Debugging
+
             $('#editAttachmentList').empty(); // Kosongkan list sebelumnya
             oldFiles = []; // Reset array file lama
 
             if (fileUrl) {
                 try {
-                    const files = JSON.parse(fileUrl); // Decode JSON file_url
+                    let files = [];
+
+                // Validasi fileUrl
+                if (Array.isArray(fileUrl)) {
+                    files = fileUrl; // Jika sudah array, langsung gunakan
+                } else if (typeof fileUrl === 'string') {
+                    try {
+                        files = JSON.parse(fileUrl.trim()); // Parsing jika string JSON
+                    } catch (error) {
+                        console.error("Error parsing file_url:", error.message);
+                        files = []; // Default ke array kosong jika gagal
+                    }
+                } else {
+                    console.warn("Unexpected fileUrl format:", fileUrl);
+                }
 
                     files.forEach((file, index) => {
                         const filePath = `/uploads/Ekses/${file}`;
@@ -846,16 +799,60 @@
                 }
             }
 
-            // Event untuk menghapus file lama dari list
-            $('#editAttachmentList').on('click', '.remove-old-file', function () {
+
+        });
+        $('#editAttachmentList').on('click', '.remove-old-file', function () {
                 const fileToRemove = $(this).data('file');
-                const indexToRemove = $(this).data('index');
 
-                // Hapus file dari tampilan dan array
-                $(`#file-${indexToRemove}`).remove();
-                oldFiles = oldFiles.filter(file => file !== fileToRemove);
+                // Ambil value input hidden dan update
+                let removedFiles = $('#removedFilesInput').val() ? JSON.parse($('#removedFilesInput').val()) : [];
+                removedFiles.push(fileToRemove);
+                $('#removedFilesInput').val(JSON.stringify(removedFiles));
 
-                console.log("File lama setelah dihapus:", oldFiles);
+                console.log("Removed Files Input:", $('#removedFilesInput').val()); // Debug
+                $(this).parent().remove(); // Hapus tampilan file
+            });
+            editAttachmentDropzone.on("success", function (file, response) {
+            console.log("File uploaded successfully:", response);
+
+            const uploadedFilesInput = document.getElementById("uploadedFilesInput");
+            let uploadedFiles = uploadedFilesInput.value ? JSON.parse(uploadedFilesInput.value) : [];
+            uploadedFiles.push(response.fileName); // Tambahkan nama file
+            uploadedFilesInput.value = JSON.stringify(uploadedFiles);
+
+            console.log("Updated uploaded_files input:", uploadedFilesInput.value); // Debug di console
+        });
+
+        // Debug sebelum form submit
+        $('#editForm').on('submit', function (e) {
+            console.log("Final Uploaded Files Input:", $('#uploadedFilesInput').val());
+        });
+        console.log("Removed Files Input:", $('#removedFilesInput').val());
+        console.log("Uploaded Files Input:", $('#uploadedFilesInput').val());
+        
+        $('#editForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Pastikan input hidden diperbarui dengan file lama dan yang dihapus
+            $('#uploadedFilesInput').val(JSON.stringify(existingFiles));
+            console.log("Final Uploaded Files:", $('#uploadedFilesInput').val());
+            console.log("Final Removed Files:", $('#removedFilesInput').val());
+
+            // Kirim form dengan AJAX
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Swal.fire('Berhasil!', 'Data berhasil diperbarui.', 'success');
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan data.', 'error');
+                }
             });
         });
 

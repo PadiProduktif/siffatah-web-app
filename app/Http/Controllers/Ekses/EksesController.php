@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Models\Ekses\Ekses;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -96,18 +97,29 @@ class EksesController extends Controller
 
     public function uploadTemp(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120',
-        ]);
+        // $request->validate([
+        //     'file' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120',
+        // ]);
     
+        // if ($request->hasFile('file')) {
+        //     $file = $request->file('file');
+        //     $filename = time() . '_' . $file->getClientOriginalName();
+        //     $file->storeAs('public/temp', $filename);
+    
+        //     return response()->json(['fileName' => $filename]);
+        // }
+    
+        // return response()->json(['error' => 'No file uploaded'], 400);
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/temp', $filename);
-    
-            return response()->json(['fileName' => $filename]);
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/Ekses'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
         }
-    
+        
         return response()->json(['error' => 'No file uploaded'], 400);
     }
     
@@ -334,71 +346,220 @@ class EksesController extends Controller
         
     // }
 
-    public function update(Request $request, $id)
+    // public function update(Request $request, $id)
+    // {
+    //     Log::info("Updating Ekses ID: {$id}, Request Data: ", $request->all());
+
+    //     try {
+    //         $ekses = Ekses::findOrFail($id);
+
+    //         // Logika Update Field Utama
+    //         $ekses->update([
+    //             'id_member' => $request->id_member,
+    //             'id_badge' => $request->id_badge,
+    //             'nama_karyawan' => $request->nama_karyawan,
+    //             'unit_kerja' => $request->unit_kerja,
+    //             'nama_pasien' => $request->nama_pasien,
+    //             'deskripsi' => $request->deskripsi,
+    //             'tanggal_pengajuan' => $request->tanggal_pengajuan,
+    //             'jumlah_ekses' => str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan),
+    //         ]);
+
+    //         // Hapus file lama jika ada
+    //         if ($request->has('removed_files') && !empty($request->removed_files)) {
+    //             $filesToRemove = json_decode($request->removed_files, true) ?? [];
+    //             Log::info("Files to Remove: ", $filesToRemove);
+            
+    //             foreach ($filesToRemove as $file) {
+    //                 $filePath = public_path("uploads/Ekses/{$file}");
+    //                 if (file_exists($filePath)) {
+    //                     unlink($filePath);
+    //                     Log::info("File deleted: {$filePath}");
+    //                 }
+    //             }
+            
+    //             // Update kolom file_url dengan sisa file
+    //             $remainingFiles = array_diff(json_decode($ekses->file_url, true) ?? [], $filesToRemove);
+    //             $ekses->file_url = json_encode($remainingFiles);
+    //             $ekses->save();
+    //         } else {
+    //             Log::info("No files to remove.");
+    //         }
+
+    //         // Simpan file baru
+    //         if ($request->hasFile('uploaded_files')) {
+    //             $uploadedFiles = [];
+    //             foreach ($request->file('uploaded_files') as $file) {
+    //                 $fileName = time() . '_' . $file->getClientOriginalName();
+    //                 $file->move(public_path('uploads/Ekses/'), $fileName);
+    //                 $uploadedFiles[] = $fileName;
+    //                 // $pesan = "harusnya sudah terupload brai";
+    //             }
+
+
+    //             // die();
+    //             // Gabungkan file lama dan baru
+    //             // $finalFiles = array_merge(json_decode($ekses->file_url, true) ?? [], $uploadedFiles);
+    //             // $ekses->file_url = json_encode($finalFiles);
+    //             // $ekses->save();
+
+    //             // Log::info("Files successfully updated: ", $finalFiles);
+    //         }
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Data retrieved successfully.',
+    //             'data' => $request->all(),
+    //             // 'pesan' => $uploadedFiles,
+    //         ], 200); // 200 OK
+
+    //         // return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+    //     } catch (\Exception $e) {
+    //         Log::error("Error updating Ekses ID: {$id}", ['error' => $e->getMessage()]);
+    //         return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data.');
+    //     }
+    // }
+
+    // public function update(Request $request, $id)
+    // {
+    //     // return response()->json([
+    //     //     'status' => 'success',
+    //     //     'message' => 'Data retrieved successfully.',
+    //     //     'data' => $request->all(),
+    //     // ], 200); // 200 OK
+    //     $data = Ekses::find($id);
+    
+    //     // Handle Removed Files
+    //     if ($request->filled('removed_files')) {
+    //         $removedFiles = json_decode($request->input('removed_files'), true);
+    //         foreach ($removedFiles as $file) {
+    //             $filePath = public_path("uploads/Ekses/{$file}");
+    //             if (file_exists($filePath)) {
+    //                 unlink($filePath);
+    //                 // $remainingFiles = array_diff(json_decode($ekses->file_url, true) ?? [], $filesToRemove);
+    //                 // $data->file_url = json_encode($remainingFiles);
+    //                 // $data->save();
+    //                 Log::info("File deleted: {$filePath}");
+    //                 // $pesan = "Harusnya sudah Terhapus";
+    //             }else{
+    //                 // $pesan = "filenya tidak ada bor";
+    //             }
+                
+    //         }
+    //          return response()->json([
+    //         'status' => 'Test',
+    //         'message' => 'Data Need To Be Test.',
+    //         'data' => $removedFiles,
+    //         // 'pesan' => $pesan
+    //         ], 200); // 200 OKK
+    //     }
+    
+    //         if ($request->hasFile('uploaded_files')) {
+    //             $uploadedFiles = [];
+    //             foreach ($request->file('uploaded_files') as $file) {
+    //                 Log::info('File found in request: ' . $file->getClientOriginalName());
+            
+    //                 $fileName = time() . '_' . $file->getClientOriginalName();
+    //                 $destinationPath = public_path('uploads/Ekses/');
+            
+    //                 // Debug apakah path tujuan benar
+    //                 Log::info('Destination path: ' . $destinationPath);
+            
+    //                 // Pindahkan file
+    //                 $file->move($destinationPath, $fileName);
+            
+    //                 Log::info('File moved successfully: ' . $fileName);
+            
+    //                 $uploadedFiles[] = $fileName;
+    //             }
+
+    //             return response()->json([
+    //                 'status' => 'Test',
+    //                 'message' => 'Data Need To Be Test.',
+    //                 'data' => $uploadedFiles,
+    //                 // 'pesan' => $pesan
+    //                 ], 200); // 200 OKK
+    //         }
+    
+    //     // // Simpan Data File
+    //     // $currentFiles = json_decode($data->file_url, true) ?? [];
+    //     // $data->file_url = json_encode(array_merge($currentFiles, $uploadedFiles));
+    //     // $data->save();
+    
+    //     // return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+    // }
+
+        public function update(Request $request, $id)
     {
-        Log::info("Updating Ekses ID: {$id}, Request Data: ", $request->all());
+        Log::info('Updating Ekses ID: ' . $id . ', Request Data: ', $request->all());
 
-        try {
-            $ekses = Ekses::findOrFail($id);
+        $uploadedFiles = []; // Pastikan variabel didefinisikan terlebih dahulu
 
-            // Logika Update Field Utama
-            $ekses->update([
-                'id_member' => $request->id_member,
-                'id_badge' => $request->id_badge,
-                'nama_karyawan' => $request->nama_karyawan,
-                'unit_kerja' => $request->unit_kerja,
-                'nama_pasien' => $request->nama_pasien,
-                'deskripsi' => $request->deskripsi,
-                'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'jumlah_ekses' => str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan),
-            ]);
-
-            // Hapus file lama jika ada
-            if ($request->has('removed_files') && !empty($request->removed_files)) {
-                $filesToRemove = json_decode($request->removed_files, true) ?? [];
-                Log::info("Files to Remove: ", $filesToRemove);
-            
-                foreach ($filesToRemove as $file) {
-                    $filePath = public_path("uploads/Ekses/{$file}");
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                        Log::info("File deleted: {$filePath}");
-                    }
-                }
-            
-                // Update kolom file_url dengan sisa file
-                $remainingFiles = array_diff(json_decode($ekses->file_url, true) ?? [], $filesToRemove);
-                $ekses->file_url = json_encode($remainingFiles);
-                $ekses->save();
-            } else {
-                Log::info("No files to remove.");
+        // Proses file yang diupload
+        if ($request->hasFile('uploaded_files')) {
+            foreach ($request->file('uploaded_files') as $file) {
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/Ekses/'), $fileName);
+                $uploadedFiles[] = $fileName; // Tambahkan nama file ke array
             }
-
-            // Simpan file baru
-            if ($request->hasFile('uploaded_files')) {
-                $uploadedFiles = [];
-                foreach ($request->file('uploaded_files') as $file) {
-                    $fileName = time() . '_' . $file->getClientOriginalName();
-                    $file->move(public_path('uploads/Ekses/'), $fileName);
-                    $uploadedFiles[] = $fileName;
-                }
-
-                // Gabungkan file lama dan baru
-                $finalFiles = array_merge(json_decode($ekses->file_url, true) ?? [], $uploadedFiles);
-                $ekses->file_url = json_encode($finalFiles);
-                $ekses->save();
-
-                Log::info("Files successfully updated: ", $finalFiles);
-            }
-
-            return redirect()->back()->with('success', 'Data berhasil diperbarui.');
-        } catch (\Exception $e) {
-            Log::error("Error updating Ekses ID: {$id}", ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data.');
         }
+        //filesnamenya tinggal get from request, habis itu di update ke file_url, habis itu save kawan
+
+        // Log uploaded files
+        Log::info('Uploaded Files:', $uploadedFiles);
+
+        Log::info('Uploaded Files (raw): ' . json_encode($request->uploaded_files));
+
+        $uploadedFiles = $request->uploaded_files ?? []; // Pastikan array
+        if (!empty($uploadedFiles)) {
+            Log::info('Uploaded Files:', $uploadedFiles);
+        } else {
+            Log::info('No files were uploaded.');
+        }
+        // Proses file yang dihapus
+        $removedFiles = $request->input('removed_files') ? json_decode($request->input('removed_files'), true) : [];
+        if (!empty($removedFiles)) {
+            foreach ($removedFiles as $file) {
+                $filePath = public_path('uploads/Ekses/' . $file);
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Hapus file fisik
+                    Log::info('File removed: ' . $filePath);
+                }
+            }
+        } else {
+            Log::info('No files to remove.');
+        }
+
+        // Simpan perubahan ke database
+        $ekses = Ekses::findOrFail($id);
+        $currentFiles = json_decode($ekses->file_url, true) ?? [];
+
+        // Gabungkan file lama dan file baru
+        $finalFiles = array_merge($currentFiles, $uploadedFiles);
+        $finalFiles = array_diff($finalFiles, $removedFiles); // Hilangkan file yang dihapus
+
+        $uang_ekses = str_replace(['Rp', '.', ','], '', $request->jumlah_pengajuan);
+        // $uang_ekses_final = str_replace('Rp.', '', $uang_ekses);
+        $ekses->file_url = json_encode($finalFiles);
+        $ekses->id_member = $request->id_member;
+        $ekses->id_badge = $request->id_badge;
+        $ekses->nama_karyawan = $request->nama_karyawan;
+        $ekses->unit_kerja = $request->unit_kerja;
+        $ekses->nama_pasien = $request->nama_pasien;
+        $ekses->tanggal_pengajuan = $request->tanggal_pengajuan;
+        $ekses->jumlah_ekses = $uang_ekses;
+        $ekses->deskripsi = $request->deskripsi;
+
+        $ekses->save();
+
+        Log::info('Final File URL:', $finalFiles);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil diupdate.',
+            'data' => $ekses,
+        ]);
     }
-
-
+    
         
     /**
      * Remove the specified resource from storage.
