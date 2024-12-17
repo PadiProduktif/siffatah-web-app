@@ -167,6 +167,7 @@
                 </button>
 
                 <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $item->id_ekses }}">Hapus</button>
+                
             </td>
         </tr>
         @endforeach
@@ -314,17 +315,18 @@
                                 <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
                             <div class="col-md-12">
-                                <label for="editAttachment" class="form-label">Attachment</label>
-                                <!-- Tempat menampilkan file lama -->
+                                <label for="dropzone" class="form-label">Attachment</label>
+                                <div id="editAttachmentDropzone" class="dropzone">
+                                    <div class="dz-message">Drag & Drop files here or click to upload</div>
+                                </div>
+                                <!-- Tampilkan file lama -->
                                 <div id="editAttachmentList">
-                                    <!-- Akan diisi file lama menggunakan JavaScript -->
+                                    <!-- File lama akan dimuat melalui JavaScript -->
                                 </div>
-                                <!-- Input file baru -->
-                                <div class="dropzone" id="editAttachmentDropzone">
-                                    <div class="dz-message">Drag & Drop file baru di sini atau klik untuk upload</div>
-                                </div>
+                                <!-- Input hidden untuk menyimpan file yang dihapus -->
+                                <input type="hidden" name="removed_files" id="removedFilesInput" value="">
                             </div>
-                            <input type="hidden" name="removed_files[]" id="removedFiles">
+                            
 
     
                            
@@ -640,6 +642,70 @@
 
         Dropzone.autoDiscover = false;
 
+        let removedFiles = [];
+        let existingFiles = [];
+
+        // Inisialisasi Dropzone
+        let editDropzone = new Dropzone("#editAttachmentDropzone", {
+            url: "/upload-temp",
+            paramName: "file",
+            maxFilesize: 5,
+            acceptedFiles: "image/*,.pdf,.doc,.docx",
+            addRemoveLinks: true,
+
+            init: function () {
+                // Load file lama
+                existingFiles.forEach(file => {
+                    const mockFile = { name: file, size: 12345 };
+                    this.emit("addedfile", mockFile);
+                    this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
+                    this.emit("complete", mockFile);
+                });
+
+                // Hapus file lama
+                this.on("removedfile", function (file) {
+                    removedFiles.push(file.name);
+                    $('#removedFilesInput').val(JSON.stringify(removedFiles));
+                });
+
+                // Tambahkan file baru
+                this.on("success", function (file, response) {
+                    file.name = response.fileName;
+                });
+            }
+        });
+
+        // Event untuk menampilkan file lama
+        $('#tableAdmin').on('click', '.editBtn', function () {
+            const fileUrl = $(this).data('file_url');
+            $('#editAttachmentList').empty();
+            removedFiles = [];
+
+            if (fileUrl) {
+                existingFiles = JSON.parse(fileUrl);
+                existingFiles.forEach(file => {
+                    const filePath = `/uploads/Ekses/${file}`;
+                    $('#editAttachmentList').append(`
+                        <div>
+                            <a href="${filePath}" target="_blank">${file}</a>
+                            <button type="button" class="btn btn-sm btn-danger remove-old-file" data-file="${file}">Hapus</button>
+                        </div>
+                    `);
+                });
+            }
+        });
+
+        // Handle tombol hapus file lama
+        $('#editAttachmentList').on('click', '.remove-old-file', function () {
+            const fileToRemove = $(this).data('file');
+            removedFiles.push(fileToRemove);
+            $('#removedFilesInput').val(JSON.stringify(removedFiles));
+            $(this).parent().remove();
+        });
+
+
+        Dropzone.autoDiscover = false;
+
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         const attachmentDropzone = new Dropzone("#attachmentDropzone", {
@@ -703,31 +769,40 @@
 
         let oldFiles = []; // Array untuk menyimpan file lama
 
-        // Inisialisasi Dropzone untuk form edit
-        const editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/upload-temp", // Endpoint untuk upload file sementara
+
+        // Inisialisasi Dropzone Edit
+        let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
+            url: "/upload-temp", // Endpoint sementara
             paramName: "file",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
-            maxFiles: 5,
             maxFilesize: 5, // 5MB
             acceptedFiles: "image/*,.pdf",
             addRemoveLinks: true,
-            dictDefaultMessage: "Drag & Drop file baru di sini atau klik untuk upload",
-            init: function () {
-                this.on("success", function (file, response) {
-                    console.log("File uploaded:", response);
+            dictRemoveFile: "Remove file",
 
-                    // Tambahkan file baru ke input hidden
-                    const hiddenInput = document.createElement("input");
-                    hiddenInput.type = "hidden";
-                    hiddenInput.name = "uploaded_files[]";
-                    hiddenInput.value = response.fileName;
-                    document.getElementById("editForm").appendChild(hiddenInput);
+            init: function () {
+                // Tambahkan file lama ke Dropzone
+                let existingFiles = JSON.parse($('#editAttachmentDropzone').attr('data-files')) || [];
+                existingFiles.forEach(file => {
+                    let mockFile = { name: file, size: 12345 };
+                    this.emit("addedfile", mockFile);
+                    this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
+                    this.emit("complete", mockFile);
+                });
+
+                // Event saat file dihapus
+                this.on("removedfile", function (file) {
+                    removedFiles.push(file.name); // Tambahkan file ke array removedFiles
+                    console.log("Removed Files:", removedFiles);
+
+                    // Set nilai ke input hidden
+                    $('#removedFilesInput').val(JSON.stringify(removedFiles));
                 });
             }
         });
+
 
         // Event untuk menampilkan file lama pada modal edit
         $('#tableAdmin').on('click', '.editBtn', function () {
