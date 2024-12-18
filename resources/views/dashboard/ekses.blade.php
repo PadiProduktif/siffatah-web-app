@@ -257,6 +257,7 @@
                             </div>
                         </div>
                     </div>
+                    <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Simpan</button>
@@ -629,14 +630,13 @@
 
         Dropzone.autoDiscover = false;
 
-        let removedFiles = [];
-        let existingFiles = [];
-
+// let uploadedFiles = []; // Array untuk menyimpan nama file yang diunggah
+        let removedFiles = []; // Array untuk menyimpan file yang dihapus
 
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-            url: "/upload-temp",
+            url: "/upload-temp", // Endpoint sementara untuk upload
             paramName: "file",
             headers: {
                 'X-CSRF-TOKEN': token
@@ -645,33 +645,50 @@
             maxFilesize: 5, // 5MB
             acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
             addRemoveLinks: true,
+            dictRemoveFile: "Hapus File",
             dictDefaultMessage: "Drag & Drop your files here or click to upload",
 
             init: function () {
+                // Saat file berhasil diunggah
                 this.on("success", function (file, response) {
-                    console.log("Dropzone Upload Response:", response); // Log response dari server
+                    console.log("File upload response:", response);
 
                     if (response && response.fileName) {
-                        console.log("File successfully uploaded:", response.fileName);
-                        
-                        // Tambahkan input hidden untuk file yang di-upload
-                        const hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "uploaded_files[]";
-                        hiddenInput.value = response.fileName;
-                        document.getElementById("editForm").appendChild(hiddenInput);
+                        file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
+                        uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
 
-                        console.log("Hidden input created:", hiddenInput.value); // Log nilai input hidden
+                        console.log("Uploaded file added:", response.fileName);
+                        console.log("Uploaded Files Array:", uploadedFiles);
+
+                        // Perbarui input hidden dengan file yang diunggah
+                        document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
                     } else {
-                        console.error("No fileName in response:", response);
+                        console.error("Error: No fileName in response:", response);
                     }
                 });
 
+                // Saat file dihapus dari Dropzone
                 this.on("removedfile", function (file) {
                     console.log("File removed:", file);
 
-                    // Kirim permintaan AJAX ke server untuk menghapus file sementara
+                    // Pastikan uploadedFileName tersedia
                     if (file.uploadedFileName) {
+                        console.log("Removing file from server:", file.uploadedFileName);
+
+                        // Tambahkan file ke array removedFiles
+                        removedFiles.push(file.uploadedFileName);
+
+                        // Hapus file dari array uploadedFiles
+                        uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
+
+                        console.log("Updated Uploaded Files:", uploadedFiles);
+                        console.log("Removed Files Array:", removedFiles);
+
+                        // Perbarui input hidden untuk uploaded_files dan removed_files
+                        document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                        document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
+
+                        // Kirim AJAX request untuk menghapus file di server
                         $.ajax({
                             url: "/delete-temp",
                             type: "POST",
@@ -680,24 +697,18 @@
                                 fileName: file.uploadedFileName
                             },
                             success: function (response) {
-                                console.log("File deleted:", response);
+                                console.log("File successfully removed from server:", response);
                             },
-                            error: function () {
-                                console.error("Failed to delete file.");
+                            error: function (error) {
+                                console.error("Failed to delete file on server:", error);
                             }
                         });
-
-                        // Hapus input hidden yang terkait dengan file
-                        document.querySelectorAll('.hidden-upload-file').forEach(input => {
-                            if (input.value === file.uploadedFileName) {
-                                input.remove();
-                            }
-                        });
+                    } else {
+                        console.warn("File not uploaded to server, skipping removal.");
                     }
                 });
             }
         });
-
 
         let oldFiles = []; // Array untuk menyimpan file lama
 
@@ -725,8 +736,69 @@
         //     }
         // });
 
-        let uploadedFiles = []; // Array untuk menyimpan nama file yang di-upload
+        // let uploadedFiles = []; // Array untuk menyimpan nama file yang di-upload
 
+        // let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
+        //     url: "/upload-temp", // Endpoint sementara untuk upload file
+        //     paramName: "file",
+        //     headers: {
+        //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //     },
+        //     maxFilesize: 5, // 5MB
+        //     acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+        //     addRemoveLinks: true,
+        //     dictRemoveFile: "Hapus File",
+
+        //     // Event saat file berhasil di-upload
+        //     success: function (file, response) {
+        //         console.log("File uploaded successfully:", response);
+
+        //         // Tambahkan nama file ke array uploadedFiles
+        //         uploadedFiles.push(response.fileName);
+        //         console.log("Uploaded Files Array:", uploadedFiles);
+
+        //         // Perbarui input hidden dengan nama file
+        //         $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
+        //         console.log("Updated hidden input:", $('#uploadedFilesInput').val());
+        //     },
+
+        //     // Event saat file dihapus dari Dropzone
+        //     removedfile: function (file) {
+        //         console.log("Removing file:", file.name);
+
+        //         // Hapus file dari array uploadedFiles
+        //         uploadedFiles = uploadedFiles.filter(f => f !== file.name);
+        //         console.log("Updated Uploaded Files Array:", uploadedFiles);
+
+        //         // Update input hidden
+        //         $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
+        //         console.log("Updated hidden input after removal:", $('#uploadedFilesInput').val());
+
+        //         // Kirim request AJAX untuk hapus file dari server jika perlu
+        //         $.ajax({
+        //             url: "/delete-temp",
+        //             method: "POST",
+        //             data: {
+        //                 _token: $('meta[name="csrf-token"]').attr('content'),
+        //                 fileName: file.name
+        //             },
+        //             success: function () {
+        //                 console.log("File removed from server:", file.name);
+        //             },
+        //             error: function () {
+        //                 console.error("Failed to remove file:", file.name);
+        //             }
+        //         });
+
+        //         // Hapus file dari tampilan Dropzone
+        //         file.previewElement.remove();
+        //     }
+        // });
+
+        let uploadedFiles = []; // Menyimpan nama file yang sudah diupload ke server
+        let existingFiles1 = []; // Menyimpan nama file yang sudah ada di database
+
+        // Konfigurasi Dropzone
         let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
             url: "/upload-temp", // Endpoint sementara untuk upload file
             paramName: "file",
@@ -740,51 +812,96 @@
 
             // Event saat file berhasil di-upload
             success: function (file, response) {
-                console.log("File uploaded successfully:", response);
+                if (response && response.fileName) {
+                    console.log("File uploaded successfully:", response);
 
-                // Tambahkan nama file ke array uploadedFiles
-                uploadedFiles.push(response.fileName);
-                console.log("Uploaded Files Array:", uploadedFiles);
+                    // Hanya tambahkan file ke array jika berhasil diupload
+                    uploadedFiles.push(response.fileName);
+                    console.log("Uploaded Files Array:", uploadedFiles);
 
-                // Perbarui input hidden dengan nama file
-                $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-                console.log("Updated hidden input:", $('#uploadedFilesInput').val());
+                    // Simpan nama file di elemen Dropzone
+                    file.serverFileName = response.fileName;
+
+                    // Update input hidden
+                    updateHiddenInput();
+                } else {
+                    console.error("File upload failed or invalid response:", response);
+                }
             },
 
-            // Event saat file dihapus dari Dropzone
+            // Event saat file dihapus
             removedfile: function (file) {
-                console.log("Removing file:", file.name);
+                console.log("Removing file:", file);
 
-                // Hapus file dari array uploadedFiles
-                uploadedFiles = uploadedFiles.filter(f => f !== file.name);
-                console.log("Updated Uploaded Files Array:", uploadedFiles);
+                // Periksa apakah file adalah file baru atau file lama
+                if (file.serverFileName) {
+                    // Jika file sudah di-upload (file baru), kirim request untuk hapus file
+                    $.ajax({
+                        url: "/delete-temp",
+                        method: "POST",
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            fileName: file.serverFileName
+                        },
+                        success: function () {
+                            console.log("File removed from server:", file.serverFileName);
 
-                // Update input hidden
-                $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-                console.log("Updated hidden input after removal:", $('#uploadedFilesInput').val());
+                            // Hapus file dari array uploadedFiles
+                            uploadedFiles = uploadedFiles.filter(f => f !== file.serverFileName);
+                            console.log("Updated Uploaded Files Array:", uploadedFiles);
 
-                // Kirim request AJAX untuk hapus file dari server jika perlu
-                $.ajax({
-                    url: "/delete-temp",
-                    method: "POST",
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        fileName: file.name
-                    },
-                    success: function () {
-                        console.log("File removed from server:", file.name);
-                    },
-                    error: function () {
-                        console.error("Failed to remove file:", file.name);
-                    }
-                });
+                            // Update input hidden
+                            updateHiddenInput();
+                        },
+                        error: function () {
+                            console.error("Failed to remove file from server:", file.serverFileName);
+                        }
+                    });
+                } else if (file.name) {
+                    // Jika file adalah file lama
+                    console.log("Mark file for removal:", file.name);
+                    existingFiles1 = existingFiles1.filter(f => f !== file.name);
+
+                    // Update input hidden untuk file lama yang dihapus
+                    $('#removedFilesInput').val(JSON.stringify(existingFiles1));
+                    console.log("Updated Removed Files Input:", existingFiles1);
+                }
 
                 // Hapus file dari tampilan Dropzone
                 file.previewElement.remove();
+            },
+
+            init: function () {
+                // Ambil data-file dari elemen Dropzone
+                let existingFilesFromServer = $('#editAttachmentDropzone').data('files') || '[]';
+
+                // Pastikan data adalah string JSON valid
+                try {
+                    existingFiles = JSON.parse(existingFilesFromServer);
+                } catch (error) {
+                    console.error("Invalid JSON in data-files:", error);
+                    existingFiles = []; // Default ke array kosong jika error
+                }
+
+                // Tampilkan file lama di Dropzone
+                if (Array.isArray(existingFiles)) {
+                    existingFiles.forEach(file => {
+                        let mockFile = { name: file, size: 12345, serverFileName: file };
+                        this.emit("addedfile", mockFile);
+                        this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
+                        this.emit("complete", mockFile);
+                    });
+                } else {
+                    console.warn("No valid files to display.");
+                }
             }
         });
 
-
+        // Fungsi untuk memperbarui input hidden
+        function updateHiddenInput() {
+            $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
+            console.log("Updated hidden input:", $('#uploadedFilesInput').val());
+        }
 
 
         // Event untuk menampilkan file lama pada modal edit
