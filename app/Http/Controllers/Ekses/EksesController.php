@@ -12,20 +12,17 @@ use Illuminate\Support\Facades\Log;
 
 class EksesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         try {
-            
-            $data['ekses'] = Ekses::all();
-            
+            if (auth()->user()->role === 'tko') {
+                $data['ekses'] = Ekses::where('id_badge', auth()->user()->username)->get();
+            } else {
+                $data['ekses'] = Ekses::all();
+            }
             
             return view('dashboard/ekses' ,$data); 
-
         } catch (\Exception $e) {
-            
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to retrieve data.',
