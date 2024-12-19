@@ -155,6 +155,42 @@ class KlaimKecelakaanController extends Controller
         }
     }
 
+    public function uploadTemp(Request $request)
+    {
+    
+        // return response()->json(['error' => 'No file uploaded'], 400);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/PengajuanKlaim/klaim_Kecelakaan'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+        
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Ekses Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/PengajuanKlaim/klaim_Kecelakaan/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Ekses: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
+    }
+
     public function uploadExcel(Request $request){
 
 

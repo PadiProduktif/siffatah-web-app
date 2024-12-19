@@ -286,5 +286,84 @@
                 alert('Selected ID Badges: ' + selected.join(', '));
             });
         });
+        
+            Dropzone.autoDiscover = false;
+            let removedFiles = [];
+            let uploadedFiles = []; // Array untuk menyimpan file yang dihapus
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const attachmentDropzone = new Dropzone("#attachmentDropzone", {
+                url: "/pengajuan-klaim-kecelakaan/upload-temp", // Endpoint sementara untuk upload
+                paramName: "file",
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                maxFiles: 5,
+                maxFilesize: 5, // 5MB
+                acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+                addRemoveLinks: true,
+                dictRemoveFile: "Hapus File",
+                dictDefaultMessage: "Drag & Drop your files here or click to upload",
+
+                init: function () {
+                    // Saat file berhasil diunggah
+                    this.on("success", function (file, response) {
+                        console.log("File upload response:", response);
+
+                        if (response && response.fileName) {
+                            file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
+                            uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
+
+                            console.log("Uploaded file added:", response.fileName);
+                            console.log("Uploaded Files Array:", uploadedFiles);
+
+                            // Perbarui input hidden dengan file yang diunggah
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                        } else {
+                            console.error("Error: No fileName in response:", response);
+                        }
+                    });
+
+                    // Saat file dihapus dari Dropzone
+                    this.on("removedfile", function (file) {
+                        console.log("File removed:", file);
+
+                        // Pastikan uploadedFileName tersedia
+                        if (file.uploadedFileName) {
+                            console.log("Removing file from server:", file.uploadedFileName);
+
+                            // Tambahkan file ke array removedFiles
+                            removedFiles.push(file.uploadedFileName);
+
+                            // Hapus file dari array uploadedFiles
+                            uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
+
+                            console.log("Updated Uploaded Files:", uploadedFiles);
+                            console.log("Removed Files Array:", removedFiles);
+
+                            // Perbarui input hidden untuk uploaded_files dan removed_files
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                            document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
+
+                            // Kirim AJAX request untuk menghapus file di server
+                            $.ajax({
+                                url: "/pengajuan-klaim-kecelakaan/delete-temp",
+                                type: "POST",
+                                data: {
+                                    _token: token,
+                                    fileName: file.uploadedFileName
+                                },
+                                success: function (response) {
+                                    console.log("File successfully removed from server:", response);
+                                },
+                                error: function (error) {
+                                    console.error("Failed to delete file on server:", error);
+                                }
+                            });
+                        } else {
+                            console.warn("File not uploaded to server, skipping removal.");
+                        }
+                    });
+                }
+            });
 </script>
 @endsection
