@@ -26,12 +26,12 @@
                 Klaim Asuransi
             </a>
             <ul class="dropdown-menu" aria-labelledby="kelengkapanKerjaDropdown">
-                <li><a href="/admin/claim/pengobatan" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Pengobatan</a></li>
-                <li><a href="/admin/claim/kecelakaan" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Kecelakaan</a></li>
-                <li><a href="/admin/claim/kematian" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Kematian</a></li>
-                <li><a href="/admin/claim/purna-jabatan" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Purna jabatan</a></li>
-                <li><a href="/admin/claim/lumpsum-kacamata" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Lumpsum kacamata</a></li>
-                <li><a href="/admin/claim/lumpsum-lahiran" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Lumpsum lahiran</a></li>
+                <li><a href="/admin/klaim_pengobatan" class="dropdown-item {{ Request::is('wearpack') ? 'active' : '' }}">Pengobatan</a></li>
+                <li><a href="/admin/klaim_kecelakaan" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Kecelakaan</a></li>
+                <li><a href="/admin/klaim_kematian" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Kematian</a></li>
+                <li><a href="/admin/klaim_purna-jabatan" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Purna jabatan</a></li>
+                <li><a href="/admin/klaim_lumpsum-kacamata" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Lumpsum kacamata</a></li>
+                <li><a href="/admin/klaim_lumpsum-lahiran" class="dropdown-item {{ Request::is('sepatu') ? 'active' : '' }}">Lumpsum lahiran</a></li>
             </ul>
         </li>
         <!-- <li class="nav-item dropdown">

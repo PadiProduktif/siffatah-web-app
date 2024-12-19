@@ -82,19 +82,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/kelengkapan_kerja/delete/{id}', [KelengkapanKerjaController::class, 'destroy'])->name('kelengkapan-kerja.destroy');
     Route::post('/admin/kelengkapan_kerja/delete-multiple', [KelengkapanKerjaController::class, 'deleteMultiple'])->name('kelengkapan-kerja.delete-multiple');
 
-
-    //Kelengkapan Kerja Sepatu
-    Route::get('/admin/kelengkapan_kerja/sepatu', [KelengkapanKerjaController::class, 'index_sepatu']);
-    Route::post('/admin/kelengkapan_kerja/sepatu/tambah', [KelengkapanKerjaController::class, 'store']);
-    Route::get('/admin/kelengkapan_kerja/sepatu/edit/{id}', [KelengkapanKerjaController::class, 'edit']);
-    Route::post('/admin/kelengkapan_kerja/sepatu/update/{id}', [KelengkapanKerjaController::class, 'update']);
-    Route::get('/admin/kelengkapan_kerja/sepatu/delete/{id}', [KelengkapanKerjaController::class, 'destroy']);
     
     //Klaim Kecelakaan
     Route::get('/admin/klaim_kecelakaan', [KlaimKecelakaanController::class, 'index']);
-    Route::post('/admin/klaim_kecelakaan/tambah', [KlaimKecelakaanController::class, 'store']);
+    Route::post('/admin/klaim_kecelakaan/tambah', [KlaimKecelakaanController::class, 'store'])->name('pengajuan-klaim.store');
+    Route::post('/admin/klaim_kecelakaan/upload', [KlaimKecelakaanController::class, 'uploadExcel'])->name('ekses.upload');
     Route::get('/admin/klaim_kecelakaan/edit/{id}', [KlaimKecelakaanController::class, 'edit']);
-    Route::post('/admin/klaim_kecelakaan/update/{id}', [KlaimKecelakaanController::class, 'update']);
+    Route::post('/admin/klaim_kecelakaan/update/{id}', [KlaimKecelakaanController::class, 'update'])->name('pengajuan-klaim.update');
     Route::get('/admin/klaim_kecelakaan/delete/{id}', [KlaimKecelakaanController::class, 'destroy']);
     
     //Klaim Kematian

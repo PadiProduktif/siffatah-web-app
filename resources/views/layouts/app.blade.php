@@ -53,6 +53,30 @@
         .status.verified { background-color: #10b981; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.rejected { background-color: #ef4444; color: #fff; padding: 5px 10px; border-radius: 5px; }
         .status.processing { background-color: #3b82f6; color: #fff; padding: 5px 10px; border-radius: 5px; }
+        .uploaded-file {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        .uploaded-file img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .uploaded-file p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .detailRow {
+                cursor: pointer; /* Pointer berubah menjadi tangan */
+            }
+        .detailRow:hover {
+                background-color: #f8f9fa; /* Highlight baris ketika dihover */
+        }
     </style>
     @stack('styles')
 </head>
@@ -108,6 +132,7 @@
     {{-- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> --}}
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     @stack('scripts')
 
 </body>

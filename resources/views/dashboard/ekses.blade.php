@@ -4,44 +4,7 @@
 
 @section('content')
 
-<style>
-.uploaded-file {
-    display: inline-block;
-    margin: 10px;
-    text-align: center;
-}
 
-.uploaded-file img {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.uploaded-file p {
-    margin-top: 5px;
-    font-size: 14px;
-}
-.detailRow {
-        cursor: pointer; /* Pointer berubah menjadi tangan */
-    }
-.detailRow:hover {
-        background-color: #f8f9fa; /* Highlight baris ketika dihover */
-    }
-/* .dropzone {
-    border: 2px dashed #007bff;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 5px;
-    text-align: center;
-    margin-top: 10px;
-}
-.dz-message {
-    color: #007bff;
-    font-size: 16px;
-} */
-</style>
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
             <h4 class="me-auto">Ekses</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
@@ -149,9 +112,7 @@
             @endphp
             <td>{{ $formatted_jumlah }}</td>
             <td>
-                <!-- <button type="button" class="btn btn-warning btn-sm editBtn" data-bs-toggle="modal" data-bs-target="#modalEditData">
-                    Edit
-                </button> -->
+
                 <button type="button" class="btn btn-warning btn-sm editBtn"
                     data-id="{{ $item->id_ekses }}"
                     data-id_member="{{ $item->id_member }}"
@@ -356,10 +317,7 @@
                         <button type="submit" class="btn btn-primary">Upload</button>
                     </form>
                     </div>
-                    {{-- <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="button" class="btn btn-success">Upload</button>
-                    </div> --}}
+
                 </div>
             </div>
         </div>
@@ -715,85 +673,7 @@
 
         // Inisialisasi Dropzone Edit
 
-        // let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-        //     url: "/upload-temp", // Endpoint upload file sementara
-        //     paramName: "file",
-        //     headers: {
-        //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        //     },
-        //     maxFilesize: 5, // 5MB
-        //     acceptedFiles: "image/*,.pdf",
-        //     addRemoveLinks: true,
-        //     dictRemoveFile: "Hapus File",
 
-        //     init: function () {
-        //         this.on("success", function (file, response) {
-        //             console.log("File uploaded:", response.fileName);
-        //         });
-        //         this.on("removedfile", function (file) {
-        //             console.log("File removed:", file.name);
-        //         });
-        //     }
-        // });
-
-        // let uploadedFiles = []; // Array untuk menyimpan nama file yang di-upload
-
-        // let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-        //     url: "/upload-temp", // Endpoint sementara untuk upload file
-        //     paramName: "file",
-        //     headers: {
-        //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //     },
-        //     maxFilesize: 5, // 5MB
-        //     acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
-        //     addRemoveLinks: true,
-        //     dictRemoveFile: "Hapus File",
-
-        //     // Event saat file berhasil di-upload
-        //     success: function (file, response) {
-        //         console.log("File uploaded successfully:", response);
-
-        //         // Tambahkan nama file ke array uploadedFiles
-        //         uploadedFiles.push(response.fileName);
-        //         console.log("Uploaded Files Array:", uploadedFiles);
-
-        //         // Perbarui input hidden dengan nama file
-        //         $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-        //         console.log("Updated hidden input:", $('#uploadedFilesInput').val());
-        //     },
-
-        //     // Event saat file dihapus dari Dropzone
-        //     removedfile: function (file) {
-        //         console.log("Removing file:", file.name);
-
-        //         // Hapus file dari array uploadedFiles
-        //         uploadedFiles = uploadedFiles.filter(f => f !== file.name);
-        //         console.log("Updated Uploaded Files Array:", uploadedFiles);
-
-        //         // Update input hidden
-        //         $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-        //         console.log("Updated hidden input after removal:", $('#uploadedFilesInput').val());
-
-        //         // Kirim request AJAX untuk hapus file dari server jika perlu
-        //         $.ajax({
-        //             url: "/delete-temp",
-        //             method: "POST",
-        //             data: {
-        //                 _token: $('meta[name="csrf-token"]').attr('content'),
-        //                 fileName: file.name
-        //             },
-        //             success: function () {
-        //                 console.log("File removed from server:", file.name);
-        //             },
-        //             error: function () {
-        //                 console.error("Failed to remove file:", file.name);
-        //             }
-        //         });
-
-        //         // Hapus file dari tampilan Dropzone
-        //         file.previewElement.remove();
-        //     }
-        // });
 
         let uploadedFiles = []; // Menyimpan nama file yang sudah diupload ke server
         let existingFiles1 = []; // Menyimpan nama file yang sudah ada di database
@@ -1001,16 +881,7 @@
                     $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
                 }
             });
-        //     editAttachmentDropzone.on("success", function (file, response) {
-        //     console.log("File uploaded successfully:", response);
 
-        //     const uploadedFilesInput = document.getElementById("uploadedFilesInput");
-        //     let uploadedFiles = uploadedFilesInput.value ? JSON.parse(uploadedFilesInput.value) : [];
-        //     uploadedFiles.push(response.fileName); // Tambahkan nama file
-        //     uploadedFilesInput.value = JSON.stringify(uploadedFiles);
-
-        //     console.log("Updated uploaded_files input:", uploadedFilesInput.value); // Debug di console
-        // });
 
         // Debug sebelum form submit
         $('#editForm').on('submit', function (e) {
@@ -1050,14 +921,7 @@
                     console.error('Error:', error);
                     Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan data.', 'error');
                 }
-            //     init: function () {
-            //         this.on("success", function (file, response) {
-            //             console.log("File uploaded:", response.fileName);
-            //         });
-            //         this.on("removedfile", function (file) {
-            //             console.log("File removed:", file.name);
-            //         });
-            // }
+
             });
         });
 
