@@ -43,7 +43,15 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    // tko viewer
     Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('ekses', [EksesController::class, 'index']);
+    Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
+    // Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
+
+
+
+
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
     //Master Data Karyawan
@@ -141,6 +149,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
     Route::get('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
+    
+    Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
+    
     //Logout
     Route::get('/logout', [AuthController::class, 'logout']);
 });
