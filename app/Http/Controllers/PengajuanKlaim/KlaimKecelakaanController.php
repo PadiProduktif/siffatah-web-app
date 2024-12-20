@@ -74,6 +74,12 @@ class KlaimKecelakaanController extends Controller
      */
     public function store(Request $request)
     {
+        // return response()->json([
+        //     'status' => 'data test',
+        //     'message' => 'Test',
+        //     'data' => json_decode($request->uploaded_files),
+        // ], 200);
+        // die();
         // Validate required fields and file
         $validatedData = $request->validate([
             'id_badge' => 'required|string|max:255',
@@ -103,7 +109,7 @@ class KlaimKecelakaanController extends Controller
                 'nama_keluarga' => $validatedData['nama_keluarga'],
                 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'deskripsi' => $validatedData['deskripsi'],
-                // 'file_url' => $fileName,
+                'file_url' => $request->uploaded_files,
             ]);
             Log::info("Menambah data Ekses Request Data: ", $request->all());
 

@@ -150,11 +150,8 @@
                                 <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
                             <div class="col-md-12">
-                                <label for="dropzone" class="form-label">Attachment</label>
-                                <div class="dropzone" id="attachmentDropzone">
-                                    <div class="dz-message">
-                                        Drag & Drop your files here or click to upload
-                                    </div>
+                                <div id="attachmentDropzone" class="dropzone">
+                                    <div class="dz-message">Drag & Drop your files here or click to upload</div>
                                 </div>
                             </div>
                         </div>
@@ -214,10 +211,107 @@
         </div>
     </div>
 </div>
+    <!-- Modal Detail Data -->
+    <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDetailLabel">Detail Informasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <p><strong>ID Badge:</strong> <span id="detailIDBadge"></span></p>
+                    <p><strong>Nama Karyawan:</strong> <span id="detailNamaKaryawan"></span></p>
+                    <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
+                    <p><strong>Nama Asuransi:</strong> <span id="detailNamaPasien"></span></p>
+                    <p><strong>Rumah Sakit/Klinik:</strong> <span id="detailDeskripsi"></span></p>
+                    <p><strong>Tanggal Kejadian:</strong> <span id="detailTanggalPengajuan"></span></p>
+                    <p><strong>Nama Keluarga:</strong> <span id="detailJumlahEkses"></span></p>
+                    <p><strong>Hubungan Keluarga:</strong> <span id="detailJumlahEkses"></span></p>
+                    <p><strong>Deskripsi:</strong> <span id="detailJumlahEkses"></span></p>
+                    
+                    <p><strong>Attachments:</strong></p>
+                    <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Event listener untuk klik baris tabel
+        $('#tableAdmin tbody').on('click', 'tr', function () {
+        // Cegah klik pada tombol Edit agar tidak memicu modal detail
+        if ($(event.target).closest('.editBtn, .deleteBtn').length) return;
+
+        const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
+        const rowData = button.data(); // Ambil semua data attributes dari tombol
+
+        console.log("Debug Row Data:", rowData); // Debug data row di console
+
+        // Set data ke dalam modal
+        $('#detailMemberID').text(rowData.id_member || '-');
+        $('#detailIDBadge').text(rowData.id_badge || '-');
+        $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
+        $('#detailUnitKerja').text(rowData.unit_kerja || '-');
+        $('#detailNamaPasien').text(rowData.nama_pasien || '-');
+        $('#detailDeskripsi').text(rowData.deskripsi || '-');
+        $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
+        $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
+
+        // Parsing dan menampilkan file_url jika ada
+        let attachmentHtml = 'Tidak ada file';
+
+        if (rowData.file_url) {
+            console.log("Raw file_url:", rowData.file_url); // Debugging
+            let files = [];
+
+            // Jika file_url sudah berupa array, langsung gunakan
+            if (Array.isArray(rowData.file_url)) {
+                files = rowData.file_url;
+            } else {
+                // Jika file_url berupa string, parse terlebih dahulu
+                try {
+                    files = JSON.parse(rowData.file_url);
+                } catch (error) {
+                    console.error("Error Parsing JSON:", error.message);
+                }
+            }
+
+            // Tampilkan file sebagai gambar atau link
+            if (files.length > 0) {
+                attachmentHtml = files.map(file => {
+                    const fileExtension = file.split('.').pop().toLowerCase();
+                    const filePath = `/uploads/Ekses/${file}`;
+
+                    // Periksa ekstensi file
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                        // Jika file adalah gambar, tampilkan sebagai img tag
+                        return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
+                    } else {
+                        // Jika file bukan gambar, tampilkan sebagai link
+                        return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
+                    }
+                }).join('');
+            }
+        }
+
+        // Tampilkan hasil pada modal
+        $('#detailAttachment').html(attachmentHtml);
+
+        // Tampilkan modal
+        $('#modalDetail').modal('show');
+    });
+
+    });
+</script>
 <script>
     function hapusData(id) {
         if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
@@ -250,6 +344,9 @@
         form.find('input[name=hubungan]').val(button.data('hubungan'));
         form.find('textarea[name=deskripsi]').val(button.data('deskripsi'));
     });
+
+    
+
 
     $(document).ready(function () {
             // Inisialisasi DataTables
@@ -287,64 +384,64 @@
             });
         });
         
+            
+        
+        $(document).ready(function () {
             Dropzone.autoDiscover = false;
+
+            // Cegah inisialisasi ganda
+            if (Dropzone.instances.length) {
+                Dropzone.instances.forEach(instance => instance.destroy());
+            }
+
             let removedFiles = [];
-            let uploadedFiles = []; // Array untuk menyimpan file yang dihapus
+            let uploadedFiles = [];
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
             const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/pengajuan-klaim-kecelakaan/upload-temp", // Endpoint sementara untuk upload
+                url: "/pengajuan-klaim-kecelakaan/upload-temp",
                 paramName: "file",
                 headers: {
                     'X-CSRF-TOKEN': token
                 },
                 maxFiles: 5,
-                maxFilesize: 5, // 5MB
+                maxFilesize: 5,
                 acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
                 addRemoveLinks: true,
                 dictRemoveFile: "Hapus File",
                 dictDefaultMessage: "Drag & Drop your files here or click to upload",
 
                 init: function () {
-                    // Saat file berhasil diunggah
                     this.on("success", function (file, response) {
-                        console.log("File upload response:", response);
-
                         if (response && response.fileName) {
-                            file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
-                            uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
+                            file.uploadedFileName = response.fileName;
+                            uploadedFiles.push(response.fileName);
 
-                            console.log("Uploaded file added:", response.fileName);
-                            console.log("Uploaded Files Array:", uploadedFiles);
-
-                            // Perbarui input hidden dengan file yang diunggah
-                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
-                        } else {
-                            console.error("Error: No fileName in response:", response);
+                            const uploadedFilesInput = document.getElementById("uploadedFilesInput");
+                            if (uploadedFilesInput) {
+                                uploadedFilesInput.value = JSON.stringify(uploadedFiles);
+                            } else {
+                                console.error("Element with ID 'uploadedFilesInput' not found.");
+                            }
                         }
                     });
 
-                    // Saat file dihapus dari Dropzone
                     this.on("removedfile", function (file) {
-                        console.log("File removed:", file);
-
-                        // Pastikan uploadedFileName tersedia
                         if (file.uploadedFileName) {
-                            console.log("Removing file from server:", file.uploadedFileName);
-
-                            // Tambahkan file ke array removedFiles
                             removedFiles.push(file.uploadedFileName);
-
-                            // Hapus file dari array uploadedFiles
                             uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
 
-                            console.log("Updated Uploaded Files:", uploadedFiles);
-                            console.log("Removed Files Array:", removedFiles);
+                            const uploadedFilesInput = document.getElementById("uploadedFilesInput");
+                            const removedFilesInput = document.getElementById("removedFilesInput");
 
-                            // Perbarui input hidden untuk uploaded_files dan removed_files
-                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
-                            document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
+                            if (uploadedFilesInput) {
+                                uploadedFilesInput.value = JSON.stringify(uploadedFiles);
+                            }
 
-                            // Kirim AJAX request untuk menghapus file di server
+                            if (removedFilesInput) {
+                                removedFilesInput.value = JSON.stringify(removedFiles);
+                            }
+
                             $.ajax({
                                 url: "/pengajuan-klaim-kecelakaan/delete-temp",
                                 type: "POST",
@@ -359,11 +456,77 @@
                                     console.error("Failed to delete file on server:", error);
                                 }
                             });
-                        } else {
-                            console.warn("File not uploaded to server, skipping removal.");
                         }
                     });
                 }
             });
+        });
+            $(document).ready(function () {
+                // Event listener untuk klik baris tabel
+                $('#tableAdmin tbody').on('click', 'tr', function () {
+                // Cegah klik pada tombol Edit agar tidak memicu modal detail
+                if ($(event.target).closest('.editBtn, .deleteBtn').length) return;
+
+                const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
+                const rowData = button.data(); // Ambil semua data attributes dari tombol
+
+                console.log("Debug Row Data:", rowData); // Debug data row di console
+
+                // Set data ke dalam modal
+                $('#detailMemberID').text(rowData.id_member || '-');
+                $('#detailIDBadge').text(rowData.id_badge || '-');
+                $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
+                $('#detailUnitKerja').text(rowData.unit_kerja || '-');
+                $('#detailNamaPasien').text(rowData.nama_pasien || '-');
+                $('#detailDeskripsi').text(rowData.deskripsi || '-');
+                $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
+                $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
+
+                // Parsing dan menampilkan file_url jika ada
+                let attachmentHtml = 'Tidak ada file';
+
+                if (rowData.file_url) {
+                    console.log("Raw file_url:", rowData.file_url); // Debugging
+                    let files = [];
+
+                    // Jika file_url sudah berupa array, langsung gunakan
+                    if (Array.isArray(rowData.file_url)) {
+                        files = rowData.file_url;
+                    } else {
+                        // Jika file_url berupa string, parse terlebih dahulu
+                        try {
+                            files = JSON.parse(rowData.file_url);
+                        } catch (error) {
+                            console.error("Error Parsing JSON:", error.message);
+                        }
+                    }
+
+                    // Tampilkan file sebagai gambar atau link
+                    if (files.length > 0) {
+                        attachmentHtml = files.map(file => {
+                            const fileExtension = file.split('.').pop().toLowerCase();
+                            const filePath = `/uploads/Ekses/${file}`;
+
+                            // Periksa ekstensi file
+                            if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                                // Jika file adalah gambar, tampilkan sebagai img tag
+                                return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
+                            } else {
+                                // Jika file bukan gambar, tampilkan sebagai link
+                                return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
+                            }
+                        }).join('');
+                    }
+                }
+
+                // Tampilkan hasil pada modal
+                $('#detailAttachment').html(attachmentHtml);
+
+                // Tampilkan modal
+                $('#modalDetail').modal('show');
+            });
+
+        });
+
 </script>
 @endsection
