@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\RestitusiKaryawan;
 
 use App\Http\Controllers\Controller;
+use App\Models\MasterData\DataKaryawan;
 use App\Models\RestitusiKaryawan\RestitusiKaryawan;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -22,76 +25,6 @@ class RestitusiKaryawanController extends Controller
 }
 
     
-    // public function store(Request $request)
-    // {
-    //     // Validate the request data
-    //     $validatedData = $request->validate([
-    //         'id_badge' => 'required|string|max:255',
-    //         'nama_karyawan' => 'required|string|max:255',
-    //         'jabatan_karyawan' => 'nullable|string|max:255',
-    //         'nama_anggota_keluarga' => 'nullable|string|max:255',
-    //         'hubungan_keluarga' => 'nullable|string|max:255',
-    //         'deskripsi' => 'nullable|string',
-    //         'nominal' => 'nullable|numeric',
-    //         'rumah_sakit' => 'nullable|string|max:255',
-    //         'urgensi' => 'nullable|string|max:255',
-    //         'no_surat_rs' => 'nullable|string|max:255',
-    //         'tanggal_pengobatan' => 'nullable|date',
-    //         'keterangan_pengajuan' => 'nullable|string',
-    //         'status_pengajuan' => 'nullable|string',
-    //         'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
-    //     ]);
-    
-    //     try {
-    //         // Handle file upload if present
-    //         $fileName = null;
-    //         if ($request->hasFile('file')) {
-    //             $file = $request->file('file');
-    //             $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-    //             $file->move(public_path('uploads/Restitusi_Karyawan/'), $fileName);
-    //         }
-    
-    //         // Create new RestitusiKaryawan record
-    //         $restitusi = RestitusiKaryawan::create([
-    //             'id_pengajuan' => rand(10, 99999999),
-    //             'id_badge' => $validatedData['id_badge'],
-    //             'nama_karyawan' => $validatedData['nama_karyawan'],
-    //             'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
-    //             'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
-    //             'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
-    //             'deskripsi' => $validatedData['deskripsi'],
-    //             'nominal' => $validatedData['nominal'],
-    //             'rumah_sakit' => $validatedData['rumah_sakit'],
-    //             'urgensi' => $validatedData['urgensi'],
-    //             'no_surat_rs' => $validatedData['no_surat_rs'],
-    //             'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
-    //             'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
-    //             'url_file' => $fileName,
-    //             'status_pengajuan' => $validatedData['status_pengajuan'],
-    //         ]);
-    
-    //         // // Return success response
-    //         // return response()->json([
-    //         //     'status' => 'success',
-    //         //     'message' => 'Data successfully created',
-    //         //     'data' => $restitusi
-    //         // ], 201);
-    
-    //     } catch (\Exception $e) {
-    //         // Log the error for debugging
-    //         Log::error("Error creating data: " . $e->getMessage());
-    
-    //         // Return error response
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Failed to create data',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-        
-    //     return redirect("/admin/restitusi_karyawan/$id")
-    //     ->with('toast_success', 'Data karyawan berhasil diperbarui.');
-    // }
 
     public function store(Request $request)
     {
@@ -167,6 +100,88 @@ class RestitusiKaryawanController extends Controller
         //         'error' => $e->getMessage()
         //     ], 500);
         // }
+    }
+
+    public function uploadExcel(Request $request){
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
+        }
+        
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
+
+            if (!empty($data) && count($data[0]) > 0) {
+                $totalProcessed = 0; // Total data yang diproses
+                $successCount = 0;   // Data yang berhasil ditambahkan
+
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key < 2) continue;
+            
+                    $totalProcessed++; // Tambahkan ke total data yang diproses
+
+                    $badge = substr($row[3] ?? '', 0, 50);
+                    $dataKaryawan = DataKaryawan::where('id_badge', $badge)->first();
+
+                    if (!$dataKaryawan) continue;
+
+                    try {
+
+                        $tgl = Carbon::createFromFormat('d F Y', $tanggal)->format('Y-m-d');
+                        $dataImp = [
+
+                            // 'tanggal_pengobatan' => !empty($row[23]) ? Carbon::parse($row[23])->format('Y-m-d') : null,
+
+                            'urgensi' => match ($row[24] ?? '') {
+                                'Low' => 'Low',
+                                'Medium' => 'Medium',
+                                'High' => 'High',
+                                default => null,
+                            },
+
+
+                            'status_pengajuan' => substr($row[27] ?? '', 0, 50),
+
+                            'url_file' => '',
+
+                            'updated_at' => now(),
+                            'updated_by' => auth()->user()->role,
+                            'created_at' => now(),
+                            'created_by' => auth()->user()->role,
+                        ];
+            
+                        dd(
+                            $dataImp,
+                            $row,
+                            $badge,
+                            $dataKaryawan,
+                            4498,
+                            $data[0],
+                        );
+                        RestitusiKaryawan::create($dataImp);
+                        
+
+                        $successCount++; // Tambahkan ke jumlah sukses
+                    } catch (\Exception $e) {
+                        // Log error atau abaikan jika terjadi kesalahan
+                        \Log::error('Error adding data: ' . $e->getMessage());
+                    }
+                }
+            }
+            // Redirect dengan pesan jumlah sukses dan total
+            return redirect()->back()->with('toast_message', 'success')->with(
+                'toast_success',
+                "$successCount dari $totalProcessed data berhasil diunggah!"
+            );
+        }
+
+        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
     
 
