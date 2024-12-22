@@ -101,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Klaim Kecelakaan
     Route::get('/admin/klaim_kecelakaan', [KlaimKecelakaanController::class, 'index']);
     Route::post('/admin/klaim_kecelakaan/tambah', [KlaimKecelakaanController::class, 'store'])->name('pengajuan-klaim.store');
-    Route::post('/admin/klaim_kecelakaan/upload', [KlaimKecelakaanController::class, 'uploadExcel'])->name('ekses.upload');
+    Route::post('/admin/klaim_kecelakaan/upload', [KlaimKecelakaanController::class, 'uploadExcel'])->name('pengajuan-klaim.upload');
     Route::get('/admin/klaim_kecelakaan/edit/{id}', [KlaimKecelakaanController::class, 'edit']);
     Route::post('/admin/klaim_kecelakaan/update/{id}', [KlaimKecelakaanController::class, 'update'])->name('pengajuan-klaim.update');
     Route::get('/admin/klaim_kecelakaan/delete/{id}', [KlaimKecelakaanController::class, 'destroy']);
