@@ -831,7 +831,7 @@
                 }
             }
 
-
+//point
         });
         $('#editAttachmentList').on('click', '.remove-old-file', function () {
                 const fileToRemove = $(this).data('file');

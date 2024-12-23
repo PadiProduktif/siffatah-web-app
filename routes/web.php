@@ -107,7 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/klaim_kecelakaan/delete/{id}', [KlaimKecelakaanController::class, 'destroy']);
     Route::post('/pengajuan-klaim-kecelakaan/upload-temp', [KlaimKecelakaanController::class, 'uploadTemp'])->name('upload.temp');
     Route::post('/pengajuan-klaim-kecelakaan/delete-temp', [KlaimKecelakaanController::class, 'deleteTemp'])->name('delete.temp');
-    
+     
     //Klaim Kematian
     Route::get('/admin/klaim_kematian', [KlaimKematianController::class, 'index']);
     Route::post('/admin/klaim_kematian/tambah', [KlaimKematianController::class, 'store']);
@@ -162,3 +162,5 @@ Route::middleware('auth:sanctum')->group(function () {
         return view('extras/set-profil');
     });
 // });
+
+//point

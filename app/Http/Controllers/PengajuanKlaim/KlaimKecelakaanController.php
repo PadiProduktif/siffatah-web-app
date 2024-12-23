@@ -60,7 +60,7 @@ class KlaimKecelakaanController extends Controller
             ], 500);
         }
     }
-
+//point
     /**
      * Show the form for creating a new resource.
      */

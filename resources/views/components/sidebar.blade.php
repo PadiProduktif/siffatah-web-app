@@ -61,7 +61,7 @@
                 </ul>
             </li>
         @endif
-
+<!-- //point -->
         <li><a href="/set-profil" class="{{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
         <li><a href="/logout">Logout</a></li>
     </ul>
