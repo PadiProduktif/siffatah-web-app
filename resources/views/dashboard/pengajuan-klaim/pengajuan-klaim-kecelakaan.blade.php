@@ -678,6 +678,7 @@
                     console.log("File uploaded successfully:", response);
 
                     // Hanya tambahkan file ke array jika berhasil diupload
+
                     uploadedFiles.push(response.fileName);
                     console.log("Uploaded Files Array:", uploadedFiles);
 
@@ -762,7 +763,7 @@
         // Fungsi untuk memperbarui input hidden
         function updateHiddenInput() {
             $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-            console.log("Updated hidden input:", $('#uploadedFilesInput').val());
+            console.log("Updated Uploaded Files Input:", $('#uploadedFilesInput').val());
         }
 
 
@@ -874,36 +875,38 @@
         
         $('#editForm').on('submit', function (e) {
             e.preventDefault();
-            const uploadedFiles = $('input[name="uploaded_files[]"]').map(function () {
-                return $(this).val();
-            }).get();
-            console.log("Files to be sent:", uploadedFiles);
-            const uploadedFilesInput = document.getElementById("uploadedFilesInput");
+
+            const uploadedFilesInput = $('#uploadedFilesInput').val();
+            const removedFilesInput = $('#removedFilesInput').val();
+
             let formData = new FormData(this);
+
+            // Tambahkan uploadedFilesInput secara manual ke FormData
+            formData.append('uploaded_files', uploadedFilesInput);
+            formData.append('removed_files', removedFilesInput);
+
             console.log("===== Data Form =====");
             formData.forEach((value, key) => {
                 console.log(`${key}:`, value);
             });
-            console.log("Final Uploaded Files:", uploadedFilesInput.value);
-            console.log("Final Removed Files:", $('#removedFilesInput').val());
 
             // Kirim form dengan AJAX
             $.ajax({
                 url: $(this).attr('action'),
                 type: 'POST',
-                data: new FormData(this),
+                data: formData,
                 processData: false,
                 contentType: false,
-                
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil diperbarui.', 'success');
-                    location.reload();
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
                 },
                 error: function (error) {
                     console.error('Error:', error);
                     Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan data.', 'error');
                 }
-
             });
         });
 
