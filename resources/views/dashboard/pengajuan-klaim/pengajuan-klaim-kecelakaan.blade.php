@@ -54,14 +54,14 @@
                 data-id_badge="{{ $data->id_badge }}" 
                 data-nama_karyawan="{{ $data->nama_karyawan }}" 
                 data-unit_kerja="{{ $data->unit_kerja }}"
-                data-asuransi="{{ $data->asuransi }}"
-                data-rumah_sakit="{{ $data->rumah_sakit }}"
+                data-asuransi="{{ $data->nama_asuransi }}"
+                data-rumah_sakit="{{ $data->rs_klinik }}"
                 data-tanggal_kejadian="{{ $data->tanggal_kejadian }}"
                 data-nama_keluarga="{{ $data->nama_keluarga }}"
-                data-hubungan="{{ $data->hubungan }}"
+                data-hubungan="{{ $data->hubungan_keluarga }}"
                 data-deskripsi="{{ $data->deskripsi }}"
                 data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
-                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_ekses }}"></td>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_kecelakaan }}"></td>
                 <td>{{ $data->id_badge }}</td>
                 <td>{{ $data->nama_karyawan }}</td>
                 <td>{{ $data->unit_kerja }}</td>
@@ -78,11 +78,11 @@
                         data-id_badge="{{ $data->id_badge }}" 
                         data-nama_karyawan="{{ $data->nama_karyawan }}" 
                         data-unit_kerja="{{ $data->unit_kerja }}"
-                        data-asuransi="{{ $data->asuransi }}"
-                        data-rumah_sakit="{{ $data->rumah_sakit }}"
+                        data-asuransi="{{ $data->nama_asuransi }}"
+                        data-rumah_sakit="{{ $data->rs_klinik }}"
                         data-tanggal_kejadian="{{ $data->tanggal_kejadian }}"
                         data-nama_keluarga="{{ $data->nama_keluarga }}"
-                        data-hubungan="{{ $data->hubungan }}"
+                        data-hubungan="{{ $data->hubungan_keluarga }}"
                         data-deskripsi="{{ $data->deskripsi }}"
                         data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
                         Edit
@@ -239,17 +239,22 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Hubungan Keluarga</label>
-                                <input type="text" id="editHubunganKeluarga" class="form-control" name="hubungan_keluarga">
+                                <input type="text" id="editHubungan" class="form-control" name="hubungan_keluarga">
                             </div>
                             <div class="col-12">
                                 <label for="alamat" class="form-label">Deskripsi</label>
                                 <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
                             </div>
                             <div class="col-md-12">
-                                <div id="attachmentDropzone" class="dropzone">
-                                    <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                                <label for="dropzone" class="form-label">Attachment</label>
+                                <div id="editAttachmentDropzone" class="dropzone">
+                                    <div class="dz-message">Drag & Drop files here or click to upload</div>
                                 </div>
-                            </div>       
+                                <!-- Tampilkan file lama -->
+                                <div id="editAttachmentList">
+                                    <!-- File lama akan dimuat melalui JavaScript -->
+                                </div>
+                            </div>              
                         </div>
                     </div>
                     <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
@@ -353,7 +358,7 @@
         $('#detailIDBadge').text(rowData.id_badge || '-');
         $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
         $('#detailUnitKerja').text(rowData.unit_kerja || '-');
-        $('#detailNamaAsuransi').text(rowData.nama_asuransi || '-');
+        $('#detailNamaAsuransi').text(rowData.asuransi || '-');
         $('#detailRumahSakit').text(rowData.rumah_sakit || '-');
         $('#detailTanggalKejadian').text(rowData.tanggal_kejadian || '-');
         $('#detailNamaKeluarga').text(rowData.nama_keluarga || '-');
@@ -427,11 +432,11 @@
             // const deskripsi = $(this).data('deskripsi');
             // const tanggal_pengajuan = $(this).data('tanggal_pengajuan');
             // const jumlah_ekses = $(this).data('jumlah_ekses');
-            const id = $(this).data('id_klaim_kecelakaan');
+            const id = $(this).data('id');
             const id_badge = $(this).data('id_badge') || '-';
             const nama_karyawan = $(this).data('nama_karyawan') || '-';
             const unit_kerja = $(this).data('unit_kerja') || '-';
-            const nama_asuransi = $(this).data('nama_asuransi') || '-';
+            const nama_asuransi = $(this).data('asuransi') || '-';
             const rumah_sakit = $(this).data('rumah_sakit') || '-';
             const tanggal_kejadian = $(this).data('tanggal_kejadian') || '-';
             const nama_keluarga = $(this).data('nama_keluarga') || '-';
@@ -745,7 +750,7 @@
                     existingFiles.forEach(file => {
                         let mockFile = { name: file, size: 12345, serverFileName: file };
                         this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
+                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Kecelakan/${file}`);
                         this.emit("complete", mockFile);
                     });
                 } else {
@@ -801,7 +806,7 @@
                 }
 
                     files.forEach((file, index) => {
-                        const filePath = `/uploads/Ekses/klaim_Kecelakaan/${file}`;
+                        const filePath = `/uploads/PengajuanKlaim/klaim_Kecelakaan/${file}`;
                         const fileExtension = file.split('.').pop().toLowerCase();
 
                         // Tampilkan file lama sebagai gambar atau link
