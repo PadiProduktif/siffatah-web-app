@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Klaim Kematian
     Route::get('/admin/klaim_kematian', [KlaimKematianController::class, 'index']);
     Route::post('/admin/klaim_kematian/tambah', [KlaimKematianController::class, 'store']);
+    Route::post('/admin/klaim_kematian/upload', [KlaimKematianController::class, 'uploadExcel'])->name('pengajuan-klaim-kematian.upload');
     Route::get('/admin/klaim_kematian/edit/{id}', [KlaimKematianController::class, 'edit']);
     Route::post('/admin/klaim_kematian/update/{id}', [KlaimKematianController::class, 'update']);
     Route::get('/admin/klaim_kematian/delete/{id}', [KlaimKematianController::class, 'destroy']);
