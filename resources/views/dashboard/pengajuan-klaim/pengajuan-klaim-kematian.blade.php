@@ -61,7 +61,7 @@
                 data-hubungan="{{ $data->hubungan_keluarga }}"
                 data-no_polis="{{ $data->no_polis }}"
                 data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
-                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_kecelakaan }}"></td>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_kematian }}"></td>
                 <td>{{ $data->id_badge }}</td>
                 <td>{{ $data->nama_karyawan }}</td>
                 <td>{{ $data->unit_kerja }}</td>
@@ -92,7 +92,7 @@
                         Edit
                     </button>
 
-                    <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $data->id_klaim_kecelakaan }}">Hapus</button>
+                    <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $data->id_klaim_kematian }}">Hapus</button>
                     
                 </td>
             </tr>
@@ -115,10 +115,10 @@
                     <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
                     <p><strong>Nama Asuransi:</strong> <span id="detailNamaAsuransi"></span></p>
                     <p><strong>Rumah Sakit:</strong> <span id="detailRumahSakit"></span></p>
-                    <p><strong>Tanggal Kejadian:</strong> <span id="detailTanggalKejadian"></span></p>
+                    <p><strong>Tanggal Wafat:</strong> <span id="detailTanggalWafat"></span></p>
                     <p><strong>Ahli Waris:</strong> <span id="detailNamaKeluarga"></span></p>
                     <p><strong>Hubungan:</strong> <span id="detailHubungan"></span></p>
-                    <p><strong>No Polis:</strong> <span id="detailDeskripsi"></span></p>
+                    <p><strong>No Polis:</strong> <span id="detailNoPolis"></span></p>
                     <p><strong>Attachments:</strong></p>
                     <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
                 </div>
@@ -234,20 +234,20 @@
                                 <input type="text" class="form-control" id="editRumahSakit" name="rs_klinik">
                             </div>
                             <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Tanggal Kejadian</label>
-                                <input type="date" class="form-control" id="editTanggalKejadian" name="tanggal_kejadian">
+                                <label for="gelar_belakang" class="form-label">Tanggal Wafat</label>
+                                <input type="date" class="form-control" id="editTanggalWafat" name="tanggal_wafat">
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Nama Keluarga</label>
-                                <input type="text" id="editNamaKeluarga" class="form-control" name="nama_keluarga">
+                                <input type="text" id="editAhliWaris" class="form-control" name="nama_keluarga">
                             </div>
                             <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Hubungan Keluarga</label>
                                 <input type="text" id="editHubungan" class="form-control" name="hubungan_keluarga">
                             </div>
-                            <div class="col-12">
-                                <label for="alamat" class="form-label">Deskripsi</label>
-                                <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
+                            <div class="col-4">
+                                <label for="no_polis" class="form-label">No Polis</label>
+                                <input class="form-control" id="editNoPolis" name="no_polis" rows="3" required></input>
                             </div>
                             <div class="col-md-12">
                                 <label for="dropzone" class="form-label">Attachment</label>
@@ -364,10 +364,10 @@
         $('#detailUnitKerja').text(rowData.unit_kerja || '-');
         $('#detailNamaAsuransi').text(rowData.asuransi || '-');
         $('#detailRumahSakit').text(rowData.rumah_sakit || '-');
-        $('#detailTanggalKejadian').text(rowData.tanggal_kejadian || '-');
-        $('#detailNamaKeluarga').text(rowData.nama_keluarga || '-');
+        $('#detailTanggalWafat').text(rowData.tanggal_wafat || '-');
+        $('#detailNamaKeluarga').text(rowData.ahli_waris || '-');
         $('#detailHubungan').text(rowData.hubungan || '-');
-        $('#detailDeskripsi').text(rowData.deskripsi || '-');
+        $('#detailNoPolis').text(rowData.no_polis || '-');
 
         // Parsing dan menampilkan file_url jika ada
         let attachmentHtml = 'Tidak ada file';
@@ -392,7 +392,7 @@
             if (files.length > 0) {
                 attachmentHtml = files.map(file => {
                     const fileExtension = file.split('.').pop().toLowerCase();
-                    const filePath = `/uploads/PengajuanKlaim/klaim_Kecelakaan/${file}`;
+                    const filePath = `/uploads/PengajuanKlaim/klaim_Kematian/${file}`;
 
                     // Periksa ekstensi file
                     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
@@ -442,10 +442,10 @@
             const unit_kerja = $(this).data('unit_kerja') || '-';
             const nama_asuransi = $(this).data('asuransi') || '-';
             const rumah_sakit = $(this).data('rumah_sakit') || '-';
-            const tanggal_kejadian = $(this).data('tanggal_kejadian') || '-';
-            const nama_keluarga = $(this).data('nama_keluarga') || '-';
+            const tanggal_wafat = $(this).data('tanggal_wafat') || '-';
+            const ahli_waris = $(this).data('ahli_waris') || '-';
             const hubungan = $(this).data('hubungan') || '-';
-            const deskripsi = $(this).data('deskripsi') || '-';
+            const no_polis = $(this).data('no_polis') || '-';
 
             // Isi data di dalam form modal
             // $('#editIdMember').val(id_member);
@@ -461,13 +461,13 @@
             $('#editUnitKerja').val(unit_kerja || '-');
             $('#editNamaAsuransi').val(nama_asuransi || '-');
             $('#editRumahSakit').val(rumah_sakit || '-');
-            $('#editTanggalKejadian').val(tanggal_kejadian || '-');
-            $('#editNamaKeluarga').val(nama_keluarga || '-');
+            $('#editTanggalWafat').val(tanggal_wafat || '-');
+            $('#editAhliWaris').val(ahli_waris || '-');
             $('#editHubungan').val(hubungan || '-');
-            $('#editDeskripsi').val(deskripsi || '-');
+            $('#editNoPolis').val(no_polis || '-');
 
             // Set action form update
-            $('#editForm').attr('action', '/admin/klaim_kecelakaan/update/' + id);
+            $('#editForm').attr('action', '/admin/klaim_kematian/update/' + id);
 
             // Tampilkan modal edit
             $('#modalEditData').modal('show');
@@ -494,7 +494,7 @@
             if (result.isConfirmed) {
                 // Jika dikonfirmasi, kirim permintaan hapus ke server
                 $.ajax({
-                url: '/admin/klaim_kecelakaan/delete/' + id,
+                url: '/admin/klaim_kematian/delete/' + id,
                 type: 'GET', // Ubah dari DELETE ke GET
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
@@ -552,7 +552,7 @@
                     if (result.isConfirmed) {
                         // Kirim permintaan hapus melalui AJAX
                         $.ajax({
-                            url: '/admin/klaim_kecelakaan/delete-multiple', // Endpoint untuk hapus data
+                            url: '/admin/klaim_kematian/delete-multiple', // Endpoint untuk hapus data
                             type: 'POST',
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content'),
@@ -666,7 +666,7 @@
 
         // Konfigurasi Dropzone
         let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/pengajuan-klaim-kecelakaan/upload-temp", // Endpoint sementara untuk upload file
+            url: "/pengajuan-klaim-kematian/upload-temp", // Endpoint sementara untuk upload file
             paramName: "file",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -704,7 +704,7 @@
                 if (file.serverFileName) {
                     // Jika file sudah di-upload (file baru), kirim request untuk hapus file
                     $.ajax({
-                        url: "/pengajuan-klaim-kecelakaan/delete-temp",
+                        url: "/pengajuan-klaim-kematian/delete-temp",
                         method: "POST",
                         data: {
                             _token: $('meta[name="csrf-token"]').attr('content'),
@@ -755,7 +755,7 @@
                     existingFiles.forEach(file => {
                         let mockFile = { name: file, size: 12345, serverFileName: file };
                         this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Kecelakan/${file}`);
+                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Kematian/${file}`);
                         this.emit("complete", mockFile);
                     });
                 } else {
@@ -811,7 +811,7 @@
                 }
 
                     files.forEach((file, index) => {
-                        const filePath = `/uploads/PengajuanKlaim/klaim_Kecelakaan/${file}`;
+                        const filePath = `/uploads/PengajuanKlaim/klaim_Kematian/${file}`;
                         const fileExtension = file.split('.').pop().toLowerCase();
 
                         // Tampilkan file lama sebagai gambar atau link

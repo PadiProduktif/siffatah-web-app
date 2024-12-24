@@ -134,7 +134,7 @@ class KlaimKematianController extends Controller
         try {
             // Handle file upload if present
 
-            // Create new klaim_kecelakaan record
+            // Create new klaim_kematian record
             $klaim = Klaim_kematian::create([
                 'id_klaim_kematian' => rand(10, 99999999),
                 'id_badge' => $validatedData['id_badge'],
@@ -146,7 +146,7 @@ class KlaimKematianController extends Controller
                 'nama_keluarga' => $validatedData['nama_keluarga'],
                 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'no_polis' => $validatedData['no_polis'],
-                'file_url' => $fileName,
+                'file_url' => $request->uploaded_files
             ]);
             Log::info("Menambah data klaim Kematian Request Data: ", $request->all());
 
@@ -191,12 +191,12 @@ class KlaimKematianController extends Controller
     
         if (file_exists($filePath)) {
             unlink($filePath);
-            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan Temp: " . json_encode($filename));
+            Log::info("File Terhapus dari Public Upload Klaim Kematian Temp: " . json_encode($filename));
             return response()->json(['success' => true]);
         }else{
             $filePath = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$filename}");
             unlink($filePath);
-            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan: " . json_encode($filename));
+            Log::info("File Terhapus dari Public Upload Klaim Kematian: " . json_encode($filename));
             return response()->json(['success' => true]);
         }
     
@@ -241,69 +241,79 @@ class KlaimKematianController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'id_badge' => 'required|string|max:255',
-            'nama_karyawan' => 'required|string|max:255',
-            'unit_kerja' => 'nullable|string|max:255',
-            'nama_asuransi' => 'nullable|string|max:255',
-            'rs_klinik' => 'nullable|string|max:255',
-            'tanggal_wafat' => 'nullable|date',
-            'nama_keluarga' => 'nullable|string|max:255',
-            'hubungan_keluarga' => 'nullable|string|max:255',
-            'no_polis' => 'nullable|string|max:255',
-            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
-        ]);
-    
-        try {
-            // Find the klaim by ID or throw a 404 if not found
-            $klaim = Klaim_kematian::findOrFail($id);
-    
-            // Handle file upload if present
-            if ($request->hasFile('file')) {
-                // Delete the old file if it exists
-                if ($klaim->file_url) {
-                    $oldFile = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$klaim->file_url}");
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
+                // Log request data untuk debug
+                Log::info('Updating Klaim Kematian ID: ' . $id . ', Request Data: ', $request->all());
+
+                // Decode uploaded_files dan removed_files
+                $uploadedFiles = $request->input('uploaded_files', '[]');
+                $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+        
+                $removedFiles = $request->input('removed_files', '[]');
+                $removedFiles = json_decode($removedFiles, true) ?? [];
+        
+                Log::info('Decoded Uploaded Files:', $uploadedFiles);
+                Log::info('Decoded Removed Files:', $removedFiles);
+        
+                // Pastikan uploadedFiles dan removedFiles adalah array
+                $uploadedFiles = is_array($uploadedFiles) ? $uploadedFiles : [];
+                $removedFiles = is_array($removedFiles) ? $removedFiles : [];
+        
+                // Ambil data klaim dari database
+                $klaim = Klaim_kematian::findOrFail($id);
+                $currentFiles = json_decode($klaim->file_url, true) ?? [];
+        
+                // 1. Hapus file dari array dan juga file fisik
+                if (!empty($removedFiles)) {
+                    foreach ($removedFiles as $file) {
+                        $filePath = public_path('uploads/PengajuanKlaim/klaim_Kematian/' . $file);
+        
+                        // Hapus file fisik jika ada
+                        if (file_exists($filePath)) {
+                            unlink($filePath);
+                            Log::info('File removed: ' . $filePath);
+                        }
                     }
+        
+                    // Hapus file dari array currentFiles
+                    $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+                    Log::info('Files after removal:', $currentFiles);
                 }
-    
-                // Save the new file
-                $file = $request->file('file');
-                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/klaim_Kematian'), $fileName);
-                $klaim->file_url = $fileName;
-            }
-    
-            // Update klaim data with validated data
-            $klaim->update($validatedData);
-    
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully updated',
-                'data' => $klaim
-            ], 200);
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if klaim is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-    
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Error updating data: " . $e->getMessage());
-    
-            // Return a 500 response for any other errors
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to update data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        
+                // 2. Tambahkan file baru ke currentFiles
+                if (!empty($uploadedFiles)) {
+                    // Filter uploaded_files agar tidak ada file yang sudah dihapus
+                    $uploadedFiles = array_diff($uploadedFiles, $removedFiles);
+                
+                    // Gabungkan file baru ke currentFiles
+                    $currentFiles = array_merge($currentFiles, $uploadedFiles);
+                    Log::info('Files after addition:', $currentFiles);
+                }
+        
+                // Hilangkan duplikat nama file dan reset index
+                $finalFiles = array_values(array_unique($currentFiles));
+
+                $klaim->update([
+                    'id_badge' => $request->id_badge,
+                    'nama_karyawan' => $request->nama_karyawan,
+                    'unit_kerja' => $request->unit_kerja,
+                    'nama_asuransi' => $request->nama_asuransi,
+                    'rs_klinik' => $request->rs_klinik,
+                    'tanggal_wafat' => $request->tanggal_wafat,
+                    'nama_keluarga' => $request->nama_keluarga,
+                    'hubungan_keluarga' => $request->hubungan_keluarga,
+                    'no_polis' => $request->no_polis,
+                    'file_url' => json_encode($finalFiles)
+                ]);
+                // Log hasil akhir
+                Log::info('Final File URL:', $finalFiles);
+        
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Data berhasil diupdate.',
+                    'data' => $klaim,
+                ]);
+        
+        
     }
     
 
@@ -313,43 +323,76 @@ class KlaimKematianController extends Controller
     public function destroy(string $id)
     {
         try {
-            // Find the klaim by ID or throw a 404 if not found
-            $klaim = Klaim_kematian::findOrFail($id);
-
-            // Delete associated file if it exists
+            Log::info("Menghapus data dengan ID: {$id}"); // Log untuk debugging awal
+            
+            // Ambil data berdasarkan ID
+            $klaim = klaim_kematian::findOrFail($id);
+    
+            // Hapus file attachment jika ada
             if ($klaim->file_url) {
-                $filePath = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$klaim->file_url}");
-                if (file_exists($filePath)) {
-                    unlink($filePath); // Delete the file
+                $fileUrls = json_decode($klaim->file_url, true); // Decode JSON ke array
+                if (is_array($fileUrls)) {
+                    foreach ($fileUrls as $file) {
+                        $filePath = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$file}");
+                        if (file_exists($filePath)) {
+                            unlink($filePath); // Hapus file dari direktori
+                            Log::info("File dihapus: {$filePath}");
+                        }
+                    }
                 }
             }
-
-            // Delete the klaim record from the database
+    
+            // Hapus data dari database
             $klaim->delete();
-
-            // Return a success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully deleted',
-            ], 200);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if klaim is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-
+            Log::info("Data klaim Kematian dengan ID: {$id} berhasil dihapus.");
+    
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
-            // Log error for debugging
-            Log::error("Error deleting data: " . $e->getMessage());
-
-            // Return a 500 response for any other error
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete data',
-                'error' => $e->getMessage()
-            ], 500);
+            Log::error("Error saat menghapus data dengan ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+    
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+        }
+    }
+    public function deleteMultiple(Request $request)
+    {
+        try {
+            $ids = $request->input('ids'); // Ambil array ID dari request
+            Log::info('IDs yang akan dihapus: ', $ids);
+            
+    
+            // Ambil semua data berdasarkan ID
+            $klaimList = klaim_kematian::whereIn('id_klaim_kematian', $ids)->get();
+    
+            // Hapus semua file attachment yang terkait
+            foreach ($klaimList as $klaim) {
+                if ($klaim->file_url) {
+                    $fileUrls = json_decode($klaim->file_url, true);
+                    if (is_array($fileUrls)) {
+                        foreach ($fileUrls as $file) {
+                            $filePath = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$file}");
+                            if (file_exists($filePath)) {
+                                unlink($filePath); // Hapus file
+                                Log::info("File dihapus: {$filePath}");
+                            }
+                        }
+                    }
+                }
+            }
+    
+            // Hapus data dari database
+            Klaim_kematian::whereIn('id_klaim_kematian', $ids)->delete();
+    
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error saat menghapus data:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
     }
 

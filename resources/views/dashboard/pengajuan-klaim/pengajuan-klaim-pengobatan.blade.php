@@ -7,7 +7,7 @@
 
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
-            <h4 class="me-auto">Ekses</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
+            <h4 class="me-auto">Pengajuan Klaim - Pengobatan</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
             <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
             <a href="" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#modalDataExcel">+ Masukan Data Excel</a> <!-- Tambahkan kelas 'ms-2' untuk memberi margin kiri pada tombol kedua -->
         </div>
@@ -31,106 +31,70 @@
     <table id="tableAdmin" class="display">
         <thead>
             <tr>
-                <th><input type="checkbox" id="selectAll"></th> <!-- Checkbox untuk Select All -->
-                <th>Member ID</th>
+                <th><input type="checkbox" id="selectAll"></th>
+
                 <th>ID Badge</th>
                 <th>Nama Karyawan</th>
                 <th>Unit Kerja</th>
-                <th>Nama Pasien</th>
-                <th>Deskripsi</th>
+                <th>Asuransi</th>
+                <th>Rumah Sakit/Klinik</th>
                 <th>Tanggal Pengajuan</th>
-                <th>Jumlah Pengajuan</th>
+                <th>Nominal</th>
+                <th>Deskripsi</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Data Dummy
-            @foreach($ekses as $item)
-            <tr>
-                <td><input type="checkbox" class="rowCheckbox" value="{{ $item->id_ekses }}"></td>
-                <th>{{ $item->id_member }}</th>
-                <th>{{ $item->id_badge }}</th>
-                <th>{{ $item->nama_karyawan }}</th>
-                <th>{{ $item->unit_kerja }}</th>
-                <td>{{ $item->nama_pasien }}</td>
-                <td>{{ $item->deskripsi }}</td>
-                @php
-                    setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
-                    $tanggal_formatted = strftime('%d %B %Y', strtotime($item->tanggal_pengajuan));
-                @endphp
+            
+
+            @foreach($pengajuanKlaim as $data)
+            @php
+                        setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
+                        $tanggal_formatted = strftime('%d %B %Y', strtotime($data->tanggal_pengajuan));
+                        $formatted_jumlah = 'Rp.' . number_format($data->nominal, 0, ',', '.');
+                        
+            @endphp
+            <tr class="detailRow"
+                data-id="{{ $data->id_klaim_pengobatan }}" 
+                data-id_badge="{{ $data->id_badge }}" 
+                data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                data-unit_kerja="{{ $data->unit_kerja }}"
+                data-asuransi="{{ $data->nama_asuransi }}"
+                data-rumah_sakit="{{ $data->rs_klinik }}"
+                data-tanggal_pengajuan="{{ $tanggal_formatted }}"
+                data-nominal="{{ $formatted_jumlah }}"
+                data-deskripsi="{{ $data->deskripsi }}"
+                data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
+                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_pengobatan }}"></td>
+                <td>{{ $data->id_badge }}</td>
+                <td>{{ $data->nama_karyawan }}</td>
+                <td>{{ $data->unit_kerja }}</td>
+                <td>{{ $data->nama_asuransi }}</td>
+                <td>{{ $data->rs_klinik }}</td>
+                
                 <td>{{ $tanggal_formatted }}</td>
-                @php
-                    $formatted_jumlah = 'Rp.' . number_format($item->jumlah_ekses, 0, ',', '.');
-                @endphp
                 <td>{{ $formatted_jumlah }}</td>
-
+                <td>{{ $data->deskripsi }}</td>
                 <td>
-                    <button type="button" class="btn btn-warning btn-sm editBtn"
-                    data-id="{{ $item->id_ekses }}"
-                    data-id_member="{{ $item->id_member }}"
-                    data-id_badge="{{ $item->id_badge }}"
-                    data-nama_karyawan="{{ $item->nama_karyawan }}"
-                    data-unit_kerja="{{ $item->unit_kerja }}"
-                    data-nama_pasien="{{ $item->nama_pasien }}"
-                    data-deskripsi="{{ $item->deskripsi }}"
-                    data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
-                    data-jumlah_ekses="{{ $formatted_jumlah }}"
 
-                    data-bs-toggle="modal" data-bs-target="#modalEditData">
-                Edit
-                </button>
-                <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $item->id_ekses }}">Hapus</button>
+                    <button type="button" class="btn btn-warning btn-sm editBtn"
+                        data-id="{{ $data->id_klaim_pengobatan }}" 
+                        data-id_badge="{{ $data->id_badge }}" 
+                        data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                        data-unit_kerja="{{ $data->unit_kerja }}"
+                        data-asuransi="{{ $data->nama_asuransi }}"
+                        data-rumah_sakit="{{ $data->rs_klinik }}"
+                        data-tanggal_pengajuan="{{ $data->tanggal_pengajuan }}"
+                        data-nominal="{{ $data->nominal }}"
+                        data-deskripsi="{{ $data->deskripsi }}"
+                        data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
+                        Edit
+                    </button>
+
+                    <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $data->id_klaim_pengobatan }}">Hapus</button>
+                    
                 </td>
             </tr>
-            @endforeach -->
-            @foreach($ekses as $item)
-        <tr class="detailRow"
-            data-id="{{ $item->id_ekses }}"
-            data-id_member="{{ $item->id_member }}"
-            data-id_badge="{{ $item->id_badge }}"
-            data-nama_karyawan="{{ $item->nama_karyawan }}"
-            data-unit_kerja="{{ $item->unit_kerja }}"
-            data-nama_pasien="{{ $item->nama_pasien }}"
-            data-deskripsi="{{ $item->deskripsi }}"
-            data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
-            data-jumlah_ekses="{{ $formatted_jumlah }}"
-            data-file_url="{{ $item->file_url }}"> <!-- Tambahkan file_url -->
-            <td><input type="checkbox" class="rowCheckbox" value="{{ $item->id_ekses }}"></td>
-            <th>{{ $item->id_member }}</th>
-            <th>{{ $item->id_badge }}</th>
-            <th>{{ $item->nama_karyawan }}</th>
-            <th>{{ $item->unit_kerja }}</th>
-            <td>{{ $item->nama_pasien }}</td>
-            <td>{{ $item->deskripsi }}</td>
-            @php
-                    setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
-                    $tanggal_formatted = strftime('%d %B %Y', strtotime($item->tanggal_pengajuan));
-            @endphp
-            <td>{{ $tanggal_formatted }}</td>
-            @php
-                $formatted_jumlah = 'Rp.' . number_format($item->jumlah_ekses, 0, ',', '.');
-            @endphp
-            <td>{{ $formatted_jumlah }}</td>
-            <td>
-
-                <button type="button" class="btn btn-warning btn-sm editBtn"
-                    data-id="{{ $item->id_ekses }}"
-                    data-id_member="{{ $item->id_member }}"
-                    data-id_badge="{{ $item->id_badge }}"
-                    data-nama_karyawan="{{ $item->nama_karyawan }}"
-                    data-unit_kerja="{{ $item->unit_kerja }}"
-                    data-nama_pasien="{{ $item->nama_pasien }}"
-                    data-deskripsi="{{ $item->deskripsi }}"
-                    data-tanggal_pengajuan="{{ $item->tanggal_pengajuan }}"
-                    data-jumlah_ekses="{{ $formatted_jumlah }}"
-                    data-file_url="{{ $item->file_url }}">
-                    Edit
-                </button>
-
-                <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $item->id_ekses }}">Hapus</button>
-                
-            </td>
-        </tr>
         @endforeach
 
             <!-- Tambahkan Data lainnya -->
@@ -145,14 +109,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Member ID:</strong> <span id="detailMemberID"></span></p>
                     <p><strong>ID Badge:</strong> <span id="detailIDBadge"></span></p>
                     <p><strong>Nama Karyawan:</strong> <span id="detailNamaKaryawan"></span></p>
                     <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
-                    <p><strong>Nama Pasien:</strong> <span id="detailNamaPasien"></span></p>
-                    <p><strong>Deskripsi:</strong> <span id="detailDeskripsi"></span></p>
+                    <p><strong>Nama Asuransi:</strong> <span id="detailNamaAsuransi"></span></p>
+                    <p><strong>Rumah Sakit:</strong> <span id="detailRumahSakit"></span></p>
                     <p><strong>Tanggal Pengajuan:</strong> <span id="detailTanggalPengajuan"></span></p>
-                    <p><strong>Jumlah Pengajuan:</strong> <span id="detailJumlahEkses"></span></p>
+                    <p><strong>Nominal:</strong> <span id="detailNominal"></span></p>
+                    <p><strong>Deskripsi:</strong> <span id="detailDeskripsi"></span></p>
                     <p><strong>Attachments:</strong></p>
                     <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
                 </div>
@@ -170,50 +134,47 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="dataForm" action="{{ route('ekses.store') }}" method="POST" enctype="multipart/form-data" >
+                <form id="dataForm" action="{{ route('pengajuan-klaim-pengobatan.store') }}" method="POST" enctype="multipart/form-data" >
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <!-- Informasi Dasar -->
                             <div class="col-md-2">
-                                <label for="id_badge" class="form-label">Member ID</label>
-                                <input type="text" class="form-control" id="id_member" name="id_member" required>
+                                <label for="id_badge" class="form-label">ID Badge</label>
+                                <input type="text" class="form-control" id="id_badge" name="id_badge" required>
                             </div>
 
-                            <div class="col-md-2">
-                                <label for="gelar_depan" class="form-label">ID Badge</label>
-                                <input type="text" class="form-control" id="id_badge" name="id_badge">
+                            <div class="col-md-5">
+                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
+                                <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan">
                             </div>
                             <div class="col-md-5">
-                                <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan" required>
+                                <label for="nama_karyawan" class="form-label">Unit Kerja</label>
+                                <input type="text" class="form-control" id="unit_kerja" name="unit_kerja" required>
                             </div>
-                            <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Unit Kerja</label>
-                                <input type="text" class="form-control" id="unit_kerja" name="unit_kerja">
+                            <div class="col-md-12">
+                                <label for="gelar_belakang" class="form-label">Asuransi</label>
+                                <input type="text" class="form-control" id="nama_asuransi" name="nama_asuransi">
                             </div>
-                            <div class="col-md-5">
-                                <label for="gelar_belakang" class="form-label">Nama Pasien</label>
-                                <input type="text" class="form-control" id="nama_pasien" name="nama_pasien">
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Rumah Sakit / Klinik</label>
+                                <input type="text" class="form-control" id="rs_klinik" name="rs_klinik">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
                                 <input type="date" class="form-control" id="tanggal_pengajuan" name="tanggal_pengajuan">
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Jumlah Pengajuan</label>
-                                <input type="text" id="nominal" class="form-control" name="jumlah_pengajuan">
+                                <label for="gelar_belakang" class="form-label">Nominal</label>
+                                <input type="text" id="nominal" class="form-control" name="nominal">
                             </div>
                             <div class="col-12">
                                 <label for="alamat" class="form-label">Deskripsi</label>
                                 <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" ></textarea>
                             </div>
                             <div class="col-md-12">
-                                <label for="dropzone" class="form-label">Attachment</label>
-                                <div class="dropzone" id="attachmentDropzone">
-                                    <div class="dz-message">
-                                        Drag & Drop your files here or click to upload
-                                    </div>
+                                <div id="attachmentDropzone" class="dropzone">
+                                    <div class="dz-message">Drag & Drop your files here or click to upload</div>
                                 </div>
                             </div>
                         </div>
@@ -243,39 +204,40 @@
                     <div class="modal-body">
                         <div class="row g-3">
                             <!-- Informasi Dasar -->
+
+                            <!-- Informasi Dasar -->
                             <div class="col-md-2">
-                                <label for="id_badge" class="form-label">Member ID</label>
-                                <input type="text" class="form-control" id="editIdMember" name="id_member" required>
-                                
+                                <label for="id_badge" class="form-label">ID Badge</label>
+                                <input type="text" class="form-control" id="editIdBadge" name="id_badge" required>
                             </div>
 
-                            <div class="col-md-2">
-                                <label for="gelar_depan" class="form-label">ID Badge</label>
-                                <input type="text" class="form-control" id="editIdBadge" name="id_badge">
+                            <div class="col-md-5">
+                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
+                                <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan">
                             </div>
                             <div class="col-md-5">
-                                <label for="nama_karyawan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan" required>
+                                <label for="nama_karyawan" class="form-label">Unit Kerja</label>
+                                <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja" required>
                             </div>
-                            <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Unit Kerja</label>
-                                <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja">
+                            <div class="col-md-12">
+                                <label for="gelar_belakang" class="form-label">Asuransi</label>
+                                <input type="text" class="form-control" id="editNamaAsuransi" name="nama_asuransi">
                             </div>
-                            <div class="col-md-5">
-                                <label for="gelar_belakang" class="form-label">Nama Pasien</label>
-                                <input type="text" class="form-control" id="editNamaPasien" name="nama_pasien">
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Rumah Sakit / Klinik</label>
+                                <input type="text" class="form-control" id="editRumahSakit" name="rs_klinik">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
                                 <input type="date" class="form-control" id="editTanggalPengajuan" name="tanggal_pengajuan">
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Jumlah Pengajuan</label>
-                                <input type="text" id="editJumlahPengajuan" class="form-control" name="jumlah_pengajuan">
+                                <label for="gelar_belakang" class="form-label">Nominal</label>
+                                <input type="text" id="editNominal" class="form-control" name="nominal">
                             </div>
                             <div class="col-12">
                                 <label for="alamat" class="form-label">Deskripsi</label>
-                                <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" required></textarea>
+                                <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" ></textarea>
                             </div>
                             <div class="col-md-12">
                                 <label for="dropzone" class="form-label">Attachment</label>
@@ -286,7 +248,7 @@
                                 <div id="editAttachmentList">
                                     <!-- File lama akan dimuat melalui JavaScript -->
                                 </div>
-                            </div>        
+                            </div>              
                         </div>
                     </div>
                     <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
@@ -308,7 +270,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                    <form action="{{ route('ekses.upload') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('pengajuan-klaim-pengobatan.upload') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
                             <label for="file_excel" class="form-label">Upload File Excel</label>
@@ -326,6 +288,7 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+
     <script>
         new Cleave('#nominal', {
             numeral: true,
@@ -382,113 +345,119 @@
     </script>
 
     <script>
-    $(document).ready(function () {
+        $(document).ready(function () {
         // Event listener untuk klik baris tabel
-        $('#tableAdmin tbody').on('click', 'tr', function () {
-        // Cegah klik pada tombol Edit agar tidak memicu modal detail
-        if ($(event.target).closest('.editBtn, .deleteBtn').length) return;
+        $('#tableAdmin tbody').on('click', 'tr', function (event) {
+            // Cegah klik pada tombol Edit atau Hapus agar tidak memicu modal detail
+            if ($(event.target).closest('.editBtn, .deleteBtn').length) return;
 
-        const button = $(this).find('button.editBtn'); // Ambil tombol edit di dalam baris
-        const rowData = button.data(); // Ambil semua data attributes dari tombol
+            const row = $(this); // Baris yang diklik
+            const rowData = row.data(); // Ambil semua atribut data-* dari baris
 
-        console.log("Debug Row Data:", rowData); // Debug data row di console
+            console.log("Debug Row Data:", rowData); // Debug data row di console
 
-        // Set data ke dalam modal
-        $('#detailMemberID').text(rowData.id_member || '-');
-        $('#detailIDBadge').text(rowData.id_badge || '-');
-        $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
-        $('#detailUnitKerja').text(rowData.unit_kerja || '-');
-        $('#detailNamaPasien').text(rowData.nama_pasien || '-');
-        $('#detailDeskripsi').text(rowData.deskripsi || '-');
-        $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
-        $('#detailJumlahEkses').text(rowData.jumlah_ekses || '-');
+            // Set data ke dalam modal
+            $('#detailIDBadge').text(rowData.id_badge || '-');
+            $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
+            $('#detailUnitKerja').text(rowData.unit_kerja || '-');
+            $('#detailNamaAsuransi').text(rowData.asuransi || '-');
+            $('#detailRumahSakit').text(rowData.rumah_sakit || '-');
+            $('#detailTanggalPengajuan').text(rowData.tanggal_pengajuan || '-');
+            $('#detailNominal').text(rowData.nominal || '-');
+            $('#detailDeskripsi').text(rowData.deskripsi || '-');
 
-        // Parsing dan menampilkan file_url jika ada
-        let attachmentHtml = 'Tidak ada file';
+            // Parsing dan menampilkan file_url jika ada
+            let attachmentHtml = 'Tidak ada file';
 
-        if (rowData.file_url) {
-            console.log("Raw file_url:", rowData.file_url); // Debugging
-            let files = [];
+            if (rowData.file_url) {
+                console.log("Raw file_url:", rowData.file_url); // Debugging
+                let files = [];
 
-            // Jika file_url sudah berupa array, langsung gunakan
-            if (Array.isArray(rowData.file_url)) {
-                files = rowData.file_url;
-            } else {
-                // Jika file_url berupa string, parse terlebih dahulu
-                try {
-                    files = JSON.parse(rowData.file_url);
-                } catch (error) {
-                    console.error("Error Parsing JSON:", error.message);
+                // Jika file_url sudah berupa array, langsung gunakan
+                if (Array.isArray(rowData.file_url)) {
+                    files = rowData.file_url;
+                } else {
+                    // Jika file_url berupa string, parse terlebih dahulu
+                    try {
+                        files = JSON.parse(rowData.file_url);
+                    } catch (error) {
+                        console.error("Error Parsing JSON:", error.message);
+                    }
+                }
+
+                // Tampilkan file sebagai gambar atau link
+                if (files.length > 0) {
+                    attachmentHtml = files.map(file => {
+                        const fileExtension = file.split('.').pop().toLowerCase();
+                        const filePath = `/uploads/PengajuanKlaim/klaim_Pengobatan/${file}`;
+
+                        // Periksa ekstensi file
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                            // Jika file adalah gambar, tampilkan sebagai img tag
+                            return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
+                        } else {
+                            // Jika file bukan gambar, tampilkan sebagai link
+                            return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
+                        }
+                    }).join('');
                 }
             }
 
-            // Tampilkan file sebagai gambar atau link
-            if (files.length > 0) {
-                attachmentHtml = files.map(file => {
-                    const fileExtension = file.split('.').pop().toLowerCase();
-                    const filePath = `/uploads/Ekses/${file}`;
+            // Tampilkan hasil pada modal
+            $('#detailAttachment').html(attachmentHtml);
 
-                    // Periksa ekstensi file
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-                        // Jika file adalah gambar, tampilkan sebagai img tag
-                        return `<div><img src="${filePath}" alt="${file}" style="max-width: 150px; height: auto; margin: 5px;"></div>`;
-                    } else {
-                        // Jika file bukan gambar, tampilkan sebagai link
-                        return `<div><a href="${filePath}" target="_blank">${file}</a></div>`;
-                    }
-                }).join('');
-            }
-        }
-
-        // Tampilkan hasil pada modal
-        $('#detailAttachment').html(attachmentHtml);
-
-        // Tampilkan modal
-        $('#modalDetail').modal('show');
+            // Tampilkan modal
+            $('#modalDetail').modal('show');
+        });
     });
 
-    });
     </script>
 
 
     <script>
-    $(document).ready(function () {
-        // Inisialisasi DataTables
-        var table = $('#tableAdmin').DataTable();
+       $(document).ready(function () {
+            // Fungsi untuk memformat angka menjadi format Rupiah
+            function formatRupiah(number) {
+                return 'Rp.' + Number(number).toLocaleString('id-ID');
+            }
 
-        // Event delegation untuk tombol Edit
-        $('#tableAdmin').on('click', '.editBtn', function (event) {
-            event.stopPropagation(); // Hentikan event klik dari propagasi ke elemen parent (baris)
-            
-            // Ambil data dari atribut tombol
-            const id = $(this).data('id');
-            const id_member = $(this).data('id_member');
-            const id_badge = $(this).data('id_badge');
-            const nama_karyawan = $(this).data('nama_karyawan');
-            const unit_kerja = $(this).data('unit_kerja');
-            const nama_pasien = $(this).data('nama_pasien');
-            const deskripsi = $(this).data('deskripsi');
-            const tanggal_pengajuan = $(this).data('tanggal_pengajuan');
-            const jumlah_ekses = $(this).data('jumlah_ekses');
+            // Inisialisasi DataTables
+            var table = $('#tableAdmin').DataTable();
 
-            // Isi data di dalam form modal
-            $('#editIdMember').val(id_member);
-            $('#editIdBadge').val(id_badge);
-            $('#editNamaKaryawan').val(nama_karyawan);
-            $('#editUnitKerja').val(unit_kerja);
-            $('#editNamaPasien').val(nama_pasien);
-            $('#editDeskripsi').val(deskripsi);
-            $('#editTanggalPengajuan').val(tanggal_pengajuan);
-            $('#editJumlahPengajuan').val(jumlah_ekses);
+            // Event delegation untuk tombol Edit
+            $('#tableAdmin').on('click', '.editBtn', function (event) {
+                event.stopPropagation(); // Hentikan event klik dari propagasi ke elemen parent (baris)
 
-            // Set action form update
-            $('#editForm').attr('action', '/admin/ekses/update/' + id);
+                // Ambil data dari atribut tombol
+                const id = $(this).data('id');
+                const id_badge = $(this).data('id_badge') || '-';
+                const nama_karyawan = $(this).data('nama_karyawan') || '-';
+                const unit_kerja = $(this).data('unit_kerja') || '-';
+                const nama_asuransi = $(this).data('asuransi') || '-';
+                const rumah_sakit = $(this).data('rumah_sakit') || '-';
+                const tanggal_pengajuan = $(this).data('tanggal_pengajuan') || '-';
+                const nominal = $(this).data('nominal') || '0'; // Pastikan defaultnya angka '0' jika kosong
+                const deskripsi = $(this).data('deskripsi') || '-';
 
-            // Tampilkan modal edit
-            $('#modalEditData').modal('show');
+                // Pastikan nominal adalah string, kemudian format ke Rupiah
+                const formattedNominal = formatRupiah(String(nominal).replace('Rp.', '').replace(/,/g, ''));
+
+                $('#editIdBadge').val(id_badge || '-');
+                $('#editNamaKaryawan').val(nama_karyawan || '-');
+                $('#editUnitKerja').val(unit_kerja || '-');
+                $('#editNamaAsuransi').val(nama_asuransi || '-');
+                $('#editRumahSakit').val(rumah_sakit || '-');
+                $('#editTanggalPengajuan').val(tanggal_pengajuan || '-');
+                $('#editNominal').val(formattedNominal || '-');
+                $('#editDeskripsi').val(deskripsi || '-');
+                // Set action form update
+                $('#editForm').attr('action', '/admin/klaim_pengobatan/update/' + id);
+
+                // Tampilkan modal edit
+                $('#modalEditData').modal('show');
+            });
         });
 
-    });
 
     $(document).ready(function () {
     // Event delegation untuk tombol Hapus
@@ -509,7 +478,7 @@
             if (result.isConfirmed) {
                 // Jika dikonfirmasi, kirim permintaan hapus ke server
                 $.ajax({
-                url: '/admin/ekses/delete/' + id,
+                url: '/admin/klaim_pengobatan/delete/' + id,
                 type: 'GET', // Ubah dari DELETE ke GET
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
@@ -567,7 +536,7 @@
                     if (result.isConfirmed) {
                         // Kirim permintaan hapus melalui AJAX
                         $.ajax({
-                            url: '/admin/ekses/delete-multiple', // Endpoint untuk hapus data
+                            url: '/admin/klaim_pengobatan/delete-multiple', // Endpoint untuk hapus data
                             type: 'POST',
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content'),
@@ -592,81 +561,82 @@
         let removedFiles = []; // Array untuk menyimpan file yang dihapus
 
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        if (document.querySelector('#attachmentDropzone')) {
+            const attachmentDropzone = new Dropzone("#attachmentDropzone", {
+                url: "/pengajuan-klaim-pengobatan/upload-temp", // Endpoint sementara untuk upload
+                paramName: "file",
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                maxFiles: 5,
+                maxFilesize: 5, // 5MB
+                acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+                addRemoveLinks: true,
+                dictRemoveFile: "Hapus File",
+                dictDefaultMessage: "Drag & Drop your files here or click to upload",
 
-        const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-            url: "/upload-temp", // Endpoint sementara untuk upload
-            paramName: "file",
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            maxFiles: 5,
-            maxFilesize: 5, // 5MB
-            acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
-            addRemoveLinks: true,
-            dictRemoveFile: "Hapus File",
-            dictDefaultMessage: "Drag & Drop your files here or click to upload",
+                init: function () {
+                    // Saat file berhasil diunggah
+                    this.on("success", function (file, response) {
+                        console.log("File upload response:", response);
 
-            init: function () {
-                // Saat file berhasil diunggah
-                this.on("success", function (file, response) {
-                    console.log("File upload response:", response);
+                        if (response && response.fileName) {
+                            file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
+                            uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
 
-                    if (response && response.fileName) {
-                        file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
-                        uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
+                            console.log("Uploaded file added:", response.fileName);
+                            console.log("Uploaded Files Array:", uploadedFiles);
 
-                        console.log("Uploaded file added:", response.fileName);
-                        console.log("Uploaded Files Array:", uploadedFiles);
+                            // Perbarui input hidden dengan file yang diunggah
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                        } else {
+                            console.error("Error: No fileName in response:", response);
+                        }
+                    });
 
-                        // Perbarui input hidden dengan file yang diunggah
-                        document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
-                    } else {
-                        console.error("Error: No fileName in response:", response);
-                    }
-                });
+                    // Saat file dihapus dari Dropzone
+                    this.on("removedfile", function (file) {
+                        console.log("File removed:", file);
 
-                // Saat file dihapus dari Dropzone
-                this.on("removedfile", function (file) {
-                    console.log("File removed:", file);
+                        // Pastikan uploadedFileName tersedia
+                        if (file.uploadedFileName) {
+                            console.log("Removing file from server:", file.uploadedFileName);
 
-                    // Pastikan uploadedFileName tersedia
-                    if (file.uploadedFileName) {
-                        console.log("Removing file from server:", file.uploadedFileName);
+                            // Tambahkan file ke array removedFiles
+                            removedFiles.push(file.uploadedFileName);
 
-                        // Tambahkan file ke array removedFiles
-                        removedFiles.push(file.uploadedFileName);
+                            // Hapus file dari array uploadedFiles
+                            uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
 
-                        // Hapus file dari array uploadedFiles
-                        uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
+                            console.log("Updated Uploaded Files:", uploadedFiles);
+                            console.log("Removed Files Array:", removedFiles);
 
-                        console.log("Updated Uploaded Files:", uploadedFiles);
-                        console.log("Removed Files Array:", removedFiles);
+                            // Perbarui input hidden untuk uploaded_files dan removed_files
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                            document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
 
-                        // Perbarui input hidden untuk uploaded_files dan removed_files
-                        document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
-                        document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
-
-                        // Kirim AJAX request untuk menghapus file di server
-                        $.ajax({
-                            url: "/delete-temp",
-                            type: "POST",
-                            data: {
-                                _token: token,
-                                fileName: file.uploadedFileName
-                            },
-                            success: function (response) {
-                                console.log("File successfully removed from server:", response);
-                            },
-                            error: function (error) {
-                                console.error("Failed to delete file on server:", error);
-                            }
-                        });
-                    } else {
-                        console.warn("File not uploaded to server, skipping removal.");
-                    }
-                });
-            }
-        });
+                            // Kirim AJAX request untuk menghapus file di server
+                            $.ajax({
+                                url: "/pengajuan-klaim-pengobatan/delete-temp",
+                                type: "POST",
+                                data: {
+                                    _token: token,
+                                    fileName: file.uploadedFileName
+                                },
+                                success: function (response) {
+                                    console.log("File successfully removed from server:", response);
+                                },
+                                error: function (error) {
+                                    console.error("Failed to delete file on server:", error);
+                                }
+                            });
+                        } else {
+                            console.warn("File not uploaded to server, skipping removal.");
+                        }
+                    });
+                }
+            });
+        }
 
         let oldFiles = []; // Array untuk menyimpan file lama
 
@@ -680,7 +650,7 @@
 
         // Konfigurasi Dropzone
         let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/upload-temp", // Endpoint sementara untuk upload file
+            url: "/pengajuan-klaim-pengobatan/upload-temp", // Endpoint sementara untuk upload file
             paramName: "file",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -696,6 +666,7 @@
                     console.log("File uploaded successfully:", response);
 
                     // Hanya tambahkan file ke array jika berhasil diupload
+
                     uploadedFiles.push(response.fileName);
                     console.log("Uploaded Files Array:", uploadedFiles);
 
@@ -717,7 +688,7 @@
                 if (file.serverFileName) {
                     // Jika file sudah di-upload (file baru), kirim request untuk hapus file
                     $.ajax({
-                        url: "/delete-temp",
+                        url: "/pengajuan-klaim-pengobatan/delete-temp",
                         method: "POST",
                         data: {
                             _token: $('meta[name="csrf-token"]').attr('content'),
@@ -768,7 +739,7 @@
                     existingFiles.forEach(file => {
                         let mockFile = { name: file, size: 12345, serverFileName: file };
                         this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, `/uploads/Ekses/${file}`);
+                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Pengobatan/${file}`);
                         this.emit("complete", mockFile);
                     });
                 } else {
@@ -780,7 +751,7 @@
         // Fungsi untuk memperbarui input hidden
         function updateHiddenInput() {
             $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-            console.log("Updated hidden input:", $('#uploadedFilesInput').val());
+            console.log("Updated Uploaded Files Input:", $('#uploadedFilesInput').val());
         }
 
 
@@ -824,7 +795,7 @@
                 }
 
                     files.forEach((file, index) => {
-                        const filePath = `/uploads/Ekses/${file}`;
+                        const filePath = `/uploads/PengajuanKlaim/klaim_Pengobatan/${file}`;
                         const fileExtension = file.split('.').pop().toLowerCase();
 
                         // Tampilkan file lama sebagai gambar atau link
@@ -854,7 +825,7 @@
                 }
             }
 
-
+//point
         });
         $('#editAttachmentList').on('click', '.remove-old-file', function () {
                 const fileToRemove = $(this).data('file');
@@ -892,36 +863,38 @@
         
         $('#editForm').on('submit', function (e) {
             e.preventDefault();
-            const uploadedFiles = $('input[name="uploaded_files[]"]').map(function () {
-                return $(this).val();
-            }).get();
-            console.log("Files to be sent:", uploadedFiles);
-            const uploadedFilesInput = document.getElementById("uploadedFilesInput");
+
+            const uploadedFilesInput = $('#uploadedFilesInput').val();
+            const removedFilesInput = $('#removedFilesInput').val();
+
             let formData = new FormData(this);
+
+            // Tambahkan uploadedFilesInput secara manual ke FormData
+            formData.append('uploaded_files', uploadedFilesInput);
+            formData.append('removed_files', removedFilesInput);
+
             console.log("===== Data Form =====");
             formData.forEach((value, key) => {
                 console.log(`${key}:`, value);
             });
-            console.log("Final Uploaded Files:", uploadedFilesInput.value);
-            console.log("Final Removed Files:", $('#removedFilesInput').val());
 
             // Kirim form dengan AJAX
             $.ajax({
                 url: $(this).attr('action'),
                 type: 'POST',
-                data: new FormData(this),
+                data: formData,
                 processData: false,
                 contentType: false,
-                
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil diperbarui.', 'success');
-                    location.reload();
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
                 },
                 error: function (error) {
                     console.error('Error:', error);
                     Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan data.', 'error');
                 }
-
             });
         });
 

@@ -116,8 +116,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/klaim_kematian/edit/{id}', [KlaimKematianController::class, 'edit']);
     Route::post('/admin/klaim_kematian/update/{id}', [KlaimKematianController::class, 'update']);
     Route::get('/admin/klaim_kematian/delete/{id}', [KlaimKematianController::class, 'destroy']);
-    Route::post('/pengajuan-klaim-kematian/upload-temp', [KlaimKematianController::class, 'uploadTemp'])->name('upload.temp');
-    Route::post('/pengajuan-klaim-kematian/delete-temp', [KlaimKematianController::class, 'deleteTemp'])->name('delete.temp');
+    Route::post('/admin/klaim_kematian/delete-multiple', [KlaimKematianController::class, 'deleteMultiple'])->name('pengajuan-klaim.delete-multiple');
+    Route::post('/pengajuan-klaim-kematian/upload-temp', [KlaimKematianController::class, 'uploadTemp'])->name('klaim-kematian-upload.temp');
+    Route::post('/pengajuan-klaim-kematian/delete-temp', [KlaimKematianController::class, 'deleteTemp'])->name('klaim-kematian-delete.temp');
     
     //Klaim Lumpsum Kacamata
     Route::get('/admin/klaim_lumpsum_kacamata', [KlaimLumpsumKacamataController::class, 'index']);
@@ -135,10 +136,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Klaim Pengobatan
     Route::get('/admin/klaim_pengobatan', [KlaimPengobatanController::class, 'index']);
-    Route::post('/admin/klaim_pengobatan/tambah', [KlaimPengobatanController::class, 'store']);
+    Route::post('/admin/klaim_pengobatan/upload', [KlaimPengobatanController::class, 'uploadExcel'])->name('pengajuan-klaim-pengobatan.upload');
+    Route::post('/admin/klaim_pengobatan/tambah', [KlaimPengobatanController::class, 'store'])->name('pengajuan-klaim-pengobatan.store');
     Route::get('/admin/klaim_pengobatan/edit/{id}', [KlaimPengobatanController::class, 'edit']);
     Route::post('/admin/klaim_pengobatan/update/{id}', [KlaimPengobatanController::class, 'update']);
     Route::get('/admin/klaim_pengobatan/delete/{id}', [KlaimPengobatanController::class, 'destroy']);
+    Route::post('/admin/klaim_pengobatan/delete-multiple', [KlaimPengobatanController::class, 'deleteMultiple'])->name('pengajuan-klaim.delete-multiple');
+    Route::post('/pengajuan-klaim-pengobatan/upload-temp', [KlaimPengobatanController::class, 'uploadTemp'])->name('klaim-pengobatan-upload.temp');
+    Route::post('/pengajuan-klaim-pengobatan/delete-temp', [KlaimPengobatanController::class, 'deleteTemp'])->name('klaim-pengobatan-delete.temp');
 
     //Klaim Purnajabatan
     Route::get('/admin/klaim_purnajabatan', [KlaimPurnaJabatanController::class, 'index']);
