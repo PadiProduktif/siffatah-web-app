@@ -39,7 +39,7 @@
                 <th>Asuransi</th>
                 <th>Rumah Sakit/Klinik</th>
                 <th>Tanggal Kematian</th>
-                <th>Nama Keluarga</th>
+                <th>Ahli Waris</th>
                 <th>Hubungan</th>
                 <th>No Polis</th>
                 <th>Aksi</th>
@@ -50,16 +50,16 @@
 
             @foreach($pengajuanKlaim as $data)
             <tr class="detailRow"
-                data-id="{{ $data->id_klaim_kecelakaan }}" 
+                data-id="{{ $data->id_klaim_kematian }}" 
                 data-id_badge="{{ $data->id_badge }}" 
                 data-nama_karyawan="{{ $data->nama_karyawan }}" 
                 data-unit_kerja="{{ $data->unit_kerja }}"
                 data-asuransi="{{ $data->nama_asuransi }}"
                 data-rumah_sakit="{{ $data->rs_klinik }}"
-                data-tanggal_kejadian="{{ $data->tanggal_kejadian }}"
-                data-nama_keluarga="{{ $data->nama_keluarga }}"
+                data-tanggal_wafat="{{ $data->tanggal_wafat }}"
+                data-ahli_waris="{{ $data->nama_keluarga }}"
                 data-hubungan="{{ $data->hubungan_keluarga }}"
-                data-deskripsi="{{ $data->deskripsi }}"
+                data-no_polis="{{ $data->no_polis }}"
                 data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
                 <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_kecelakaan }}"></td>
                 <td>{{ $data->id_badge }}</td>
@@ -78,16 +78,16 @@
                 <td>
 
                     <button type="button" class="btn btn-warning btn-sm editBtn"
-                        data-id="{{ $data->id_klaim_kecelakaan }}" 
+                        data-id="{{ $data->id_klaim_kematian }}" 
                         data-id_badge="{{ $data->id_badge }}" 
                         data-nama_karyawan="{{ $data->nama_karyawan }}" 
                         data-unit_kerja="{{ $data->unit_kerja }}"
                         data-asuransi="{{ $data->nama_asuransi }}"
                         data-rumah_sakit="{{ $data->rs_klinik }}"
-                        data-tanggal_kejadian="{{ $data->tanggal_kejadian }}"
-                        data-nama_keluarga="{{ $data->nama_keluarga }}"
+                        data-tanggal_wafat="{{ $data->tanggal_wafat }}"
+                        data-ahli_waris="{{ $data->nama_keluarga }}"
                         data-hubungan="{{ $data->hubungan_keluarga }}"
-                        data-deskripsi="{{ $data->deskripsi }}"
+                        data-no_polis="{{ $data->no_polis }}"
                         data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
                         Edit
                     </button>
@@ -116,9 +116,9 @@
                     <p><strong>Nama Asuransi:</strong> <span id="detailNamaAsuransi"></span></p>
                     <p><strong>Rumah Sakit:</strong> <span id="detailRumahSakit"></span></p>
                     <p><strong>Tanggal Kejadian:</strong> <span id="detailTanggalKejadian"></span></p>
-                    <p><strong>Nama Keluarga:</strong> <span id="detailNamaKeluarga"></span></p>
+                    <p><strong>Ahli Waris:</strong> <span id="detailNamaKeluarga"></span></p>
                     <p><strong>Hubungan:</strong> <span id="detailHubungan"></span></p>
-                    <p><strong>Deskripsi:</strong> <span id="detailDeskripsi"></span></p>
+                    <p><strong>No Polis:</strong> <span id="detailDeskripsi"></span></p>
                     <p><strong>Attachments:</strong></p>
                     <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
                 </div>
@@ -136,7 +136,7 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="dataForm" action="{{ route('pengajuan-klaim.store') }}" method="POST" enctype="multipart/form-data" >
+                <form id="dataForm" action="{{ route('pengajuan-klaim-kematian.store') }}" method="POST" enctype="multipart/form-data" >
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -163,20 +163,20 @@
                                 <input type="text" class="form-control" id="rs_klinik" name="rs_klinik">
                             </div>
                             <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Tanggal Kejadian</label>
-                                <input type="date" class="form-control" id="tanggal_kejadian" name="tanggal_kejadian">
+                                <label for="gelar_belakang" class="form-label">Tanggal Wafat</label>
+                                <input type="date" class="form-control" id="tanggal_wafat" name="tanggal_wafat">
                             </div>
-                            <div class="col-md-8">
-                                <label for="gelar_belakang" class="form-label">Nama Keluarga</label>
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Ahli Waris</label>
                                 <input type="text" id="nama_keluarga" class="form-control" name="nama_keluarga">
                             </div>
                             <div class="col-md-4">
                                 <label for="gelar_belakang" class="form-label">Hubungan Keluarga</label>
                                 <input type="text" id="hubungan_keluarga" class="form-control" name="hubungan_keluarga">
                             </div>
-                            <div class="col-12">
-                                <label for="alamat" class="form-label">Deskripsi</label>
-                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
+                            <div class="col-md-4">
+                                <label for="alamat" class="form-label">No Polis</label>
+                                <input class="form-control" id="no_polis" name="no_polis" rows="3" required></input>
                             </div>
                             <div class="col-md-12">
                                 <div id="attachmentDropzone" class="dropzone">
@@ -579,7 +579,7 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         if (document.querySelector('#attachmentDropzone')) {
             const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/pengajuan-klaim-kecelakaan/upload-temp", // Endpoint sementara untuk upload
+                url: "/pengajuan-klaim-kematian/upload-temp", // Endpoint sementara untuk upload
                 paramName: "file",
                 headers: {
                     'X-CSRF-TOKEN': token
@@ -633,7 +633,7 @@
 
                             // Kirim AJAX request untuk menghapus file di server
                             $.ajax({
-                                url: "/pengajuan-klaim-kecelakaan/delete-temp",
+                                url: "/pengajuan-klaim-kematian/delete-temp",
                                 type: "POST",
                                 data: {
                                     _token: token,

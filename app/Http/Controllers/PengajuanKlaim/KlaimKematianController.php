@@ -118,30 +118,23 @@ class KlaimKematianController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request data
         $validatedData = $request->validate([
             'id_badge' => 'required|string|max:255',
             'nama_karyawan' => 'required|string|max:255',
             'unit_kerja' => 'nullable|string|max:255',
             'nama_asuransi' => 'nullable|string|max:255',
             'rs_klinik' => 'nullable|string|max:255',
-            'tanggal_kejadian' => 'nullable|date',
+            'tanggal_wafat' => 'nullable|date',
             'nama_keluarga' => 'nullable|string|max:255',
             'hubungan_keluarga' => 'nullable|string|max:255',
             'no_polis' => 'nullable|string|max:255',
-            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+            // 'file_url' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
         ]);
-    
+
         try {
             // Handle file upload if present
-            $fileName = null;
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/klaim_Kematian/'), $fileName);
-            }
-    
-            // Create new klaim_kematian record
+
+            // Create new klaim_kecelakaan record
             $klaim = Klaim_kematian::create([
                 'id_klaim_kematian' => rand(10, 99999999),
                 'id_badge' => $validatedData['id_badge'],
@@ -149,24 +142,20 @@ class KlaimKematianController extends Controller
                 'unit_kerja' => $validatedData['unit_kerja'],
                 'nama_asuransi' => $validatedData['nama_asuransi'],
                 'rs_klinik' => $validatedData['rs_klinik'],
-                'tanggal_wafat' => $validatedData['tanggal_kejadian'],
+                'tanggal_wafat' => $validatedData['tanggal_wafat'],
                 'nama_keluarga' => $validatedData['nama_keluarga'],
                 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'no_polis' => $validatedData['no_polis'],
                 'file_url' => $fileName,
             ]);
-    
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully created',
-                'data' => $klaim
-            ], 201);
-    
+            Log::info("Menambah data klaim Kematian Request Data: ", $request->all());
+
+            return redirect()->back()->with('success', 'Data berhasil ditambah!');
+
         } catch (\Exception $e) {
-            // Log the error for debugging
+            // Log error for debugging
             Log::error("Error creating data: " . $e->getMessage());
-    
+
             // Return error response
             return response()->json([
                 'status' => 'error',
@@ -174,8 +163,45 @@ class KlaimKematianController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+       
     }
     
+    public function uploadTemp(Request $request)
+    {
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/PengajuanKlaim/klaim_Kematian'), $fileName);
+    
+            // Perbaikan log
+            Log::info("Menambah data File klaim Kematian:", ['file_name' => $fileName]);
+    
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+    
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/PengajuanKlaim/klaim_Kematian/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
+    }
 
     /**
      * Display the specified resource.

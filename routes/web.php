@@ -111,11 +111,13 @@ Route::middleware('auth:sanctum')->group(function () {
      
     //Klaim Kematian
     Route::get('/admin/klaim_kematian', [KlaimKematianController::class, 'index']);
-    Route::post('/admin/klaim_kematian/tambah', [KlaimKematianController::class, 'store']);
+    Route::post('/admin/klaim_kematian/tambah', [KlaimKematianController::class, 'store'])->name('pengajuan-klaim-kematian.store');
     Route::post('/admin/klaim_kematian/upload', [KlaimKematianController::class, 'uploadExcel'])->name('pengajuan-klaim-kematian.upload');
     Route::get('/admin/klaim_kematian/edit/{id}', [KlaimKematianController::class, 'edit']);
     Route::post('/admin/klaim_kematian/update/{id}', [KlaimKematianController::class, 'update']);
     Route::get('/admin/klaim_kematian/delete/{id}', [KlaimKematianController::class, 'destroy']);
+    Route::post('/pengajuan-klaim-kematian/upload-temp', [KlaimKematianController::class, 'uploadTemp'])->name('upload.temp');
+    Route::post('/pengajuan-klaim-kematian/delete-temp', [KlaimKematianController::class, 'deleteTemp'])->name('delete.temp');
     
     //Klaim Lumpsum Kacamata
     Route::get('/admin/klaim_lumpsum_kacamata', [KlaimLumpsumKacamataController::class, 'index']);
