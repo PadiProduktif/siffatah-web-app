@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
     Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
+    Route::get('restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
 
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
