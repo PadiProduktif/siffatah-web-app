@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\PengajuanKlaim\klaim_lumpsum_kelahiran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KlaimLumpsumKelahiranController extends Controller
 {
@@ -14,21 +17,16 @@ class KlaimLumpsumKelahiranController extends Controller
      */
     public function index()
     {
-        try {
-            // Retrieve all klaim_lumpsum_kelahiran data
-            $klaim = klaim_lumpsum_kelahiran::all();
-    
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data retrieved successfully',
-                'data' => $klaim
-            ], 200);
-    
+        try {       
+            
+            $data['pengajuanKlaim'] = klaim_lumpsum_kelahiran::all();
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kelahiran', $data);
+
+
         } catch (\Exception $e) {
-            // Log the error for debugging
+            // Log error for debugging
             Log::error("Error retrieving data: " . $e->getMessage());
-    
+
             // Return error response
             return response()->json([
                 'status' => 'error',
@@ -47,62 +45,117 @@ class KlaimLumpsumKelahiranController extends Controller
         
     }
 
+    public function uploadExcel(Request $request){
+
+
+            // Validasi file
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+        
+        
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
+
+            // Validasi apakah data tidak kosong
+            if (!empty($data) && count($data[0]) > 0) {
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key < 1) {
+                        continue;
+                    }
+                    if (is_numeric($row[7])) {
+                        // Jika format tanggal adalah numerik (Excel date serial)
+                        $tanggal_pengajuan = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row[7])->format('Y-m-d');
+                    } else {
+                        try {
+                            // Parsing menggunakan format `d F Y`
+                            $tanggal_pengajuan = Carbon::createFromFormat('d F Y', trim($row[7]))->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            Log::error('Error parsing date: ' . $row[7], ['exception' => $e]);
+                            $tanggal_pengajuan = null; 
+                        }
+                    }
+                    if (is_numeric($row[8])) {
+                        // Jika format tanggal adalah numerik (Excel date serial)
+                        $tanggal_approve = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row[8])->format('Y-m-d');
+                    } else {
+                        try {
+                            // Parsing menggunakan format `d F Y`
+                            $tanggal_approve = Carbon::createFromFormat('d F Y', trim($row[8]))->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            Log::error('Error parsing date: ' . $row[8], ['exception' => $e]);
+                            $tanggal_approve = null; 
+                        }
+                    }
+                    $cleanedValue = str_replace(['Rp.', '.'], '', $row[9]);
+                    
+                    // $tanggal = convertIndonesianDate(($row[7]));
+                    
+
+                    // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
+                    klaim_lumpsum_kelahiran::create([
+                        'id_lumpsum_kelahiran' => rand(10, 99999999),
+                        'id_badge' => substr($row[1] ?? '', 0, 50), // Pastikan panjang data sesuai tipe di database
+                        'nama_karyawan' => substr($row[2] ?? '', 0, 1000),
+                        'unit_kerja' => substr($row[3] ?? '', 0, 1000),
+                        'nama_pasangan' => substr($row[4] ?? '', 0, 1000), // Perhatikan panjang maksimal
+                        'anak_ke' => $row[5] ?? null,
+                        'rumah_sakit' => $row[6] ?? null,
+                        'tanggal_pengajuan' => $tanggal_pengajuan,
+                        'tanggal_approve' => $tanggal_approve,
+                        'nominal' => $cleanedValue,
+                        'deskripsi' => $row[10] ?? null,
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Data berhasil diunggah!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal mengunggah file!');
+    }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
         // Validate the request data
-        $validatedData = $request->validate([
-            'id_badge' => 'required|string|max:255',
-            'nama_karyawan' => 'required|string|max:255',
-            'unit_kerja' => 'nullable|string|max:255',
-            'nama_pasangan' => 'nullable|string|max:255',
-            'anak_ke' => 'nullable|integer',
-            'rumah_sakit' => 'nullable|string|max:255',
-            'tanggal_pengajuan' => 'nullable|date',
-            'tanggal_approve' => 'nullable|date',
-            'nominal' => 'nullable|numeric',
-            'deskripsi' => 'nullable|string',
-            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
-        ]);
-
+    
         try {
             // Handle file upload if present
-            $fileName = null;
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/'), $fileName);
-            }
-
-            // Create new klaim_lumpsum_kelahiran record
+            
+    
+            // Create a new klaim_pengobatan record
             $klaim = klaim_lumpsum_kelahiran::create([
                 'id_lumpsum_kelahiran' => rand(10, 99999999),
-                'id_badge' => $validatedData['id_badge'],
-                'nama_karyawan' => $validatedData['nama_karyawan'],
-                'unit_kerja' => $validatedData['unit_kerja'],
-                'nama_pasangan' => $validatedData['nama_pasangan'],
-                'anak_ke' => $validatedData['anak_ke'],
-                'rumah_sakit' => $validatedData['rumah_sakit'],
-                'tanggal_pengajuan' => $validatedData['tanggal_pengajuan'],
-                'tanggal_approve' => $validatedData['tanggal_approve'],
-                'nominal' => $validatedData['nominal'],
-                'deskripsi' => $validatedData['deskripsi'],
-                'file_url' => $fileName,
+                'id_badge' => $request->id_badge,
+                'nama_karyawan' => $request->nama_karyawan,
+                'unit_kerja' => $request->unit_kerja,
+                'nama_pasangan' => $request->nama_pasangan,
+                'anak_ke' => $request->anak_ke,
+                'rumah_sakit' => $request->rumah_sakit,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'tanggal_approve' => $request->tanggal_approve,
+                'nominal' => $cleanedValue,
+                'deskripsi' => $request->deskripsi,
+                'file_url' => $request->uploaded_files,
             ]);
-
+            Log::info("Menambah data klaim Lumpsum Kelahiran Request Data: ", $request->all());
             // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully created',
-                'data' => $klaim
-            ], 201);
-
+            return redirect()->back()->with('success', 'Data berhasil ditambah!');
+    
         } catch (\Exception $e) {
             // Log the error for debugging
             Log::error("Error creating data: " . $e->getMessage());
-
+    
             // Return error response
             return response()->json([
                 'status' => 'error',
@@ -110,8 +163,45 @@ class KlaimLumpsumKelahiranController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+
+        
     }
 
+    public function uploadTemp(Request $request)
+    {
+    
+        // return response()->json(['error' => 'No file uploaded'], 400);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+        
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Lumpsum Kelahiran Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Lumpsum Kelahiran: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
+    }
 
     /**
      * Display the specified resource.
@@ -151,70 +241,83 @@ class KlaimLumpsumKelahiranController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'id_badge' => 'required|string|max:255',
-            'nama_karyawan' => 'required|string|max:255',
-            'unit_kerja' => 'nullable|string|max:255',
-            'nama_pasangan' => 'nullable|string|max:255',
-            'anak_ke' => 'nullable|integer',
-            'rumah_sakit' => 'nullable|string|max:255',
-            'tanggal_pengajuan' => 'nullable|date',
-            'tanggal_approve' => 'nullable|date',
-            'nominal' => 'nullable|numeric',
-            'deskripsi' => 'nullable|string',
-            'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
-        ]);
-    
-        try {
-            // Find the klaim by ID or throw a 404 if not found
-            $klaim = klaim_lumpsum_kelahiran::findOrFail($id);
-    
-            // Handle file upload if present
-            if ($request->hasFile('file')) {
-                // Delete the old file if it exists
-                if ($klaim->file_url) {
-                    $oldFile = public_path("uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/{$klaim->file_url}");
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
-                    }
+                // Log request data untuk debug
+        Log::info('Updating Pengajuan Klaim Lumpsum Kelahiran ID: ' . $id . ', Request Data: ', $request->all());
+
+        // Decode uploaded_files dan removed_files
+        $uploadedFiles = $request->input('uploaded_files', '[]');
+        $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+
+        $removedFiles = $request->input('removed_files', '[]');
+        $removedFiles = json_decode($removedFiles, true) ?? [];
+
+        Log::info('Decoded Uploaded Files:', $uploadedFiles);
+        Log::info('Decoded Removed Files:', $removedFiles);
+
+        // Pastikan uploadedFiles dan removedFiles adalah array
+        $uploadedFiles = is_array($uploadedFiles) ? $uploadedFiles : [];
+        $removedFiles = is_array($removedFiles) ? $removedFiles : [];
+
+        // Ambil data klaim dari database
+        $klaim = klaim_lumpsum_kelahiran::findOrFail($id);
+        $currentFiles = json_decode($klaim->file_url, true) ?? [];
+
+        // 1. Hapus file dari array dan juga file fisik
+        if (!empty($removedFiles)) {
+            foreach ($removedFiles as $file) {
+                $filePath = public_path('uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/' . $file);
+
+                // Hapus file fisik jika ada
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                    Log::info('File removed: ' . $filePath);
                 }
-    
-                // Save the new file
-                $file = $request->file('file');
-                $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran'), $fileName);
-                $validatedData['file_url'] = $fileName;
             }
-    
-            // Update klaim data
-            $klaim->update($validatedData);
-    
-            // Return success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data updated successfully',
-                'data' => $klaim
-            ], 200);
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if klaim is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-    
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Error updating data: " . $e->getMessage());
-    
-            // Return a 500 response for any other errors
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to update data',
-                'error' => $e->getMessage()
-            ], 500);
+
+            // Hapus file dari array currentFiles
+            $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+            Log::info('Files after removal:', $currentFiles);
         }
+
+        // 2. Tambahkan file baru ke currentFiles
+        if (!empty($uploadedFiles)) {
+            // Filter uploaded_files agar tidak ada file yang sudah dihapus
+            $uploadedFiles = array_diff($uploadedFiles, $removedFiles);
+        
+            // Gabungkan file baru ke currentFiles
+            $currentFiles = array_merge($currentFiles, $uploadedFiles);
+            Log::info('Files after addition:', $currentFiles);
+        }
+
+        // Hilangkan duplikat nama file dan reset index
+        $finalFiles = array_values(array_unique($currentFiles));
+
+        // 3. Update data ke database
+        $uang_klaim = str_replace(['Rp', '.', ','], '', $request->nominal);
+        
+        $klaim->update([
+            'file_url' => json_encode($finalFiles),
+            'id_badge' => $request->id_badge,
+            'nama_karyawan' => $request->nama_karyawan,
+            'unit_kerja' => $request->unit_kerja,
+            'nama_pasangan' => $request->nama_pasangan,
+            'anak_ke' => $request->anak_ke,
+            'rumah_sakit' => $request->rumah_sakit,
+            'tanggal_pengajuan' => $request->tanggal_pengajuan,
+            'tanggal_approve' => $request->tanggal_approve,
+            'nominal' => $uang_klaim,
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        // Log hasil akhir
+        Log::info('Final File URL:', $finalFiles);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil diupdate.',
+            'data' => $klaim,
+        ]);
+        
     }
     
 
@@ -224,43 +327,76 @@ class KlaimLumpsumKelahiranController extends Controller
     public function destroy(string $id)
     {
         try {
-            // Find the klaim by ID or throw a 404 if not found
+            Log::info("Menghapus data dengan ID: {$id}"); // Log untuk debugging awal
+            
+            // Ambil data berdasarkan ID
             $klaim = klaim_lumpsum_kelahiran::findOrFail($id);
     
-            // Delete associated file if it exists
+            // Hapus file attachment jika ada
             if ($klaim->file_url) {
-                $filePath = public_path("uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/{$klaim->file_url}");
-                if (file_exists($filePath)) {
-                    unlink($filePath); // Delete the file
+                $fileUrls = json_decode($klaim->file_url, true); // Decode JSON ke array
+                if (is_array($fileUrls)) {
+                    foreach ($fileUrls as $file) {
+                        $filePath = public_path("uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/{$file}");
+                        if (file_exists($filePath)) {
+                            unlink($filePath); // Hapus file dari direktori
+                            Log::info("File dihapus: {$filePath}");
+                        }
+                    }
                 }
             }
     
-            // Delete the klaim record from the database
+            // Hapus data dari database
             $klaim->delete();
+            Log::info("Data klaim LumpSum Kelahiran dengan ID: {$id} berhasil dihapus.");
     
-            // Return a success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully deleted',
-            ], 200);
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if klaim is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-    
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
-            // Log error for debugging
-            Log::error("Error deleting data: " . $e->getMessage());
+            Log::error("Error saat menghapus data dengan ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
     
-            // Return a 500 response for any other error
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete data',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+        }
+    }
+    public function deleteMultiple(Request $request)
+    {
+        try {
+            $ids = $request->input('ids'); // Ambil array ID dari request
+            Log::info('IDs yang akan dihapus: ', $ids);
+            
+    
+            // Ambil semua data berdasarkan ID
+            $klaimList = klaim_lumpsum_kelahiran::whereIn('id_lumpsum_kelahiran', $ids)->get();
+    
+            // Hapus semua file attachment yang terkait
+            foreach ($klaimList as $klaim) {
+                if ($klaim->file_url) {
+                    $fileUrls = json_decode($klaim->file_url, true);
+                    if (is_array($fileUrls)) {
+                        foreach ($fileUrls as $file) {
+                            $filePath = public_path("uploads/PengajuanKlaim/Klaim_Lumpsum_Kelahiran/{$file}");
+                            if (file_exists($filePath)) {
+                                unlink($filePath); // Hapus file
+                                Log::info("File dihapus: {$filePath}");
+                            }
+                        }
+                    }
+                }
+            }
+    
+            // Hapus data dari database
+            klaim_lumpsum_kelahiran::whereIn('id_lumpsum_kelahiran', $ids)->delete();
+    
+            return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error saat menghapus data:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
     }
     
