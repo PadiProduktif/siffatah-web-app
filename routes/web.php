@@ -146,11 +146,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pengajuan-klaim-pengobatan/delete-temp', [KlaimPengobatanController::class, 'deleteTemp'])->name('klaim-pengobatan-delete.temp');
 
     //Klaim Purnajabatan
-    Route::get('/admin/klaim_purnajabatan', [KlaimPurnaJabatanController::class, 'index']);
-    Route::post('/admin/klaim_purnajabatan/tambah', [KlaimPurnaJabatanController::class, 'store']);
-    Route::get('/admin/klaim_purnajabatan/edit/{id}', [KlaimPurnaJabatanController::class, 'edit']);
-    Route::post('/admin/klaim_purnajabatan/update/{id}', [KlaimPurnaJabatanController::class, 'update']);
-    Route::get('/admin/klaim_purnajabatan/delete/{id}', [KlaimPurnaJabatanController::class, 'destroy']);
+    Route::get('/admin/klaim_purna-jabatan', [KlaimPurnaJabatanController::class, 'index']);
+    Route::post('/admin/klaim_purna-jabatan/upload', [KlaimPurnaJabatanController::class, 'uploadExcel'])->name('pengajuan-klaim-purna-jabatan.upload');
+    Route::post('/admin/klaim_purna-jabatan/tambah', [KlaimPurnaJabatanController::class, 'store'])->name('pengajuan-klaim-purnajabatan.store');
+    Route::get('/admin/klaim_purna-jabatan/edit/{id}', [KlaimPurnaJabatanController::class, 'edit']);
+    Route::post('/admin/klaim_purna-jabatan/update/{id}', [KlaimPurnaJabatanController::class, 'update']);
+    Route::get('/admin/klaim_purna-jabatan/delete/{id}', [KlaimPurnaJabatanController::class, 'destroy']);
+    Route::post('/admin/klaim_purna-jabatan/delete-multiple', [KlaimPurnaJabatanController::class, 'deleteMultiple'])->name('pengajuan-klaim.delete-multiple');
+    Route::post('/pengajuan-klaim-purna-jabatan/upload-temp', [KlaimPurnaJabatanController::class, 'uploadTemp'])->name('klaim-pengobatan-upload.temp');
+    Route::post('/pengajuan-klaim-purna-jabatan/delete-temp', [KlaimPurnaJabatanController::class, 'deleteTemp'])->name('klaim-pengobatan-delete.temp');
 
     //Klaim Restitusi Karyawan / Pengajuana Reimburse
     Route::get('/admin/restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
