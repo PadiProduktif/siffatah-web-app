@@ -49,8 +49,34 @@
                         </ul>
                     </div>
                 </div>
+                
             </div>
         </div>
+        <div class="accordion" id="sidebarAccordion2">
+            <!-- Kepersertaan BPJS -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingInsurance2">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance2" aria-expanded="false" aria-controls="collapseInsurance">
+                        Kepesertaan BPJS
+                    </button>
+                </h2>
+                <div
+                    id="collapseInsurance2" 
+                    class="accordion-collapse collapse {{ request()->is('admin/bpjs/bpjs-kesehatan', 'admin/bpjs/bpjs-ketenagakerjaan') ? 'show' : '' }}" 
+                    aria-labelledby="headingInsurance2" 
+                    data-bs-parent="#sidebarAccordion2">
+                    <div class="accordion-body">
+                        <ul class="nav flex-column">
+                            <li><a href="/admin/bpjs/bpjs-kesehatan" class="nav-link {{ request()->is('admin/bpjs/bpjs-kesehatan') ? 'active' : '' }}">Kesehatan</a></li>
+                            <li><a href="/admin/bpjs/bpjs-ketenagakerjaan" class="nav-link {{ request()->is('admin/bpjs/bpjs-ketenagakerjaan') ? 'active' : '' }}">Ketenaga Kerjaan</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        
     @else
         <ul class="nav flex-column">
             <li><a href="/dashboard" class="nav-link {{ Request::is('/dashboard') ? 'active' : '' }}">Dashboard</a></li>

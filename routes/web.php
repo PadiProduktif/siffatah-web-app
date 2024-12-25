@@ -15,6 +15,7 @@ use App\Http\Controllers\PengajuanKlaim\KlaimPengobatanController;
 use App\Http\Controllers\PengajuanKlaim\KlaimPurnaJabatanController;
 use App\Http\Controllers\RestitusiKaryawan\RestitusiKaryawanController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PesertaBPJS\PesertaBPJSKesehatanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -165,6 +166,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
     Route::get('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
+
+    //Kepesertaan BPJS 
+    Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);
     
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
