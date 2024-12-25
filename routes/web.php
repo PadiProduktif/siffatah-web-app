@@ -118,10 +118,13 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //Klaim Lumpsum Kacamata
     Route::get('/admin/klaim_lumpsum-kacamata', [KlaimLumpsumKacamataController::class, 'index']);
-    Route::post('/admin/klaim_lumpsum-kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store']);
-    Route::get('/admin/klaim_lumpsum-kacamata/edit/{id}', [KlaimLumpsumKacamataController::class, 'edit']);
+    Route::post('/admin/klaim_lumpsum-kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store'])->name('pengajuan-klaim-lumpsum-kacamata.store');
+    Route::post('/admin/klaim_lumpsum-kacamata/upload', [KlaimLumpsumKacamataController::class, 'uploadExcel'])->name('pengajuan-klaim-lumpsum-kacamata.upload');
     Route::post('/admin/klaim_lumpsum-kacamata/update/{id}', [KlaimLumpsumKacamataController::class, 'update']);
     Route::get('/admin/klaim_lumpsum-kacamata/delete/{id}', [KlaimLumpsumKacamataController::class, 'destroy']);
+    Route::post('/admin/klaim_lumpsum-kacamata/delete-multiple', [KlaimLumpsumKacamataController::class, 'deleteMultiple'])->name('pengajuan-klaim-lumpsum-kacamata.delete-multiple');
+    Route::post('/pengajuan-klaim-lumpsum-kacamata/upload-temp', [KlaimLumpsumKacamataController::class, 'uploadTemp'])->name('klaim-lumpsum-kacamata-upload.temp');
+    Route::post('/pengajuan-klaim-lumpsum-kacamata/delete-temp', [KlaimLumpsumKacamataController::class, 'deleteTemp'])->name('klaim-lumpsum-kacamata-delete.temp');
 
     //Klaim Lumpsum Kelahiran
     Route::get('/admin/klaim_lumpsum-lahiran', [KlaimLumpsumKelahiranController::class, 'index']);
