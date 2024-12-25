@@ -25,11 +25,24 @@
             max-height: 50px;
             margin: 0 10px;
         }
-        .login-header {
+        /* .login-header {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
+        } */
+        .login-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px; /* Atur jarak bawah */
+            gap: 10px; /* Tambahkan jarak antar elemen */
+        }
+
+        .login-header img {
+            max-height: 90px; /* Perbesar tinggi gambar */
+            max-width: 100%; /* Pastikan gambar tetap responsif */
+            object-fit: contain; /* Jaga proporsi gambar */
         }
         .login-container h1 {
             font-size: 18px;
@@ -70,14 +83,21 @@
         .forgot-password:hover {
             text-decoration: underline;
         }
+        
+        @media (max-width: 768px) {
+            .login-header {
+                flex-direction: column; /* Tumpuk gambar secara vertikal */
+                gap: 10px; /* Kurangi jarak antar elemen */
+            }
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN">
-            <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="Logo Pupuk Kujang">
-            <img src="{{ asset('img/Logo Pupuk Indonesia png 2.png') }}" alt="Logo Pupuk Indonesia">
+            <img src="{{ asset('img/logo-bumn.png') }}" alt="Logo BUMN">
+            <img src="{{ asset('img/logo-pupuk-indonesia.png') }}" alt="Logo Pupuk Indonesia">
+            <img src="{{ asset('img/logo-pupuk-kujang.png') }}" alt="Logo Pupuk Kujang">
         </div>
         <h1>SI FATAH v0.01</h1>
         <p>Sistem Informasi Fasilitas dan Kesehatan</p>
