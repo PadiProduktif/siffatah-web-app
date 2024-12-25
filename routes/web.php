@@ -117,18 +117,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pengajuan-klaim-kematian/delete-temp', [KlaimKematianController::class, 'deleteTemp'])->name('klaim-kematian-delete.temp');
     
     //Klaim Lumpsum Kacamata
-    Route::get('/admin/klaim_lumpsum_kacamata', [KlaimLumpsumKacamataController::class, 'index']);
-    Route::post('/admin/klaim_lumpsum_kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store']);
-    Route::get('/admin/klaim_lumpsum_kacamata/edit/{id}', [KlaimLumpsumKacamataController::class, 'edit']);
-    Route::post('/admin/klaim_lumpsum_kacamata/update/{id}', [KlaimLumpsumKacamataController::class, 'update']);
-    Route::get('/admin/klaim_lumpsum_kacamata/delete/{id}', [KlaimLumpsumKacamataController::class, 'destroy']);
+    Route::get('/admin/klaim_lumpsum-kacamata', [KlaimLumpsumKacamataController::class, 'index']);
+    Route::post('/admin/klaim_lumpsum-kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store']);
+    Route::get('/admin/klaim_lumpsum-kacamata/edit/{id}', [KlaimLumpsumKacamataController::class, 'edit']);
+    Route::post('/admin/klaim_lumpsum-kacamata/update/{id}', [KlaimLumpsumKacamataController::class, 'update']);
+    Route::get('/admin/klaim_lumpsum-kacamata/delete/{id}', [KlaimLumpsumKacamataController::class, 'destroy']);
 
     //Klaim Lumpsum Kelahiran
-    Route::get('/admin/klaim_lumpsum_kelahiran', [KlaimLumpsumKelahiranController::class, 'index']);
-    Route::post('/admin/klaim_lumpsum_kelahiran/tambah', [KlaimLumpsumKelahiranController::class, 'store']);
-    Route::get('/admin/klaim_lumpsum_kelahiran/edit/{id}', [KlaimLumpsumKelahiranController::class, 'edit']);
-    Route::post('/admin/klaim_lumpsum_kelahiran/update/{id}', [KlaimLumpsumKelahiranController::class, 'update']);
-    Route::get('/admin/klaim_lumpsum_kelahiran/delete/{id}', [KlaimLumpsumKelahiranController::class, 'destroy']);
+    Route::get('/admin/klaim_lumpsum-lahiran', [KlaimLumpsumKelahiranController::class, 'index']);
+    Route::post('/admin/klaim_lumpsum-lahiran/tambah', [KlaimLumpsumKelahiranController::class, 'store'])->name('pengajuan-klaim-lumpsum-kelahiran.store');
+    Route::post('/admin/klaim_lumpsum-lahiran/upload', [KlaimLumpsumKelahiranController::class, 'uploadExcel'])->name('pengajuan-klaim-lumpsum-kelahiran.upload');
+    Route::get('/admin/klaim_lumpsum-lahiran/edit/{id}', [KlaimLumpsumKelahiranController::class, 'edit']);
+    Route::post('/admin/klaim_lumpsum-lahiran/update/{id}', [KlaimLumpsumKelahiranController::class, 'update']);
+    Route::get('/admin/klaim_lumpsum-lahiran/delete/{id}', [KlaimLumpsumKelahiranController::class, 'destroy']);
+    Route::post('/admin/klaim_lumpsum-lahiran/delete-multiple', [KlaimLumpsumKelahiranController::class, 'deleteMultiple'])->name('pengajuan-klaim-lumpsum-kelahiran.delete-multiple');
+    Route::post('/pengajuan-klaim-lumpsum-kelahiran/upload-temp', [KlaimLumpsumKelahiranController::class, 'uploadTemp'])->name('klaim-lumpsum-kelahiran-upload.temp');
+    Route::post('/pengajuan-klaim-lumpsum-kelahiran/delete-temp', [KlaimLumpsumKelahiranController::class, 'deleteTemp'])->name('klaim-lumpsum-kelahiran-delete.temp');
 
     //Klaim Pengobatan
     Route::get('/admin/klaim_pengobatan', [KlaimPengobatanController::class, 'index']);
