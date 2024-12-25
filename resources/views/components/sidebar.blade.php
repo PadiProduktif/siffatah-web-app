@@ -35,7 +35,13 @@
                 </h2>
                 <div
                     id="collapseInsurance" 
-                    class="accordion-collapse collapse {{ request()->is('admin/klaim_pengobatan', 'admin/klaim_kecelakaan', 'admin/klaim_kematian', 'admin/klaim_purna-jabatan', 'admin/klaim_lumpsum-kacamata', 'admin/klaim_lumpsum-lahiran') ? 'show' : '' }}" 
+                    class="accordion-collapse collapse {{ request()->is(
+                        'admin/klaim_pengobatan',
+                        'admin/klaim_kecelakaan',
+                        'admin/klaim_kematian',
+                        'admin/klaim_purna-jabatan',
+                        'admin/klaim_lumpsum-kacamata',
+                        'admin/klaim_lumpsum-lahiran') ? 'show' : '' }}" 
                     aria-labelledby="headingInsurance" 
                     data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body">
@@ -46,6 +52,39 @@
                             <li><a href="/admin/klaim_purna-jabatan" class="nav-link {{ request()->is('admin/klaim_purna-jabatan') ? 'active' : '' }}">Purna Jabatan</a></li>
                             <li><a href="/admin/klaim_lumpsum-kacamata" class="nav-link {{ request()->is('admin/klaim_lumpsum-kacamata') ? 'active' : '' }}">Lumpsum Kacamata</a></li>
                             <li><a href="/admin/klaim_lumpsum-lahiran" class="nav-link {{ request()->is('admin/klaim_lumpsum-lahiran') ? 'active' : '' }}">Lumpsum Lahiran</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Perlengkapan Kerja -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPerlengkapanKerja">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerlengkapanKerja" aria-expanded="false" aria-controls="collapsePerlengkapanKerja">
+                        Kelengkapan Kerja
+                    </button>
+                </h2>
+                <div
+                    id="collapsePerlengkapanKerja" 
+                    class="accordion-collapse collapse {{ request()->is(
+                        'admin/wearpack',
+                        'admin/seragam-dinas-harian',
+                        'admin/seragam-olahraga',
+                        'admin/jaket-shift',
+                        'admin/jaket-kasual',
+                        'admin/sepatu-safety',
+                        'admin/sepatu-kantor') ? 'show' : '' }}" 
+                    aria-labelledby="headingPerlengkapanKerja" 
+                    data-bs-parent="#sidebarAccordion">
+                    <div class="accordion-body">
+                        <ul class="nav flex-column">
+                            <li><a href="/admin/wearpack" class="nav-link {{ request()->is('admin/wearpack') ? 'active' : '' }}">Wearpack</a></li>
+                            <li><a href="/admin/seragam-dinas-harian" class="nav-link {{ request()->is('admin/seragam-dinas-harian') ? 'active' : '' }}">Seragam Dinas Harian</a></li>
+                            <li><a href="/admin/seragam-olahraga" class="nav-link {{ request()->is('admin/seragam-olahraga') ? 'active' : '' }}">Seragam Olahraga</a></li>
+                            <li><a href="/admin/sepatu-safety" class="nav-link {{ request()->is('admin/sepatu-safety') ? 'active' : '' }}">Sepatu Safety</a></li>
+                            <li><a href="/admin/sepatu-kantor" class="nav-link {{ request()->is('admin/sepatu-kantor') ? 'active' : '' }}">Sepatu Kantor</a></li>
+                            <li><a href="/admin/jaket-shift" class="nav-link {{ request()->is('admin/jaket-shift') ? 'active' : '' }}">Jaket Shift</a></li>
+                            <li><a href="/admin/jaket-kasual" class="nav-link {{ request()->is('admin/jaket-kasual') ? 'active' : '' }}">Jaket Casual</a></li>
                         </ul>
                     </div>
                 </div>
@@ -69,7 +108,13 @@
                 </h2>
                 <div
                     id="collapseInsurance" 
-                    class="accordion-collapse collapse {{ request()->is('/klaim_pengobatan', '/klaim_kecelakaan', '/klaim_kematian', '/klaim_purna-jabatan', '/klaim_lumpsum-kacamata', '/klaim_lumpsum-lahiran') ? 'show' : '' }}" 
+                    class="accordion-collapse collapse {{ request()->is(
+                        '/klaim_pengobatan',
+                        '/klaim_kecelakaan',
+                        '/klaim_kematian',
+                        '/klaim_purna-jabatan',
+                        '/klaim_lumpsum-kacamata',
+                        '/klaim_lumpsum-lahiran') ? 'show' : '' }}" 
                     aria-labelledby="headingInsurance" 
                     data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body">
@@ -88,6 +133,7 @@
     @endif
 
     <ul class="nav flex-column">
+        <li><a href="/kepesertaan-anggota" class="nav-link {{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li>
         <li><a href="/set-profil" class="nav-link {{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
         <li><a href="/logout" class="nav-link text-danger">Logout</a></li>
     </ul>
