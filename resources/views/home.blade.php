@@ -2,7 +2,7 @@
 @section('title', 'Dashboard')
 @section('content')
 
-    <!-- Stats -->
+    {{-- <!-- Stats -->
     <div class="row g-3 mb-4">
         <div class="col-md">
             <div class="stat bg-light text-center p-3 rounded shadow">
@@ -48,10 +48,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('monthlyStats').getContext('2d');
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-</script>
+</script> --}}
 @endpush
 
 @endsection
