@@ -47,10 +47,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
     Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
-    // Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
-
-
-
 
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
@@ -165,15 +161,16 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
+    Route::get('set-profil', function () {
+        return view('extras/set-profil');
+    });
+    
     //Logout
     Route::get('/logout', [AuthController::class, 'logout']);
 });
 
 
 
-    Route::get('set-profil', function () {
-        return view('extras/set-profil');
-    });
 // });
 
 //point
