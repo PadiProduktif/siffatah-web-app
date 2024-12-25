@@ -12,17 +12,40 @@
             background-color: #9CBESD !important;
             color: white;
         }
+    
+        .login-header {
+            height: 120px; /* Atur tinggi sesuai kebutuhan */
+            display: flex; /* Untuk menjaga layout fleksibel */
+            align-items: center; /* Tengah vertikal */
+            gap: 15px; /* Jarak antar gambar */
+        }
+    
+        .login-header img {
+            max-height: 80px; /* Maksimalkan tinggi gambar agar seragam */
+            width: auto; /* Pertahankan proporsi gambar */
+        }
+        .navbar-logo {
+            font-size: 1.8rem; /* Membuat teks lebih besar */
+            font-weight: bold; /* Membuat teks tebal */
+            font-family: 'Arial', sans-serif; /* Gunakan font yang menarik */
+            color: white; /* Warna teks */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* Efek bayangan teks */
+            letter-spacing: 1px; /* Jarak antar huruf */
+            text-transform: uppercase; /* Mengubah semua teks menjadi huruf besar */
+        }
     </style>
 </head>
 <body>
     <header class="p-3" style="background-color: #F59F18; color: white; position: relative; overflow: hidden;">
     <!-- <header class="bg-orange-600 p-3"> -->
         <div class="container d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-                <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="PKC Logo" width="100">
-                <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN" width="150">
+            <div class="navbar-logo">SiFattah</div>
+            {{-- <div class="d-flex align-items-center login-header">
+                <img src="{{ asset('img/logo-bumn-transparant.png') }}" alt="Logo BUMN">
+                <img src="{{ asset('img/logo-pupuk-indonesia-transparant.png') }}" alt="Logo BUMN">
+                <img src="{{ asset('img/logo-pupuk-kujang-transparant.png') }}" alt="PKC Logo">
                 <!-- <h1 class="ms-3 text-white fw-bold fs-1">Si Fatah</h1> -->
-            </div>
+            </div> --}}
             <!-- <a href="{{ route('login') }}" class="btn btn-warning text-white fw-semibold">Login</a> -->
             <a href="{{ route('login') }}" class="btn text-black fw-semibold" style="background-color: #FFE492;">Login</a>
         </div>
@@ -152,10 +175,9 @@
                 </div>
                 <!-- Middle Section -->
                 <div class="col-md-4 text-center">
-                    <!-- <img src="{{ asset('img/logo-bumn.png') }}" alt="BUMN Logo" width="80">
-                    <img src="{{ asset('img/logo-pupuk-indonesia.png') }}" alt="Pupuk Logo" width="80"> -->
-                    <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="PKC Logo" width="100">
-                    <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN" width="150">
+                    <img src="{{ asset('img/logo-bumn-transparant.png') }}" alt="PKC Logo" width="100">
+                    <img src="{{ asset('img/logo-pupuk-indonesia-transparant.png') }}" alt="Logo BUMN" width="100">
+                    <img src="{{ asset('img/logo-pupuk-kujang-transparant.png') }}" alt="Logo BUMN" width="100">
                 </div>
                 <!-- Right Section -->
                 <div class="col-md-4">
