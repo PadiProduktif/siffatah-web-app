@@ -1,10 +1,12 @@
 <div class="sidebar bg-light p-3">
     <!-- Header Sidebar -->
     <div class="d-flex align-items-center justify-content-between">
-        <img src="{{ asset('img/Logo PT Pupuk Kujang png 1.png') }}" alt="PKC Logo" 
-            class="img-fluid" style="max-width: 70px; max-height: 70px; object-fit: contain;">
-        <img src="{{ asset('img/Logo BUMN png 3.png') }}" alt="Logo BUMN" 
+        <img src="{{ asset('img/logo-bumn.png') }}" alt="Logo BUMN" 
             class="img-fluid" style="max-width: 100px; max-height: 70px; object-fit: contain;">
+        <img src="{{ asset('img/logo-pupuk-indonesia.png') }}" alt="Logo BUMN" 
+            class="img-fluid" style="max-width: 100px; max-height: 70px; object-fit: contain;">
+        <img src="{{ asset('img/logo-pupuk-kujang.png') }}" alt="PKC Logo" 
+            class="img-fluid" style="max-width: 70px; max-height: 70px; object-fit: contain;">
     </div>
     
     <h1 class="fs-5 mb-1">SI FATAH <span class="text-muted" style="font-size: 12px;">v.01</span></h1>
