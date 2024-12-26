@@ -34,14 +34,15 @@
                 <th><input type="checkbox" id="selectAll"></th>
 
                 <th>ID Badge</th>
+                <th>Nama Lengkap</th>
+                <th>NIK</th>
+                <th>Tanggal Lahir</th>
+                <th>Faskes Tingkat 1</th>
+                <th>Kelas Rawat</th>
+                <th>Alamat</th>
                 <th>Nama Karyawan</th>
-                <th>Unit Kerja</th>
-                <th>Asuransi</th>
-                <th>Rumah Sakit/Klinik</th>
-                <th>Tanggal Kematian</th>
-                <th>Ahli Waris</th>
-                <th>Hubungan</th>
-                <th>No Polis</th>
+                <th>Hubungan Keluarga</th>
+                <th>No BPJS</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -49,50 +50,58 @@
             
 
             @foreach($pesertaBPJS as $data)
-            <tr class="detailRow"
-                data-id="{{ $data->id_klaim_kematian }}" 
-                data-id_badge="{{ $data->id_badge }}" 
-                data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                data-unit_kerja="{{ $data->unit_kerja }}"
-                data-asuransi="{{ $data->nama_asuransi }}"
-                data-rumah_sakit="{{ $data->rs_klinik }}"
-                data-tanggal_wafat="{{ $data->tanggal_wafat }}"
-                data-ahli_waris="{{ $data->nama_keluarga }}"
-                data-hubungan="{{ $data->hubungan_keluarga }}"
-                data-no_polis="{{ $data->no_polis }}"
-                data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
-                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_klaim_kematian }}"></td>
-                <td>{{ $data->id_badge }}</td>
-                <td>{{ $data->nama_karyawan }}</td>
-                <td>{{ $data->unit_kerja }}</td>
-                <td>{{ $data->nama_asuransi }}</td>
-                <td>{{ $data->rs_klinik }}</td>
-                @php
+            @php
                         setlocale(LC_TIME, 'id_ID'); // Set ke Bahasa Indonesia
-                        $tanggal_formatted = strftime('%d %B %Y', strtotime($data->tanggal_wafat));
+                        if ($data->tgl_lahir == null) {
+                            $tanggal_formatted = "-";
+                        }else {
+                            $tanggal_formatted = strftime('%d %B %Y', strtotime($data->tgl_lahir));    # code...
+                        }
+                        
                 @endphp
+            <tr class="detailRow"
+                data-id="{{ $data->id_peserta_bpjs_kesehatan }}" 
+                data-id_badge="{{ $data->id_badge }}" 
+                data-nama="{{ $data->nama }}" 
+                data-nik="{{ $data->nik }}"
+                data-tgl_lahir="{{ $tanggal_formatted }}"
+                data-faskes_tingkat_1="{{ $data->faskes_tingkat_1 }}"
+                data-kelas_rawat="{{ $data->kelas_rawat }}"
+                data-alamat="{{ $data->alamat }}"
+                data-nama_karyawan="{{ $data->nama_karyawan }}"
+                data-hubungan_keluarga="{{ $data->hubungan_keluarga }}"
+                data-no_bpjs="{{ $data->no_bpjs }}"
+                data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
+                <td><input type="checkbox" class="rowCheckbox" value="{{ $data->id_peserta_bpjs_kesehatan }}"></td>
+                <td>{{ $data->id_badge }}</td>
+                <td>{{ $data->nama }}</td>
+                <td>{{ $data->nik }}</td>
                 <td>{{ $tanggal_formatted }}</td>
-                <td>{{ $data->nama_keluarga }}</td>
+                <td>{{ $data->faskes_tingkat_1 }}</td>
+                <td>{{ $data->kelas_rawat }}</td>
+                <td>{{ $data->alamat }}</td>
+                <td>{{ $data->nama_karyawan }}</td>
                 <td>{{ $data->hubungan_keluarga }}</td>
-                <td>{{ $data->no_polis }}</td>
+                <td>{{ $data->no_bpjs }}</td>
                 <td>
 
                     <button type="button" class="btn btn-warning btn-sm editBtn"
-                        data-id="{{ $data->id_klaim_kematian }}" 
-                        data-id_badge="{{ $data->id_badge }}" 
-                        data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                        data-unit_kerja="{{ $data->unit_kerja }}"
-                        data-asuransi="{{ $data->nama_asuransi }}"
-                        data-rumah_sakit="{{ $data->rs_klinik }}"
-                        data-tanggal_wafat="{{ $data->tanggal_wafat }}"
-                        data-ahli_waris="{{ $data->nama_keluarga }}"
-                        data-hubungan="{{ $data->hubungan_keluarga }}"
-                        data-no_polis="{{ $data->no_polis }}"
-                        data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
+                            data-id="{{ $data->id_peserta_bpjs_kesehatan }}" 
+                            data-id_badge="{{ $data->id_badge }}" 
+                            data-nama="{{ $data->nama }}" 
+                            data-nik="{{ $data->nik }}"
+                            data-tgl_lahir="{{ $data->tgl_lahir }}"
+                            data-faskes_tingkat_1="{{ $data->faskes_tingkat_1 }}"
+                            data-kelas_rawat="{{ $data->kelas_rawat }}"
+                            data-alamat="{{ $data->alamat }}"
+                            data-nama_karyawan="{{ $data->nama_karyawan }}"
+                            data-hubungan_keluarga="{{ $data->hubungan_keluarga }}"
+                            data-no_bpjs="{{ $data->no_bpjs }}"
+                            data-file_url="{{ $data->file_url }}"> <!-- Tambahkan file_url -->
                         Edit
                     </button>
 
-                    <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $data->id_klaim_kematian }}">Hapus</button>
+                    <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $data->id_peserta_bpjs_kesehatan }}">Hapus</button>
                     
                 </td>
             </tr>
@@ -111,14 +120,15 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>ID Badge:</strong> <span id="detailIDBadge"></span></p>
+                    <p><strong>Nama Lengkap:</strong> <span id="detailNama"></span></p>
+                    <p><strong>NIK:</strong> <span id="detailNIK"></span></p>
+                    <p><strong>Tanggal Lahir:</strong> <span id="detailTglLahir"></span></p>
+                    <p><strong>Faskes Tingkat 1:</strong> <span id="detailFaskesTingkat1"></span></p>
+                    <p><strong>Kelas Rawat:</strong> <span id="detailKelasRawat"></span></p>
+                    <p><strong>Alamat:</strong> <span id="detailAlamat"></span></p>
                     <p><strong>Nama Karyawan:</strong> <span id="detailNamaKaryawan"></span></p>
-                    <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
-                    <p><strong>Nama Asuransi:</strong> <span id="detailNamaAsuransi"></span></p>
-                    <p><strong>Rumah Sakit:</strong> <span id="detailRumahSakit"></span></p>
-                    <p><strong>Tanggal Wafat:</strong> <span id="detailTanggalWafat"></span></p>
-                    <p><strong>Ahli Waris:</strong> <span id="detailNamaKeluarga"></span></p>
-                    <p><strong>Hubungan:</strong> <span id="detailHubungan"></span></p>
-                    <p><strong>No Polis:</strong> <span id="detailNoPolis"></span></p>
+                    <p><strong>Hubungan Keluarga:</strong> <span id="detailHubunganKeluarga"></span></p>
+                    <p><strong>No BPJS:</strong> <span id="detailNoBPJS"></span></p>
                     <p><strong>Attachments:</strong></p>
                     <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
                 </div>
@@ -136,7 +146,7 @@
                     <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="dataForm" action="{{ route('pengajuan-klaim-kematian.store') }}" method="POST" enctype="multipart/form-data" >
+                <form id="dataForm" action="{{ route('bpjs-kesehatan.store') }}" method="POST" enctype="multipart/form-data" >
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -147,37 +157,43 @@
                             </div>
 
                             <div class="col-md-5">
-                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan">
+                                <label for="gelar_depan" class="form-label">Nama lengkap</label>
+                                <input type="text" class="form-control" id="nama" name="nama">
                             </div>
                             <div class="col-md-5">
-                                <label for="nama_karyawan" class="form-label">Unit Kerja</label>
-                                <input type="text" class="form-control" id="unit_kerja" name="unit_kerja" required>
+                                <label for="nama_karyawan" class="form-label">NIK</label>
+                                <input type="text" class="form-control" id="nik" name="nik" >
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Asuransi</label>
-                                <input type="text" class="form-control" id="nama_asuransi" name="nama_asuransi">
+                                <label for="gelar_belakang" class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir">
                             </div>
                             <div class="col-md-5">
-                                <label for="gelar_belakang" class="form-label">Rumah Sakit / Klinik</label>
-                                <input type="text" class="form-control" id="rs_klinik" name="rs_klinik">
+                                <label for="gelar_belakang" class="form-label">Faskes Tingkat 1</label>
+                                <input type="text" class="form-control" id="faskes_tingkat_1" name="faskes_tingkat_1">
                             </div>
                             <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Tanggal Wafat</label>
-                                <input type="date" class="form-control" id="tanggal_wafat" name="tanggal_wafat">
+                                <label for="gelar_belakang" class="form-label">Kelas Rawat</label>
+                                <input type="text" class="form-control" id="kelas_rawat" name="kelas_rawat">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Nama Karyawan</label>
+                                <input type="text" id="nama_karyawan" class="form-control" name="nama_karyawan">
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Ahli Waris</label>
-                                <input type="text" id="nama_keluarga" class="form-control" name="nama_keluarga">
+                                <label for="alamat" class="form-label">Hubungan Keluarga</label>
+                                <input type="text" class="form-control" id="hubungan_keluarga" name="hubungan_keluarga"  required></input>
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Hubungan Keluarga</label>
-                                <input type="text" id="hubungan_keluarga" class="form-control" name="hubungan_keluarga">
+                                <label for="alamat" class="form-label">No BPJS</label>
+                                <input class="form-control" id="no_bpjs" name="no_bpjs"  required></input>
                             </div>
-                            <div class="col-md-4">
-                                <label for="alamat" class="form-label">No Polis</label>
-                                <input class="form-control" id="no_polis" name="no_polis" rows="3" required></input>
+                            <div class="col-12">
+                                <label for="alamat" class="form-label">Alamat</label>
+                                <textarea class="form-control" id="alamat" name="alamat" rows="2" required></textarea>
                             </div>
+                            
                             <div class="col-md-12">
                                 <div id="attachmentDropzone" class="dropzone">
                                     <div class="dz-message">Drag & Drop your files here or click to upload</div>
@@ -218,37 +234,43 @@
                             </div>
 
                             <div class="col-md-5">
-                                <label for="gelar_depan" class="form-label">Nama Karyawan</label>
-                                <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan">
+                                <label for="gelar_depan" class="form-label">Nama lengkap</label>
+                                <input type="text" class="form-control" id="editNama" name="nama">
                             </div>
                             <div class="col-md-5">
-                                <label for="nama_karyawan" class="form-label">Unit Kerja</label>
-                                <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja" required>
+                                <label for="nama_karyawan" class="form-label">NIK</label>
+                                <input type="text" class="form-control" id="editNIK" name="nik" >
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Asuransi</label>
-                                <input type="text" class="form-control" id="editNamaAsuransi" name="nama_asuransi">
+                                <label for="gelar_belakang" class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="editTglLahir" name="tgl_lahir">
                             </div>
                             <div class="col-md-5">
-                                <label for="gelar_belakang" class="form-label">Rumah Sakit / Klinik</label>
-                                <input type="text" class="form-control" id="editRumahSakit" name="rs_klinik">
+                                <label for="gelar_belakang" class="form-label">Faskes Tingkat 1</label>
+                                <input type="text" class="form-control" id="editFaskesTingkat1" name="faskes_tingkat_1">
                             </div>
                             <div class="col-md-3">
-                                <label for="gelar_belakang" class="form-label">Tanggal Wafat</label>
-                                <input type="date" class="form-control" id="editTanggalWafat" name="tanggal_wafat">
+                                <label for="gelar_belakang" class="form-label">Kelas Rawat</label>
+                                <input type="text" class="form-control" id="editKelasRawat" name="kelas_rawat">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="gelar_belakang" class="form-label">Nama Karyawan</label>
+                                <input type="text" id="editNamaKaryawan" class="form-control" name="nama_karyawan">
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Nama Keluarga</label>
-                                <input type="text" id="editAhliWaris" class="form-control" name="nama_keluarga">
+                                <label for="alamat" class="form-label">Hubungan Keluarga</label>
+                                <input type="text" class="form-control" id="editHubunganKeluarga" name="hubungan_keluarga" ></input>
                             </div>
                             <div class="col-md-4">
-                                <label for="gelar_belakang" class="form-label">Hubungan Keluarga</label>
-                                <input type="text" id="editHubungan" class="form-control" name="hubungan_keluarga">
+                                <label for="alamat" class="form-label">No BPJS</label>
+                                <input class="form-control" id="editNoBPJS" name="no_bpjs"  required></input>
                             </div>
-                            <div class="col-4">
-                                <label for="no_polis" class="form-label">No Polis</label>
-                                <input class="form-control" id="editNoPolis" name="no_polis" rows="3" required></input>
+                            <div class="col-12">
+                                <label for="alamat" class="form-label">Alamat</label>
+                                <textarea class="form-control" id="editAlamat" name="alamat" rows="2" ></textarea>
                             </div>
+                            
                             <div class="col-md-12">
                                 <label for="dropzone" class="form-label">Attachment</label>
                                 <div id="editAttachmentDropzone" class="dropzone">
@@ -280,7 +302,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                    <form action="{{ route('pengajuan-klaim-kematian.upload') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('bpjs-kesehatan.upload') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
                             <label for="file_excel" class="form-label">Upload File Excel</label>
@@ -360,14 +382,15 @@
 
         // Set data ke dalam modal
         $('#detailIDBadge').text(rowData.id_badge || '-');
+        $('#detailNama').text(rowData.nama || '-');
+        $('#detailNIK').text(rowData.nik || '-');
+        $('#detailTglLahir').text(rowData.tgl_lahir || '-');
+        $('#detailFaskesTingkat1').text(rowData.faskes_tingkat_1 || '-');
+        $('#detailKelasRawat').text(rowData.kelas_rawat || '-');
+        $('#detailAlamat').text(rowData.alamat || '-');
         $('#detailNamaKaryawan').text(rowData.nama_karyawan || '-');
-        $('#detailUnitKerja').text(rowData.unit_kerja || '-');
-        $('#detailNamaAsuransi').text(rowData.asuransi || '-');
-        $('#detailRumahSakit').text(rowData.rumah_sakit || '-');
-        $('#detailTanggalWafat').text(rowData.tanggal_wafat || '-');
-        $('#detailNamaKeluarga').text(rowData.ahli_waris || '-');
-        $('#detailHubungan').text(rowData.hubungan || '-');
-        $('#detailNoPolis').text(rowData.no_polis || '-');
+        $('#detailHubunganKeluarga').text(rowData.hubungan_keluarga || '-');
+        $('#detailNoBPJS').text(rowData.no_bpjs || '-');
 
         // Parsing dan menampilkan file_url jika ada
         let attachmentHtml = 'Tidak ada file';
@@ -392,7 +415,7 @@
             if (files.length > 0) {
                 attachmentHtml = files.map(file => {
                     const fileExtension = file.split('.').pop().toLowerCase();
-                    const filePath = `/uploads/PengajuanKlaim/klaim_Kematian/${file}`;
+                    const filePath = `/uploads/PesertaBPJS/BPJS_Kesehatan/${file}`;
 
                     // Periksa ekstensi file
                     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
@@ -426,48 +449,33 @@
         $('#tableAdmin').on('click', '.editBtn', function (event) {
             event.stopPropagation(); // Hentikan event klik dari propagasi ke elemen parent (baris)
             
-            // Ambil data dari atribut tombol
-            // const id = $(this).data('id');
-            // const id_member = $(this).data('id_member');
-            // const id_badge = $(this).data('id_badge');
-            // const nama_karyawan = $(this).data('nama_karyawan');
-            // const unit_kerja = $(this).data('unit_kerja');
-            // const nama_pasien = $(this).data('nama_pasien');
-            // const deskripsi = $(this).data('deskripsi');
-            // const tanggal_pengajuan = $(this).data('tanggal_pengajuan');
-            // const jumlah_ekses = $(this).data('jumlah_ekses');
+
             const id = $(this).data('id');
             const id_badge = $(this).data('id_badge') || '-';
+            const nama = $(this).data('nama') || '-';
+            const nik = $(this).data('nik') || '-';
+            const tgl_lahir = $(this).data('tgl_lahir') || '-';
+            const faskes_tingkat_1 = $(this).data('faskes_tingkat_1') || '-';
+            const kelas_rawat = $(this).data('kelas_rawat') || '-';
+            const alamat = $(this).data('alamat') || '-';
             const nama_karyawan = $(this).data('nama_karyawan') || '-';
-            const unit_kerja = $(this).data('unit_kerja') || '-';
-            const nama_asuransi = $(this).data('asuransi') || '-';
-            const rumah_sakit = $(this).data('rumah_sakit') || '-';
-            const tanggal_wafat = $(this).data('tanggal_wafat') || '-';
-            const ahli_waris = $(this).data('ahli_waris') || '-';
-            const hubungan = $(this).data('hubungan') || '-';
-            const no_polis = $(this).data('no_polis') || '-';
+            const hubungan_keluarga = $(this).data('hubungan_keluarga') || '-';
+            const no_bpjs = $(this).data('no_bpjs') || '-';
 
-            // Isi data di dalam form modal
-            // $('#editIdMember').val(id_member);
-            // $('#editIdBadge').val(id_badge);
-            // $('#editNamaKaryawan').val(nama_karyawan);
-            // $('#editUnitKerja').val(unit_kerja);
-            // $('#editNamaPasien').val(nama_pasien);
-            // $('#editDeskripsi').val(deskripsi);
-            // $('#editTanggalPengajuan').val(tanggal_pengajuan);
-            // $('#editJumlahPengajuan').val(jumlah_ekses);
+
             $('#editIdBadge').val(id_badge || '-');
+            $('#editNama').val(nama || '-');
+            $('#editNIK').val(nik || '-');
+            $('#editTglLahir').val(tgl_lahir || '-');
+            $('#editFaskesTingkat1').val(faskes_tingkat_1 || '-');
+            $('#editKelasRawat').val(kelas_rawat || '-');
+            $('#editAlamat').val(alamat || '-');
             $('#editNamaKaryawan').val(nama_karyawan || '-');
-            $('#editUnitKerja').val(unit_kerja || '-');
-            $('#editNamaAsuransi').val(nama_asuransi || '-');
-            $('#editRumahSakit').val(rumah_sakit || '-');
-            $('#editTanggalWafat').val(tanggal_wafat || '-');
-            $('#editAhliWaris').val(ahli_waris || '-');
-            $('#editHubungan').val(hubungan || '-');
-            $('#editNoPolis').val(no_polis || '-');
+            $('#editHubunganKeluarga').val(hubungan_keluarga || '-');
+            $('#editNoBPJS').val(no_bpjs || '-');
 
             // Set action form update
-            $('#editForm').attr('action', '/admin/klaim_kematian/update/' + id);
+            $('#editForm').attr('action', '/admin/bpjs/bpjs-kesehatan/update/' + id);
 
             // Tampilkan modal edit
             $('#modalEditData').modal('show');
@@ -494,7 +502,7 @@
             if (result.isConfirmed) {
                 // Jika dikonfirmasi, kirim permintaan hapus ke server
                 $.ajax({
-                url: '/admin/klaim_kematian/delete/' + id,
+                url: '/admin/bpjs/bpjs-kesehatan/delete/' + id,
                 type: 'GET', // Ubah dari DELETE ke GET
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
@@ -552,7 +560,7 @@
                     if (result.isConfirmed) {
                         // Kirim permintaan hapus melalui AJAX
                         $.ajax({
-                            url: '/admin/klaim_kematian/delete-multiple', // Endpoint untuk hapus data
+                            url: '/admin/bpjs/bpjs-kesehatan/delete-multiple', // Endpoint untuk hapus data
                             type: 'POST',
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content'),
@@ -579,7 +587,7 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         if (document.querySelector('#attachmentDropzone')) {
             const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/pengajuan-klaim-kematian/upload-temp", // Endpoint sementara untuk upload
+                url: "/bpjs-kesehatan/upload-temp", // Endpoint sementara untuk upload
                 paramName: "file",
                 headers: {
                     'X-CSRF-TOKEN': token
@@ -633,7 +641,7 @@
 
                             // Kirim AJAX request untuk menghapus file di server
                             $.ajax({
-                                url: "/pengajuan-klaim-kematian/delete-temp",
+                                url: "/bpjs-kesehatan/delete-temp",
                                 type: "POST",
                                 data: {
                                     _token: token,
@@ -666,7 +674,7 @@
 
         // Konfigurasi Dropzone
         let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/pengajuan-klaim-kematian/upload-temp", // Endpoint sementara untuk upload file
+            url: "/bpjs-kesehatan/upload-temp", // Endpoint sementara untuk upload file
             paramName: "file",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -704,7 +712,7 @@
                 if (file.serverFileName) {
                     // Jika file sudah di-upload (file baru), kirim request untuk hapus file
                     $.ajax({
-                        url: "/pengajuan-klaim-kematian/delete-temp",
+                        url: "/bpjs-kesehatan/delete-temp",
                         method: "POST",
                         data: {
                             _token: $('meta[name="csrf-token"]').attr('content'),
@@ -755,7 +763,7 @@
                     existingFiles.forEach(file => {
                         let mockFile = { name: file, size: 12345, serverFileName: file };
                         this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Kematian/${file}`);
+                        this.emit("thumbnail", mockFile, `/uploads/PesertaBPJS/BPJS_Kesehatan/${file}`);
                         this.emit("complete", mockFile);
                     });
                 } else {
@@ -811,7 +819,7 @@
                 }
 
                     files.forEach((file, index) => {
-                        const filePath = `/uploads/PengajuanKlaim/klaim_Kematian/${file}`;
+                        const filePath = `/uploads/PesertaBPJS/BPJS_Kesehatan/${file}`;
                         const fileExtension = file.split('.').pop().toLowerCase();
 
                         // Tampilkan file lama sebagai gambar atau link
