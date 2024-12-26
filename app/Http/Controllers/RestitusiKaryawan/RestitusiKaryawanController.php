@@ -41,7 +41,7 @@ class RestitusiKaryawanController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                // 'id_badge' => 'required|string|max:255',
+                'id_badge' => 'required|string|max:255',
                 // 'nama_karyawan' => 'required|string|max:255',
                 // 'jabatan_karyawan' => 'nullable|string|max:255',
                 // 'nama_anggota_keluarga' => 'nullable|string|max:255',
@@ -67,7 +67,7 @@ class RestitusiKaryawanController extends Controller
                 // 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'deskripsi' => $validatedData['deskripsi'],
                 // 'nominal' => $validatedData['nominal'],
-                'nominal' => 0,
+                'nominal' => $validatedData['nominal'],
                 'rumah_sakit' => $validatedData['rumah_sakit'],
                 'urgensi' => $validatedData['urgensi'],
                 'no_surat_rs' => $validatedData['no_surat_rs'],
@@ -196,17 +196,11 @@ class RestitusiKaryawanController extends Controller
     }
     
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         try {
@@ -228,11 +222,7 @@ class RestitusiKaryawanController extends Controller
             ], 404);
         }
     }
-    
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         // Validate the request data
@@ -303,52 +293,62 @@ class RestitusiKaryawanController extends Controller
             ], 500);
         }
     }
-    
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {
             // Find the restitusi by ID or throw a 404 if not found
             $restitusi = RestitusiKaryawan::findOrFail($id);
-    
-            // Delete associated file if it exists
-            if ($restitusi->url_file) {
-                $filePath = public_path("uploads/Restitusi_Karyawan/{$restitusi->url_file}");
-                if (file_exists($filePath)) {
-                    unlink($filePath); // Delete the file
-                }
-            }
-    
+
+            // Simpan nomor surat sebelum dihapus
+            $noSurat = $restitusi->no_surat_rs;
+
             // Delete the restitusi record from the database
             $restitusi->delete();
-    
-            // Return a success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully deleted',
-            ], 200);
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if restitusi is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-    
+
+            // Set flash message with nomor surat
+            return redirect('/admin/restitusi_karyawan')->with('success', "Data dengan No. Surat $noSurat berhasil dihapus.");
         } catch (\Exception $e) {
             // Log error for debugging
             Log::error("Error deleting data: " . $e->getMessage());
     
-            // Return a 500 response for any other errors
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete data',
-                'error' => $e->getMessage()
-            ], 500);
+            // Set flash message for error
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
     
+    
+    public function approval_dr(Request $request, $id)
+    {
+        try {
+            // Temukan data restitusi karyawan berdasarkan ID
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+            // dd($restitusi);
+            // Lakukan logika persetujuan DR
+            $restitusi->status_pengajuan = '2';
+            $restitusi->save();
+
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+
+    public function approval_vp(Request $request, $id)
+    {
+        try {
+            // Temukan data restitusi karyawan berdasarkan ID
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+            // dd($restitusi);
+            // Lakukan logika persetujuan DR
+            $restitusi->status_pengajuan = '3';
+            $restitusi->save();
+
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
 }

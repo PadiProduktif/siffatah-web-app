@@ -15,24 +15,21 @@
                     </button>
                 </span>
             </div>
-
         </div>
-        <div class="card-body">
-
-            
+        <div class="card-body table-responsive">
             <table id="klaimTable" class="table">
                 <thead class="table-light">
                     <tr class="text-center">
-                        <th>NO</th>
-                        <th>Badge</th>
-                        <th>Karyawan</th>
-                        <th>Deskripsi</th>
-                        <th>Nomor Surat</th>
-                        <th>Tanggal Surat</th>
-                        <th>Nominal</th>
-                        <th>Urgency</th>
-                        <th>Status</th>
-                        <th>Opt</th>
+                        <th class="align-middle">NO</th>
+                        <th class="align-middle">Badge</th>
+                        <th class="align-middle">Karyawan</th>
+                        <th class="align-middle">Deskripsi</th>
+                        <th class="align-middle">Nomor</th>
+                        <th class="align-middle">Tanggal</th>
+                        <th class="align-middle">Nominal</th>
+                        <th class="align-middle">Urgensi</th>
+                        <th class="align-middle">Status</th>
+                        <th class="align-middle">Opt</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,88 +38,108 @@
                             <td>{{ $key1+1 }}</td>
                             <td>{{ $data1->id_badge }}</td>
                             <td class="text-start">{{ $data1->nama_karyawan }}</td>
-                            <td class="text-start">{{ $data1->deskripsi }}</td>
+                            <td class="text-start">{{ $data1->keterangan_pengajuan }}, {{ $data1->deskripsi }}</td>
                             <td>{{ $data1->no_surat_rs }}</td>
                             <td>{{ format_date($data1->tanggal_pengobatan) }}</td>
                             <td class="text-end">{{ format_currency($data1->nominal) }}</td>
                             <td>{{ $data1->urgensi }}</td>
                             <td>
                                 @if ($data1->status_pengajuan == 1)
-                                    <span class="badge bg-warning">Menunggu</span>
+                                    <span class="badge bg-secondary">Menunggu</span>
                                 @elseif ($data1->status_pengajuan == 2)
-                                    <span class="badge bg-success">Diverifikasi</span>
+                                    <span class="badge bg-warning">Verifikasi DR</span>
                                 @elseif ($data1->status_pengajuan == 3)
-                                    <span class="badge bg-danger">Ditolak</span>
+                                    <span class="badge bg-success">Verifikasi VP</span>
                                 @else
-                                    <span class="badge bg-secondary">Tidak Diketahui</span>
+                                    <span class="badge bg-danger">Tidak Diketahui</span>
                                 @endif
                             </td>
                             <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a 
-                                                href="#" 
-                                                class="dropdown-item" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalLihatBerkas-{{ $data1->id_pengajuan }}">
-                                                <i class="bi bi-file-text me-2"></i>Lihat Berkas
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ $data1->id_pengajuan }}')">
-                                                <i class="bi bi-trash me-2"></i>Hapus
-                                            </a>
-                                            
-                                            <!-- Form tersembunyi -->
-                                            <form id="delete-form-{{ $data1->id_pengajuan }}" 
-                                                action="/admin/restitusi_karyawan/delete/{{ $data1->id_pengajuan }}" 
-                                                method="POST" 
-                                                class="d-none">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                @if (auth()->user()->role === 'superadmin' || auth()->user()->role === 'tko')
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a 
+                                                    href="#" 
+                                                    class="dropdown-item" 
+                                                    data-bs-toggle="modal" 
+                                                    {{-- data-bs-target="#modalEditBerkas-{{ $data1->id_pengajuan }}"> --}}
+                                                    data-bs-target="#modalUpdate-{{ $data1->id_pengajuan }}">
+                                                    <i class="bi bi-file-text me-2"></i>Lihat Berkas
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ $data1->id_pengajuan }}')">
+                                                    <i class="bi bi-trash me-2"></i>Hapus
+                                                </a>
+                                                
+                                                <!-- Form tersembunyi -->
+                                                <form id="delete-form-{{ $data1->id_pengajuan }}" 
+                                                    action="/admin/restitusi_karyawan/delete/{{ $data1->id_pengajuan }}" 
+                                                    method="POST" 
+                                                    class="d-none">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="modal fade" id="modalUpdate-{{ $data1->id_pengajuan }}" tabindex="-1" aria-labelledby="addKaryawanModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="addKaryawanModalLabel">Update Data</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="/admin/restitusi_karyawan/tambah" method="POST">
+                                                    @csrf
+                                                    <div class="modal-body">
+                                                        {{ $data1->id_pengajuan }}
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-primary">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                
+                                    <div class="d-flex">
+                                    @if (auth()->user()->role === 'dr_hph' && $data1->status_pengajuan === 1)
+                                        <form action="{{ route('approval-dr', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-sm btn-warning w-100">Approve</button>
+                                        </form>
+                                    @elseif (auth()->user()->role === 'vp_osdm' && $data1->status_pengajuan === 2)
+                                        <form action="{{ route('approval-vp', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                            @csrf
+                                            @method('PUT') <!-- Menggunakan metode PUT -->
+                                            <button type="submit" class="btn btn-sm btn-success w-100">Approve</button>
+                                        </form>
+                                    @endif
+                                        {{-- <button class="btn btn-sm btn-success w-100 mx-1">Approve</button>
+                                        <button class="btn btn-sm btn-danger w-100 mx-1">Disapprove</button> --}}
+                                        <button class="btn btn-sm btn-info mx-1">Berkas</button>
+                                    </div>
+                                @endif
+                                
                             </td>
                         </tr>
+
+                        
                     @empty
-                        <div class="modal fade" id="modalLihatBerkas-{{ $data1->id_pengajuan }}" tabindex="-1" aria-labelledby="modalLabel-{{ $data1->id_pengajuan }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalLabel-{{ $data1->id_pengajuan }}">Detail Berkas</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p><strong>ID Pengajuan:</strong> {{ $data1->id_pengajuan }}</p>
-                                        <p><strong>Nama Karyawan:</strong> {{ $data1->nama_karyawan }}</p>
-                                        <p><strong>Deskripsi:</strong> {{ $data1->deskripsi }}</p>
-                                        <p><strong>Nominal:</strong> {{ number_format($data1->nominal, 0, ',', '.') }}</p>
-                                        <p><strong>Urgensi:</strong> {{ $data1->urgensi }}</p>
-                                        <p><strong>Tanggal Pengobatan:</strong> {{ $data1->tanggal_pengobatan }}</p>
-                                        <!-- Tambahkan detail lain sesuai kebutuhan -->
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                        <a href="/admin/master_data_karyawan/detail/{{ $data1->id_pengajuan }}" class="btn btn-primary">
-                                            Lihat Berkas Lengkap
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    
-                    
-                    
                         <tr>
                             <td colspan="6" class="text-center">Tidak ada data karyawan</td>
                         </tr>
                     @endforelse
+                    
                 </tbody>
             </table>
         
@@ -138,6 +155,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/admin/restitusi_karyawan/tambah" method="POST">
+                {{-- <form action="{{ route('admin.restitusi_karyawan.store') }}" method="POST"> --}}
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
@@ -148,7 +166,7 @@
                                     class="form-control" 
                                     id="id_badge" 
                                     name="id_badge" 
-                                    value="{{ auth()->user()->role === 'tko' ? auth()->user()->username : '' }}" 
+                                    value="{{ old('id_badge', auth()->user()->role === 'tko' ? auth()->user()->username : '') }}" 
                                     placeholder="{{ auth()->user()->role === 'tko' ? auth()->user()->username : 'Masukkan ID Badge' }}" 
                                     {{ auth()->user()->role === 'tko' ? 'disabled' : '' }} 
                                     required
@@ -204,7 +222,6 @@
     </div>
 
     {{-- MODAL IMPORT --}}
-    <div class="modal fade" id="importKaryawanModal" tabindex="-1" aria-labelledby="modalDataExcelLabel" aria-hidden="true">
 
 @endsection
 

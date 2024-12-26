@@ -14,10 +14,43 @@
 
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+
         <style>
-            body {
+            /* body {
                 font-family: Arial, sans-serif;
                 background-color: #f9fafb;
+            } */
+            /* Terapkan font Poppins ke seluruh dokumen */
+            body {
+                font-family: 'Poppins', sans-serif;
+                /* font-family: 'Sora', sans-serif; */
+                /* font-family: 'Libre Baskerville', sans-serif; */
+                /* font-family: 'Montserrat', sans-serif; */
+                font-size: 16px;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background-color: #f9fafb;
+            }
+
+            /* h1 {
+                font-weight: 700;
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            } */
+
+            h2 {
+                font-weight: 500;
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            p {
+                font-size: 1rem;
+                margin-bottom: 1rem;
             }
             .sidebar {
                 background-color: #f3f4f6;
