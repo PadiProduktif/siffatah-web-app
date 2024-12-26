@@ -192,7 +192,10 @@ class PesertaBPJSKesehatanController extends Controller
 
         return redirect()->back()->with('error', 'Gagal mengunggah file!');
     }
-
+    private function excelDateToDate($excelDate)
+    {
+        return Carbon::createFromFormat('Y-m-d', '1900-01-01')->addDays($excelDate - 2)->format('Y-m-d');
+    }
     public function update(Request $request, string $id)
     {
         // Validate the request data

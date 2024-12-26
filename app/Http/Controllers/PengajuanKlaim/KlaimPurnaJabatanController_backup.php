@@ -1,24 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\PesertaBPJS;
+namespace App\Http\Controllers\PengajuanKlaim;
 
 use App\Http\Controllers\Controller;
-use App\Models\PesertaBPJS\PesertaBPJSKetenagakerjaan;
+use App\Models\PengajuanKlaim\klaim_purnajabatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
-
-class PesertaBPJSKetenagakerjaanController extends Controller
+class KlaimPurnaJabatanController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         try {       
-            
-            $data['pesertaBPJS'] = PesertaBPJSKetenagakerjaan::all();
-            return view('dashboard/pesertaBPJS/peserta-bpjs-ketenagakerjaan', $data);
+            $data['pengajuanKlaim'] = klaim_purnajabatan::all();
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-purnajabatan', $data);
 
 
         } catch (\Exception $e) {
@@ -33,79 +35,14 @@ class PesertaBPJSKetenagakerjaanController extends Controller
             ], 500);
         }
     }
+    
 
-    public function store(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
         
-        // Validate the request data
-
-        try {
-            // Handle file upload if present
-            
-
-            // Create a new klaim_pengobatan record
-            $klaim = PesertaBPJSKetenagakerjaan::create([
-                'id_peserta_bpjs_ketenagakerjaan' => rand(10, 99999999),
-                'id_badge' => $request->id_badge,
-                'nama_karyawan' => $request->nama_karyawan,
-                'nik' => $request->nik,
-                'tgl_lahir' => $request->tgl_lahir,
-                'no_bpjs' => $request->kelas_rawat,
-                'alamat' => $request->alamat,
-                'file_url' => $request->uploaded_files,
-            ]);
-            Log::info("Menambah data Kepesertaan BPJS Ketenagakerjaan Request Data: ", $request->all());
-            // Return success response
-            return redirect()->back()->with('success', 'Data berhasil ditambah!');
-
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Error creating data: " . $e->getMessage());
-
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to create data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-        
-    }
-
-    public function uploadTemp(Request $request)
-    {
-
-        // return response()->json(['error' => 'No file uploaded'], 400);
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/PesertaBPJS/BPJS_Ketenagakerjaan'), $fileName);
-        
-            return response()->json([
-                'fileName' => $fileName
-            ]);
-        }
-        
-        return response()->json(['error' => 'No file uploaded'], 400);
-    }
-
-    public function deleteTemp(Request $request)
-    {
-        $filename = $request->input('fileName');
-        $filePath = storage_path("app/public/temp/{$filename}");
-
-        if (file_exists($filePath)) {
-            unlink($filePath);
-            Log::info("File Terhapus dari Public Upload BPJS Ketenagakerjaan Temp: " . json_encode($filename));
-            return response()->json(['success' => true]);
-        }else{
-            $filePath = public_path("uploads/PesertaBPJS/BPJS_Ketenagakerjaan/{$filename}");
-            unlink($filePath);
-            Log::info("File Terhapus dari Public Upload BPJS Ketenagakerjaan: " . json_encode($filename));
-            return response()->json(['success' => true]);
-        }
-
-        return response()->json(['error' => 'File not found'], 404);
     }
 
     public function uploadExcel(Request $request){
@@ -133,12 +70,12 @@ class PesertaBPJSKetenagakerjaanController extends Controller
 
             return $tanggal;
         }
+
             // Validasi file
         $validator = Validator::make($request->all(), [
             'file_excel' => 'required|mimes:xlsx,xls',
         ]);
-        
-        
+        Carbon::setLocale('id');
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
@@ -155,26 +92,32 @@ class PesertaBPJSKetenagakerjaanController extends Controller
                     if ($key < 1) {
                         continue;
                     }
-                    if (is_numeric($row[4])) {
-                        $tanggal_lahir = $this->excelDateToDate($row[4]);
-                    }else{
-                        $tanggal = convertIndonesianDate(($row[4]));
-                        $tanggal_lahir = Carbon::createFromFormat('d F Y', $tanggal)->format('Y-m-d');
+                    if (is_numeric($row[4])||is_numeric($row[3])) {
+                        $mulai_asuransi = $this->excelDateToDate($row[4]);
+                        $tanggal_lahir = $this->excelDateToDate($row[3]);
                     }
-                    
-                    
+                    if (is_numeric($row[5])) {
+                        $akhir_asuransi = $this->excelDateToDate($row[5]);
+                    }else {
+                        $akhir_asuransi = $row[5];
+                    }
+                    $premi_tahunan = str_replace(['Rp.', '.'], '', $row[8]);
+                    $uang_tertanggung = str_replace(['Rp.', '.'], '', $row[9]);
                     // Hanya masukkan nilai, abaikan jika panjang data terlalu besar
-                    PesertaBPJSKetenagakerjaan::create([
+                    klaim_purnajabatan::create([
+                        'id_klaim_purnajabatan' => rand(10, 99999999), // Pastikan panjang data sesuai tipe di database
+                        'nama' => substr($row[1] ?? '', 0, 1000),
+                        'jabatan' => substr($row[2] ?? '', 0, 1000),
+                        'tanggal_lahir' => $tanggal_lahir, // Perhatikan panjang maksimal
+                        'mulai_asuransi' => $mulai_asuransi,
+                        'akhir_asuransi' => $akhir_asuransi,
+                        'nama_asuransi' => $row[6] ?? null,
+                        'no_polis' => $row[7] ?? null,
+                        'premi_tahunan' =>  $premi_tahunan,
+                        'uang_tertanggung' =>  $uang_tertanggung,
+                        'deskripsi' =>  $row[10] ?? null,
 
 
-                        'id_peserta_bpjs_ketenagakerjaan' => rand(10, 99999999),
-                        'id_badge' => substr($row[1] ?? '', 0, 50),
-                        'nama_karyawan' => substr($row[2] ?? '', 0, 1000), 
-                        'nik' => substr($row[3] ?? '', 0, 1000),
-                        'tgl_lahir' => $tanggal_lahir,
-                        'alamat' => substr($row[5] ?? '', 0, 1000),        
-                        'no_bpjs' => substr($row[6] ?? '', 0, 1000),
-                        
                     ]);
                 }
             }
@@ -189,11 +132,128 @@ class PesertaBPJSKetenagakerjaanController extends Controller
     {
         return Carbon::createFromFormat('Y-m-d', '1900-01-01')->addDays($excelDate - 2)->format('Y-m-d');
     }
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $premi_tahunan = str_replace(['Rp', '.', ','], '', $request->premi_tahunan);
+        $uang_tertanggung = str_replace(['Rp', '.', ','], '', $request->uang_tertanggung);
+        // Validate the request data
+
+        try {
+            // Handle file upload if present
+            
+
+            // Create a new klaim_pengobatan record
+            $klaim = klaim_purnajabatan::create([
+                'id_klaim_purnajabatan' => rand(10, 99999999),
+                'nama' => $request->nama,
+                'jabatan' => $request->jabatan,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'mulai_asuransi' => $request->mulai_asuransi,
+                'akhir_asuransi' => $request->akhir_asuransi,
+                'nama_asuransi' => $request->nama_asuransi,
+                'no_polis' => $request->no_polis,
+                'premi_tahunan' => $premi_tahunan,            
+                'uang_tertanggung' => $uang_tertanggung,
+                'deskripsi' => $request->deskripsi,
+                'file_url' => $request->uploaded_files,
+            ]);
+            Log::info("Menambah data klaim PurnaJabatan Request Data: ", $request->all());
+            // Return success response
+            return redirect()->back()->with('success', 'Data berhasil ditambah!');
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Error creating data: " . $e->getMessage());
+
+            // Return error response
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
+    }
+
+    public function uploadTemp(Request $request)
+    {
+
+        // return response()->json(['error' => 'No file uploaded'], 400);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+        
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Purna Jabatan Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim PurnaJabatan: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'File not found'], 404);
+    }
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        // Find the klaim by ID
+        $klaim = klaim_purnajabatan::find($id);
+    
+        // Check if klaim exists
+        if (!$klaim) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found',
+            ], 404);
+        }
+    
+        // Return success response with klaim data
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $klaim,
+        ], 200);
+    }
+    
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, string $id)
     {
         // Validate the request data
         // Log request data untuk debug
-       Log::info('Updating Kepersertaan BPJS Ketenagakerjaan ID: ' . $id . ', Request Data: ', $request->all());
+       Log::info('Updating Pengajuan Klaim PurnaJabatan ID: ' . $id . ', Request Data: ', $request->all());
 
        // Decode uploaded_files dan removed_files
        $uploadedFiles = $request->input('uploaded_files', '[]');
@@ -210,13 +270,13 @@ class PesertaBPJSKetenagakerjaanController extends Controller
        $removedFiles = is_array($removedFiles) ? $removedFiles : [];
 
        // Ambil data klaim dari database
-       $klaim = PesertaBPJSKetenagakerjaan::findOrFail($id);
+       $klaim = klaim_purnajabatan::findOrFail($id);
        $currentFiles = json_decode($klaim->file_url, true) ?? [];
 
        // 1. Hapus file dari array dan juga file fisik
        if (!empty($removedFiles)) {
            foreach ($removedFiles as $file) {
-               $filePath = public_path('uploads/PesertaBPJS/BPJS_Ketenagakerjaan/' . $file);
+               $filePath = public_path('uploads/PengajuanKlaim/Klaim_PurnaJabatan/' . $file);
 
                // Hapus file fisik jika ada
                if (file_exists($filePath)) {
@@ -244,15 +304,20 @@ class PesertaBPJSKetenagakerjaanController extends Controller
        $finalFiles = array_values(array_unique($currentFiles));
 
        // 3. Update data ke database
-       $klaim->update([
+        $premi_tahunan = str_replace(['Rp', '.', ','], '', $request->uang_tertanggung);
+        $uang_tertanggung = str_replace(['Rp', '.', ','], '', $request->uang_tertanggung);
+        $klaim->update([
             'file_url' => json_encode($finalFiles),
-            'id_badge' => $request->id_badge,
-            'nik' => $request->nik,
-            'tgl_lahir' => $request->tgl_lahir,
-            'alamat' => $request->alamat,
-            'nama_karyawan' => $request->nama_karyawan,         
-            'no_bpjs' => $request->no_bpjs,
-            'file_url' => $finalFiles,
+            'nama' => $request->nama,
+            'jabatan' => $request->jabatan,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'mulai_asuransi' => $request->mulai_asuransi,
+            'akhir_asuransi' => $request->akhir_asuransi,
+            'nama_asuransi' => $request->nama_asuransi,
+            'no_polis' => $request->no_polis,
+            'premi_tahunan' => $premi_tahunan,            
+            'uang_tertanggung' => $uang_tertanggung,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         // Log hasil akhir
@@ -266,21 +331,24 @@ class PesertaBPJSKetenagakerjaanController extends Controller
 
       
     }
-
+    
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(string $id)
     {
         try {
-            Log::info("Menghapus data Peserta BPJS Kesehatan dengan ID: {$id}"); // Log untuk debugging awal
+            Log::info("Menghapus data PurnaJabatan dengan ID: {$id}"); // Log untuk debugging awal
             
             // Ambil data berdasarkan ID
-            $klaim = PesertaBPJSKetenagakerjaan::findOrFail($id);
+            $klaim = klaim_purnajabatan::findOrFail($id);
     
             // Hapus file attachment jika ada
             if ($klaim->file_url) {
                 $fileUrls = json_decode($klaim->file_url, true); // Decode JSON ke array
                 if (is_array($fileUrls)) {
                     foreach ($fileUrls as $file) {
-                        $filePath = public_path("uploads/PesertaBPJS/BPJS_Ketenagakerjaan//{$file}");
+                        $filePath = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$file}");
                         if (file_exists($filePath)) {
                             unlink($filePath); // Hapus file dari direktori
                             Log::info("File dihapus: {$filePath}");
@@ -291,7 +359,7 @@ class PesertaBPJSKetenagakerjaanController extends Controller
     
             // Hapus data dari database
             $klaim->delete();
-            Log::info("Data klaim Peserta BPJS Kesehatan dengan ID: {$id} berhasil dihapus.");
+            Log::info("Data klaim Purna Jabatan dengan ID: {$id} berhasil dihapus.");
     
             return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
@@ -313,7 +381,7 @@ class PesertaBPJSKetenagakerjaanController extends Controller
             
     
             // Ambil semua data berdasarkan ID
-            $klaimList = PesertaBPJSKetenagakerjaan::whereIn('id_peserta_bpjs_ketenagakerjaan', $ids)->get();
+            $klaimList = klaim_purnajabatan::whereIn('id_klaim_purnajabatan', $ids)->get();
     
             // Hapus semua file attachment yang terkait
             foreach ($klaimList as $klaim) {
@@ -321,7 +389,7 @@ class PesertaBPJSKetenagakerjaanController extends Controller
                     $fileUrls = json_decode($klaim->file_url, true);
                     if (is_array($fileUrls)) {
                         foreach ($fileUrls as $file) {
-                            $filePath = public_path("uploads/PesertaBPJS/BPJS_Ketenagakerjaan/{$file}");
+                            $filePath = public_path("uploads/PengajuanKlaim/Klaim_PurnaJabatan/{$file}");
                             if (file_exists($filePath)) {
                                 unlink($filePath); // Hapus file
                                 Log::info("File dihapus: {$filePath}");
@@ -332,7 +400,7 @@ class PesertaBPJSKetenagakerjaanController extends Controller
             }
     
             // Hapus data dari database
-            PesertaBPJSKetenagakerjaan::whereIn('id_peserta_bpjs_ketenagakerjaan', $ids)->delete();
+            klaim_purnajabatan::whereIn('id_klaim_purnajabatan', $ids)->delete();
     
             return response()->json(['message' => 'Data dan file attachment berhasil dihapus.'], 200);
         } catch (\Exception $e) {
@@ -344,4 +412,6 @@ class PesertaBPJSKetenagakerjaanController extends Controller
             return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
         }
     }
+
+    
 }

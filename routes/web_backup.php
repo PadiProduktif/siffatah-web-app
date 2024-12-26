@@ -15,8 +15,6 @@ use App\Http\Controllers\PengajuanKlaim\KlaimPengobatanController;
 use App\Http\Controllers\PengajuanKlaim\KlaimPurnaJabatanController;
 use App\Http\Controllers\RestitusiKaryawan\RestitusiKaryawanController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PesertaBPJS\PesertaBPJSKesehatanController;
-use App\Http\Controllers\PesertaBPJS\PesertaBPJSKetenagakerjaanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +47,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
     Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
-    Route::get('restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
+    // Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
+
+
+
 
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
@@ -120,25 +121,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pengajuan-klaim-kematian/delete-temp', [KlaimKematianController::class, 'deleteTemp'])->name('klaim-kematian-delete.temp');
     
     //Klaim Lumpsum Kacamata
-    Route::get('/admin/klaim_lumpsum-kacamata', [KlaimLumpsumKacamataController::class, 'index']);
-    Route::post('/admin/klaim_lumpsum-kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store'])->name('pengajuan-klaim-lumpsum-kacamata.store');
-    Route::post('/admin/klaim_lumpsum-kacamata/upload', [KlaimLumpsumKacamataController::class, 'uploadExcel'])->name('pengajuan-klaim-lumpsum-kacamata.upload');
-    Route::post('/admin/klaim_lumpsum-kacamata/update/{id}', [KlaimLumpsumKacamataController::class, 'update']);
-    Route::get('/admin/klaim_lumpsum-kacamata/delete/{id}', [KlaimLumpsumKacamataController::class, 'destroy']);
-    Route::post('/admin/klaim_lumpsum-kacamata/delete-multiple', [KlaimLumpsumKacamataController::class, 'deleteMultiple'])->name('pengajuan-klaim-lumpsum-kacamata.delete-multiple');
-    Route::post('/pengajuan-klaim-lumpsum-kacamata/upload-temp', [KlaimLumpsumKacamataController::class, 'uploadTemp'])->name('klaim-lumpsum-kacamata-upload.temp');
-    Route::post('/pengajuan-klaim-lumpsum-kacamata/delete-temp', [KlaimLumpsumKacamataController::class, 'deleteTemp'])->name('klaim-lumpsum-kacamata-delete.temp');
+    Route::get('/admin/klaim_lumpsum_kacamata', [KlaimLumpsumKacamataController::class, 'index']);
+    Route::post('/admin/klaim_lumpsum_kacamata/tambah', [KlaimLumpsumKacamataController::class, 'store']);
+    Route::get('/admin/klaim_lumpsum_kacamata/edit/{id}', [KlaimLumpsumKacamataController::class, 'edit']);
+    Route::post('/admin/klaim_lumpsum_kacamata/update/{id}', [KlaimLumpsumKacamataController::class, 'update']);
+    Route::get('/admin/klaim_lumpsum_kacamata/delete/{id}', [KlaimLumpsumKacamataController::class, 'destroy']);
 
     //Klaim Lumpsum Kelahiran
-    Route::get('/admin/klaim_lumpsum-lahiran', [KlaimLumpsumKelahiranController::class, 'index']);
-    Route::post('/admin/klaim_lumpsum-lahiran/tambah', [KlaimLumpsumKelahiranController::class, 'store'])->name('pengajuan-klaim-lumpsum-kelahiran.store');
-    Route::post('/admin/klaim_lumpsum-lahiran/upload', [KlaimLumpsumKelahiranController::class, 'uploadExcel'])->name('pengajuan-klaim-lumpsum-kelahiran.upload');
-    Route::get('/admin/klaim_lumpsum-lahiran/edit/{id}', [KlaimLumpsumKelahiranController::class, 'edit']);
-    Route::post('/admin/klaim_lumpsum-lahiran/update/{id}', [KlaimLumpsumKelahiranController::class, 'update']);
-    Route::get('/admin/klaim_lumpsum-lahiran/delete/{id}', [KlaimLumpsumKelahiranController::class, 'destroy']);
-    Route::post('/admin/klaim_lumpsum-lahiran/delete-multiple', [KlaimLumpsumKelahiranController::class, 'deleteMultiple'])->name('pengajuan-klaim-lumpsum-kelahiran.delete-multiple');
-    Route::post('/pengajuan-klaim-lumpsum-kelahiran/upload-temp', [KlaimLumpsumKelahiranController::class, 'uploadTemp'])->name('klaim-lumpsum-kelahiran-upload.temp');
-    Route::post('/pengajuan-klaim-lumpsum-kelahiran/delete-temp', [KlaimLumpsumKelahiranController::class, 'deleteTemp'])->name('klaim-lumpsum-kelahiran-delete.temp');
+    Route::get('/admin/klaim_lumpsum_kelahiran', [KlaimLumpsumKelahiranController::class, 'index']);
+    Route::post('/admin/klaim_lumpsum_kelahiran/tambah', [KlaimLumpsumKelahiranController::class, 'store']);
+    Route::get('/admin/klaim_lumpsum_kelahiran/edit/{id}', [KlaimLumpsumKelahiranController::class, 'edit']);
+    Route::post('/admin/klaim_lumpsum_kelahiran/update/{id}', [KlaimLumpsumKelahiranController::class, 'update']);
+    Route::get('/admin/klaim_lumpsum_kelahiran/delete/{id}', [KlaimLumpsumKelahiranController::class, 'destroy']);
 
     //Klaim Pengobatan
     Route::get('/admin/klaim_pengobatan', [KlaimPengobatanController::class, 'index']);
@@ -167,49 +161,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
-    Route::delete('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
-    // Route::patch('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr']);
-    // Route::patch('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp']);
-    Route::put('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr'])->name('approval-dr');
-    Route::put('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp'])->name('approval-vp');
-
-    //Kepesertaan BPJS  Kesehatan
-    Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);
-    Route::post('/admin/bpjs/bpjs-kesehatan/upload', [PesertaBPJSKesehatanController::class, 'uploadExcel'])->name('bpjs-kesehatan.upload');
-    Route::post('/admin/bpjs/bpjs-kesehatan/tambah', [PesertaBPJSKesehatanController::class, 'store'])->name('bpjs-kesehatan.store');
-    Route::post('/admin/bpjs/bpjs-kesehatan/update/{id}', [PesertaBPJSKesehatanController::class, 'update']);
-    Route::get('/admin/bpjs/bpjs-kesehatan/delete/{id}', [PesertaBPJSKesehatanController::class, 'destroy']);
-    Route::post('/admin/bpjs/bpjs-kesehatan/delete-multiple', [PesertaBPJSKesehatanController::class, 'deleteMultiple'])->name('bpjs-kesehatan.delete-multiple');
-    Route::post('/bpjs-kesehatan/upload-temp', [PesertaBPJSKesehatanController::class, 'uploadTemp'])->name('bpjs-kesehatan-upload.temp');
-    Route::post('/bpjs-kesehatan/delete-temp', [PesertaBPJSKesehatanController::class, 'deleteTemp'])->name('bpjs-kesehatan-delete.temp');
-
-    //Kepesertaan BPJS KetenagaKerjaan
-    Route::get('/admin/bpjs/bpjs-ketenagakerjaan', [PesertaBPJSKetenagakerjaanController::class, 'index']);
-    Route::post('/admin/bpjs/bpjs-ketenagakerjaan/upload', [PesertaBPJSKetenagakerjaanController::class, 'uploadExcel'])->name('bpjs-ketenagakerjaan.upload');
-    Route::post('/admin/bpjs/bpjs-ketenagakerjaan/tambah', [PesertaBPJSKetenagakerjaanController::class, 'store'])->name('bpjs-ketenagakerjaan.store');
-    Route::post('/admin/bpjs/bpjs-ketenagakerjaan/update/{id}', [PesertaBPJSKetenagakerjaanController::class, 'update']);
-    Route::get('/admin/bpjs/bpjs-ketenagakerjaan/delete/{id}', [PesertaBPJSKetenagakerjaanController::class, 'destroy']);
-    Route::post('/admin/bpjs/bpjs-ketenagakerjaan/delete-multiple', [PesertaBPJSKetenagakerjaanController::class, 'deleteMultiple'])->name('bpjs-ketenagakerjaan.delete-multiple');
-    Route::post('/bpjs-ketenagakerjaan/upload-temp', [PesertaBPJSKetenagakerjaanController::class, 'uploadTemp'])->name('bpjs-ketenagakerjaan-upload.temp');
-    Route::post('/bpjs-ketenagakerjaan/delete-temp', [PesertaBPJSKetenagakerjaanController::class, 'deleteTemp'])->name('bpjs-ketenagakerjaan-delete.temp');
-
+    Route::get('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
+    
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
-    Route::get('set-profil', function () {
-        return view('extras/set-profil');
-    });
-    
     //Logout
-    // use App\Http\Controllers\UserController;
-
-    // Route::get('/update-password', [UserController::class, 'showUpdatePasswordForm'])->name('password.update.form');
-    Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('password.update');
-
     Route::get('/logout', [AuthController::class, 'logout']);
 });
 
 
 
+    Route::get('set-profil', function () {
+        return view('extras/set-profil');
+    });
 // });
 
 //point
