@@ -161,7 +161,7 @@
     @endif
 
     <ul class="nav flex-column">
-        <li><a href="/kepesertaan-anggota" class="nav-link {{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li>
+        {{-- <li><a href="/kepesertaan-anggota" class="nav-link {{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li> --}}
         <li><a href="/set-profil" class="nav-link {{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
         <li><a href="/logout" class="nav-link text-danger">Logout</a></li>
     </ul>
