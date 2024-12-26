@@ -12,11 +12,12 @@ class PesertaBPJSKesehatan extends Model
     protected $table = 'table_peserta_bpjs_kesehatan';
 
     // Primary key
-    protected $primaryKey = 'id_peserta_bpjs';
+    protected $primaryKey = 'id_peserta_bpjs_kesehatan';
 
     // Kolom yang dapat diisi
     protected $fillable = [
-        'id_peserta_bpjs',
+        'id_peserta_bpjs_kesehatan',
+        'nama',
         'id_badge',
         'nik',
         'tgl_lahir',

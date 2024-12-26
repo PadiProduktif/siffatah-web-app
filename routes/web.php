@@ -170,7 +170,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Kepesertaan BPJS 
     Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);
-    
+    Route::post('/admin/bpjs/bpjs-kesehatan/upload', [PesertaBPJSKesehatanController::class, 'uploadExcel'])->name('bpjs-kesehatan.upload');
+    Route::post('/admin/bpjs/bpjs-kesehatan/tambah', [PesertaBPJSKesehatanController::class, 'store'])->name('bpjs-kesehatan.store');
+    Route::post('/admin/bpjs/bpjs-kesehatan/update/{id}', [PesertaBPJSKesehatanController::class, 'update']);
+    Route::get('/admin/bpjs/bpjs-kesehatan/delete/{id}', [PesertaBPJSKesehatanController::class, 'destroy']);
+    Route::post('/admin/bpjs/bpjs-kesehatan/delete-multiple', [PesertaBPJSKesehatanController::class, 'deleteMultiple'])->name('bpjs-kesehatan.delete-multiple');
+    Route::post('/bpjs-kesehatan/upload-temp', [PesertaBPJSKesehatanController::class, 'uploadTemp'])->name('bpjs-kesehatan-upload.temp');
+    Route::post('/bpjs-kesehatan/delete-temp', [PesertaBPJSKesehatanController::class, 'deleteTemp'])->name('bpjs-kesehatan-delete.temp');
+
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
     Route::get('set-profil', function () {
