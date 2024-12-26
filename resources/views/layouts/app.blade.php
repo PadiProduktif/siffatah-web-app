@@ -88,6 +88,16 @@
                 /* text-decoration: none; */
                 /* display: inline; */
             }
+            
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                /* background-color: #00FC74; */
+            }
         </style>
         @stack('styles')
     </head>
@@ -128,7 +138,37 @@
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> --}}
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // Toast Success
+            @if(session('success'))
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: '{{ session("success") }}',
+                    background: '#4CAF50',  // Hijau untuk success
+                    color: '#ffffff',  // Teks putih agar kontras dengan latar hijau
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            @endif
         
+            // Toast Error
+            @if(session('error'))
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: '{{ session("error") }}',
+                    background: '#f44336',  // Merah untuk error
+                    color: '#ffffff',  // Teks putih agar kontras dengan latar hijau
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            @endif
+        </script>
+
         @stack('scripts')
     </body>
 </html>
