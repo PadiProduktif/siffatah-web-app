@@ -178,6 +178,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     //Logout
+    // use App\Http\Controllers\UserController;
+
+    // Route::get('/update-password', [UserController::class, 'showUpdatePasswordForm'])->name('password.update.form');
+    Route::post('/update-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
     Route::get('/logout', [AuthController::class, 'logout']);
 });
 

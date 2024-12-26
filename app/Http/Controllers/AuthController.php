@@ -91,5 +91,35 @@ class AuthController extends Controller
     // Redirect ke halaman login
     return redirect('/login')->with('status', 'Logout berhasil!');
     }
+
+
+    // Proses update password
+    public function updatePassword(Request $request)
+    {
+        try {
+            // Validasi form
+            $validatedData = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
+    
+            // Ambil pengguna yang sedang login
+            $user = Auth::user();
+    
+            // Cek apakah password lama sesuai
+            if (!Hash::check($request->current_password, $user->password)) {
+                return redirect('/set-profil')->with('error', 'Password lama tidak sesuai.');
+            }
+    
+            // Update password
+            $user->update([
+                'password' => Hash::make($request->new_password),
+            ]);
+    
+            return redirect('/set-profil')->with('success', 'Password berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            return redirect('/set-profil')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
 }
 
