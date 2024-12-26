@@ -1,22 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Dashboard')
+@section('title', 'Restitusi')
 @section('content')
-
 @push('styles')
-    <style>
-        .icon-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* background-color: #00FC74; */
-        }
-    </style>
 @endpush
-
-
 
 <div class="table-container bg-white p-3 rounded shadow">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -56,28 +42,37 @@
 
     <table id="klaimTable" class="table">
         <thead class="table-light">
-            <tr>
+            <tr class="text-center">
                 <th>NO</th>
                 <th>Badge</th>
-                <th>Nama</th>
+                <th>Karyawan</th>
                 <th>Deskripsi</th>
                 <th>Nomor Surat</th>
-                <th>Tanggal</th>
+                <th>Tanggal Surat</th>
                 <th>Status</th>
                 <th>Opt</th>
             </tr>
         </thead>
         <tbody>
-            
             @forelse ($restitusi as $key1 => $data1)
-                <tr>
+                <tr class="text-center ">
                     <td>{{ $key1+1 }}</td>
                     <td>{{ $data1->id_badge }}</td>
-                    <td>{{ $data1->nama_karyawan }}</td>
-                    <td>{{ $data1->deskripsi }}</td>
+                    <td class="text-start">{{ $data1->nama_karyawan }}</td>
+                    <td class="text-start">{{ $data1->deskripsi }}</td>
                     <td>{{ $data1->no_surat_rs }}</td>
                     <td>{{ $data1->tanggal_pengobatan }}</td>
-                    <td>{{ $data1->status_pengajuan }}</td>
+                    <td>
+                        @if ($data1->status_pengajuan == 1)
+                            <span class="badge bg-warning">Menunggu</span>
+                        @elseif ($data1->status_pengajuan == 2)
+                            <span class="badge bg-success">Diverifikasi</span>
+                        @elseif ($data1->status_pengajuan == 3)
+                            <span class="badge bg-danger">Ditolak</span>
+                        @else
+                            <span class="badge bg-secondary">Tidak Diketahui</span>
+                        @endif
+                    </td>
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
@@ -112,8 +107,6 @@
                     </td>
                 </tr>
             @empty
-
-
                 <div class="modal fade" id="modalLihatBerkas-{{ $data1->id_pengajuan }}" tabindex="-1" aria-labelledby="modalLabel-{{ $data1->id_pengajuan }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -166,7 +159,16 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label for="id_badge" class="form-label">ID Badge</label>
-                            <input type="text" class="form-control" id="id_badge" name="id_badge" required>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="id_badge" 
+                                name="id_badge" 
+                                value="{{ auth()->user()->role === 'tko' ? auth()->user()->username : '' }}" 
+                                placeholder="{{ auth()->user()->role === 'tko' ? auth()->user()->username : 'Masukkan ID Badge' }}" 
+                                {{ auth()->user()->role === 'tko' ? 'disabled' : '' }} 
+                                required
+                            >
                         </div>
                         
 

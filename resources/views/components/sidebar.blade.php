@@ -61,7 +61,7 @@
             </div>
             
             <!-- Perlengkapan Kerja -->
-            <div class="accordion-item">
+            {{-- <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPerlengkapanKerja">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerlengkapanKerja" aria-expanded="false" aria-controls="collapsePerlengkapanKerja">
                         Kelengkapan Kerja
@@ -91,7 +91,7 @@
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         <div class="accordion" id="sidebarAccordion2">
             <!-- Kepersertaan BPJS -->
