@@ -29,6 +29,8 @@
                         <th>Deskripsi</th>
                         <th>Nomor Surat</th>
                         <th>Tanggal Surat</th>
+                        <th>Nominal</th>
+                        <th>Urgency</th>
                         <th>Status</th>
                         <th>Opt</th>
                     </tr>
@@ -41,7 +43,9 @@
                             <td class="text-start">{{ $data1->nama_karyawan }}</td>
                             <td class="text-start">{{ $data1->deskripsi }}</td>
                             <td>{{ $data1->no_surat_rs }}</td>
-                            <td>{{ $data1->tanggal_pengobatan }}</td>
+                            <td>{{ format_date($data1->tanggal_pengobatan) }}</td>
+                            <td class="text-end">{{ format_currency($data1->nominal) }}</td>
+                            <td>{{ $data1->urgensi }}</td>
                             <td>
                                 @if ($data1->status_pengajuan == 1)
                                     <span class="badge bg-warning">Menunggu</span>
@@ -165,7 +169,7 @@
                                 <label for="urgensi" class="form-label">Urgensi</label>
                                 <select class="form-control" id="urgensi" name="urgensi">
                                     <option value="" selected disabled>Pilih urgensi</option>
-                                    <option value="Low">Low</option>
+                                    <option value="Low" selected>Low</option>
                                     <option value="Medium">Medium</option>
                                     <option value="High">High</option>
                                 </select>

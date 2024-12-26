@@ -218,7 +218,13 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <form id="upload-form" enctype="multipart/form-data">
-                                        <div 
+                                        
+                                        <div id="berkas-master-data-dropzone" class="dropzone">
+                                            <div class="dz-message">
+                                                Drag & Drop your files here or click to upload
+                                            </div>
+                                        </div>
+                                        {{-- <div 
                                             id="drop-zone" 
                                             class="border border-primary rounded d-flex flex-column justify-content-center align-items-center p-5 text-center"
                                             style="min-height: 200px; cursor: pointer;"
@@ -227,7 +233,7 @@
                                             <p class="text-muted">or click to browse</p>
                                             <input type="file" id="file-input" name="image" class="d-none" accept="image/*">
                                             <img id="preview" src="#" alt="Preview" class="img-fluid d-none mt-3" style="max-height: 150px;">
-                                        </div>
+                                        </div> --}}
                                         <button type="submit" class="btn btn-primary mt-3 w-100">Upload</button>
                                     </form>
 
@@ -244,63 +250,8 @@
 </div>
 @endsection
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
     $(document).ready(function () {
-        const dropZone = $('#drop-zone');
-        const fileInput = $('#file-input');
-        const preview = $('#preview');
-        const messageDiv = $('#message');
-
-        // Trigger file input on drop-zone click
-        dropZone.on('click', function () {
-            fileInput.click();
-        });
-
-        // Handle file selection
-        fileInput.on('change', function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.attr('src', e.target.result).removeClass('d-none');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Handle drag-and-drop
-        dropZone.on('dragover', function (e) {
-            e.preventDefault();
-            dropZone.addClass('border-success');
-        });
-
-        dropZone.on('dragleave', function () {
-            dropZone.removeClass('border-success');
-        });
-
-        dropZone.on('drop', function (e) {
-            e.preventDefault();
-            dropZone.removeClass('border-success');
-            const files = e.originalEvent.dataTransfer.files;
-            if (files.length) {
-                // Masukkan file ke dalam file input tanpa memicu event 'change'
-                const dataTransfer = new DataTransfer();
-                for (let i = 0; i < files.length; i++) {
-                    dataTransfer.items.add(files[i]);
-                }
-                fileInput[0].files = dataTransfer.files;
-
-                // Pratinjau gambar tanpa memanggil event 'change' lagi
-                const file = files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.attr('src', e.target.result).removeClass('d-none');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
         // Handle form submission
         $('#upload-form').on('submit', function (e) {
             e.preventDefault();
@@ -325,5 +276,87 @@
                 },
             });
         });
+
+        let removedFiles = []; // Array untuk menyimpan file yang dihapus
+        let uploadedFiles = []; // Menyimpan nama file yang sudah diupload ke server
+
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        if (document.querySelector('#attachmentDropzone')) {
+            const attachmentDropzone = new Dropzone("#attachmentDropzone", {
+                url: "/pengajuan-klaim-pengobatan/upload-temp", // Endpoint sementara untuk upload
+                paramName: "file",
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                maxFiles: 5,
+                maxFilesize: 5, // 5MB
+                acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+                addRemoveLinks: true,
+                dictRemoveFile: "Hapus File",
+                dictDefaultMessage: "Drag & Drop your files here or click to upload",
+
+                init: function () {
+                    // Saat file berhasil diunggah
+                    this.on("success", function (file, response) {
+                        console.log("File upload response:", response);
+
+                        if (response && response.fileName) {
+                            file.uploadedFileName = response.fileName; // Simpan nama file di objek Dropzone file
+                            uploadedFiles.push(response.fileName); // Tambahkan nama file ke array uploadedFiles
+
+                            console.log("Uploaded file added:", response.fileName);
+                            console.log("Uploaded Files Array:", uploadedFiles);
+
+                            // Perbarui input hidden dengan file yang diunggah
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                        } else {
+                            console.error("Error: No fileName in response:", response);
+                        }
+                    });
+
+                    // Saat file dihapus dari Dropzone
+                    this.on("removedfile", function (file) {
+                        console.log("File removed:", file);
+
+                        // Pastikan uploadedFileName tersedia
+                        if (file.uploadedFileName) {
+                            console.log("Removing file from server:", file.uploadedFileName);
+
+                            // Tambahkan file ke array removedFiles
+                            removedFiles.push(file.uploadedFileName);
+
+                            // Hapus file dari array uploadedFiles
+                            uploadedFiles = uploadedFiles.filter(f => f !== file.uploadedFileName);
+
+                            console.log("Updated Uploaded Files:", uploadedFiles);
+                            console.log("Removed Files Array:", removedFiles);
+
+                            // Perbarui input hidden untuk uploaded_files dan removed_files
+                            document.getElementById("uploadedFilesInput").value = JSON.stringify(uploadedFiles);
+                            document.getElementById("removedFilesInput").value = JSON.stringify(removedFiles);
+
+                            // Kirim AJAX request untuk menghapus file di server
+                            $.ajax({
+                                url: "/pengajuan-klaim-pengobatan/delete-temp",
+                                type: "POST",
+                                data: {
+                                    _token: token,
+                                    fileName: file.uploadedFileName
+                                },
+                                success: function (response) {
+                                    console.log("File successfully removed from server:", response);
+                                },
+                                error: function (error) {
+                                    console.error("Failed to delete file on server:", error);
+                                }
+                            });
+                        } else {
+                            console.warn("File not uploaded to server, skipping removal.");
+                        }
+                    });
+                }
+            });
+        }
+        
     });
 </script>

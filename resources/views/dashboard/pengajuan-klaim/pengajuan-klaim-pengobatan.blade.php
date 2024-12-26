@@ -900,7 +900,5 @@
 
         
     </script>
-    
-    
 
 @endsection
