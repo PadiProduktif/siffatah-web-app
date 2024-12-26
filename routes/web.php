@@ -166,7 +166,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
-    Route::get('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
+    Route::delete('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
+    // Route::patch('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr']);
+    // Route::patch('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp']);
+    Route::put('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr'])->name('approval-dr');
+    Route::put('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp'])->name('approval-vp');
 
     //Kepesertaan BPJS 
     Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);
