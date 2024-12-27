@@ -9,8 +9,31 @@ class BerkasPengobatan extends Model
 {
     use HasFactory;
 
+    // Tentukan tabel yang digunakan
     protected $table = 'table_berkas_pengobatan';
-    protected $primaryKey = 'id_berkas_pengobatan';
-    protected $fillable = ['id_berkas_pengobatan','id_badge','nama_karyawan','jabatan_karyawan','nama_anggota_keluarga','hubungan_keluarga','deskripsi','nominal','rs_klinik','urgensi','no_surat_rs','tanggal_pengobatan','status','keterangan','filename','file_url'];
 
+    // Tentukan primary key
+    protected $primaryKey = 'id_berkas_pengobatan';
+
+    // Jika tidak menggunakan created_at & updated_at
+    public $timestamps = false;
+
+    // Kolom yang bisa diisi (whitelist)
+    protected $fillable = [
+        'id_badge',
+        'nama_karyawan',
+        'jabatan_karyawan',
+        'nama_anggota_keluarga',
+        'hubungan_keluarga',
+        'deskripsi',
+        'nominal',
+        'rs_klinik',
+        'urgensi',
+        'no_surat_rs',
+        'tanggal_pengobatan',
+        'status',
+        'keterangan',
+        'filename',
+        'file_url'
+    ];
 }

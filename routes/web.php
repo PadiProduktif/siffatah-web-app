@@ -46,9 +46,10 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::middleware('auth:sanctum')->group(function () {
 
     // tko viewer
+    Route::get('generate-code', [MasterDataKaryawanController::class, 'generate']);
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
-    Route::get('berkas_pengobatan', [DashboardController::class, 'index']);
+    Route::get('berkas-pengobatan', [DashboardController::class, 'index']);
     Route::get('restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
 
     //Admin dashboard
@@ -71,11 +72,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //Berkas Pengobatan
-    Route::get('/admin/berkas_pengobatan', [BerkasPengobatanController::class, 'index']);
-    Route::post('/admin/berkas_pengobatan/tambah', [BerkasPengobatanController::class, 'store']);
-    Route::get('/admin/berkas_pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit']);
-    Route::post('/admin/berkas_pengobatan/update/{id}', [BerkasPengobatanController::class, 'update']);
-    Route::get('/admin/berkas_pengobatan/delete/{id}', [BerkasPengobatanController::class, 'destroy']);
+    Route::get('/admin/berkas-pengobatan', [BerkasPengobatanController::class, 'index']);
+    Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store']);
+    Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit']);
+    Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update']);
+    Route::get('/admin/berkas-pengobatan/delete/{id}', [BerkasPengobatanController::class, 'destroy']);
     
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
