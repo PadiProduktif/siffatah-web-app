@@ -13,6 +13,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
 
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+        
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 
@@ -169,8 +171,10 @@
         {{-- kalau pakai chartjs  v3
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> --}}
-
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
 
         <script>
             // Toast Success
@@ -200,6 +204,14 @@
                     timer: 3000
                 });
             @endif
+            
+            $(document).ready(function() {
+                $('.select2').select2({
+                    theme: 'bootstrap-5', // Pastikan menggunakan tema bootstrap 5 jika diperlukan
+                    placeholder: "Pilih Data",
+                    allowClear: true
+                });
+            });
         </script>
 
         @stack('scripts')

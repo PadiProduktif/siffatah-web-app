@@ -77,6 +77,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit'])->name('berkas-pengobatan.edit');
     Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update'])->name('berkas-pengobatan.update');
     
+    Route::post('/berkas-pengobatan/upload-temp', [BerkasPengobatanController::class, 'uploadTemp'])->name('berkas-pengobatan-upload.temp');
+    Route::post('/berkas-pengobatan/delete-temp', [BerkasPengobatanController::class, 'deleteTemp'])->name('berkas-pengobatan-delete.temp');
+    
     
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
