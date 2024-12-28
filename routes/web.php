@@ -72,11 +72,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //Berkas Pengobatan
-    Route::get('/admin/berkas-pengobatan', [BerkasPengobatanController::class, 'index']);
-    Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store']);
-    Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit']);
-    Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update']);
-    Route::get('/admin/berkas-pengobatan/delete/{id}', [BerkasPengobatanController::class, 'destroy']);
+    Route::get('/admin/berkas-pengobatan', [BerkasPengobatanController::class, 'index'])->name('berkas-pengobatan.index');
+    Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store'])->name('berkas-pengobatan.store');
+    Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit'])->name('berkas-pengobatan.edit');
+    Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update'])->name('berkas-pengobatan.update');
+    
     
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
