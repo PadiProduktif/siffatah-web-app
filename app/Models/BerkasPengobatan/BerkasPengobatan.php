@@ -20,6 +20,7 @@ class BerkasPengobatan extends Model
 
     // Kolom yang bisa diisi (whitelist)
     protected $fillable = [
+        // 'id_berkas_pengobatan',
         'id_badge',
         'nama_karyawan',
         'jabatan_karyawan',
@@ -34,6 +35,11 @@ class BerkasPengobatan extends Model
         'status',
         'keterangan',
         'filename',
-        'file_url'
+        'file_url',
+        
+        'updated_at',
+        'updated_by',
+        'created_at',
+        'created_by'
     ];
 }
