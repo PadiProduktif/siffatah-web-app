@@ -124,6 +124,7 @@
             <li><a href="/restitusi_karyawan" class="nav-link {{ Request::is('/restitusi_karyawan') ? 'active' : '' }}">Restitusi</a></li>
             <li><a href="/ekses" class="nav-link {{ Request::is('/ekses') ? 'active' : '' }}">Ekses</a></li>
             <li><a href="/berkas-pengobatan" class="nav-link {{ Request::is('/berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
+            <li><a href="/keluarga" class="nav-link {{ Request::is('/keluarga') ? 'active' : '' }}">Keluarga</a></li>
         </ul>
 
         <div class="accordion" id="sidebarAccordion">
