@@ -34,6 +34,11 @@ class BerkasPengobatan extends Model
         'status',
         'keterangan',
         'filename',
-        'file_url'
+        'file_url',
+
+        'updated_at',
+        'updated_by',
+        'created_at',
+        'created_by'
     ];
 }
