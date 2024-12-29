@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\MasterData\DataKaryawan;
 use App\Models\MasterData\DataNonKaryawan;
 
 class MasterDataNonKaryawanController extends Controller
@@ -50,23 +51,56 @@ class MasterDataNonKaryawanController extends Controller
      */
     public function store(Request $request)
     {
+        try {
+            
+            // dd(
+            //     $request->badge_parent,
+            //     $request->nama,
+            //     $request->hubungan_keluarga,
+            //     $request->jenis_kelamin,
+            // );
+
+            $dataKaryawan = DataKaryawan::where('id_badge', $request->badge_parent)->first();
+            // dd($dataKaryawan);
+            $non_karyawan = DataNonKaryawan::create([
+                'id_non_karyawan' => rand(10, 99999999),
+                'badge_parent' => $request->badge_parent,
+                'id_karyawan_terkait' => $request->badge_parent,
+                'nama' => $request->nama,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'hubungan_keluarga' => $request->hubungan_keluarga,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'pendidikan' => $request->pendidikan,
+                'alamat' => $request->alamat,
+                'agama' => $request->agama,
+                // 'status_pernikahan' => $validatedData['status_pernikahan'],
+                'pekerjaan' => $request->pekerjaan,
+                'nik' => $request->nik,
+                // 'kewarganegaraan' => $validatedData['kewarganegaraan'],
+                // 'url_foto_diri' => $url_foto_diri_fileName,
+            ]);
+            return redirect('/admin/master_data_karyawan/detail/'.$dataKaryawan->id_karyawan)->with('success', 'Data berhasil disimpan.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/master_data_karyawan/detail/'.$dataKaryawan->id_karyawan)->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
         // Validate required fields
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
-            'jenis_kelamin' => 'nullable|string|max:10',
-            'hubungan_keluarga' => 'nullable|string|max:255',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'pendidikan' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string|max:500',
-            'agama' => 'nullable|string|max:255',
-            'status_pernikahan' => 'nullable|string|max:255',
-            'pekerjaan' => 'nullable|string|max:255',
-            'nik' => 'nullable|string|max:20',
-            'kewarganegaraan' => 'nullable|string|max:50',
-            'url_foto_diri' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
-            'id_karyawan_terkait' => 'nullable|integer',
-        ]);
+        // $validatedData = $request->validate([
+        //     'nama' => 'required|string|max:255',
+        //     'jenis_kelamin' => 'nullable|string|max:10',
+        //     'hubungan_keluarga' => 'nullable|string|max:255',
+        //     'tempat_lahir' => 'nullable|string|max:255',
+        //     'tanggal_lahir' => 'nullable|date',
+        //     'pendidikan' => 'nullable|string|max:255',
+        //     'alamat' => 'nullable|string|max:500',
+        //     'agama' => 'nullable|string|max:255',
+        //     'status_pernikahan' => 'nullable|string|max:255',
+        //     'pekerjaan' => 'nullable|string|max:255',
+        //     'nik' => 'nullable|string|max:20',
+        //     'kewarganegaraan' => 'nullable|string|max:50',
+        //     'url_foto_diri' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
+        //     'id_karyawan_terkait' => 'nullable|integer',
+        // ]);
     
         try {
             // Handle file upload if present
@@ -223,8 +257,8 @@ class MasterDataNonKaryawanController extends Controller
         try {
             // Find the non-karyawan record by ID or throw a 404 if not found
             $non_karyawan = DataNonKaryawan::findOrFail($id);
-    
-            // Delete associated file if it exists
+            $dataKaryawan = DataKaryawan::where('id_badge', $non_karyawan->badge_parent)->first();
+
             if ($non_karyawan->url_foto_diri) {
                 $filePath = public_path("uploads/non_karyawan/url_foto_diri/{$non_karyawan->url_foto_diri}");
                 if (file_exists($filePath)) {
@@ -235,28 +269,9 @@ class MasterDataNonKaryawanController extends Controller
             // Delete the non-karyawan record from the database
             $non_karyawan->delete();
     
-            // Return a success response
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data successfully deleted',
-            ], 200);
-    
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Return a 404 response if the record is not found
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found',
-            ], 404);
-    
-        } catch (\Exception $e) {
-            // Log error for debugging
-    
-            // Return a 500 response for any other error
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete data',
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect('/admin/master_data_karyawan/detail/'.$dataKaryawan->id_karyawan)->with('success', 'Data berhasil dihapus.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/master_data_karyawan/detail/'.$dataKaryawan->id_karyawan)->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
     }
     

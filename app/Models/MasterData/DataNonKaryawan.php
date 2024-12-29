@@ -13,6 +13,7 @@ class DataNonKaryawan extends Model
     protected $primaryKey = 'id_non_karyawan';
     protected $fillable = [
         'id_non_karyawan',
+        'badge_parent',
         'nama',
         'jenis_kelamin',
         'hubungan_keluarga',

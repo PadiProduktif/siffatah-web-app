@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
+use App\Models\MasterData\DataNonKaryawan;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
@@ -30,42 +31,44 @@ class MasterDataKaryawanController extends Controller
     public function detail($id=null)
     {
         // Cari data karyawan berdasarkan ID
-        $dataKaryawan = DataKaryawan::find($id);
+        $dataKaryawan = DataKaryawan::findOrFail($id);
+
+        // Cari data keluarga berdasarkan badge_parent
+        $dataKeluargaRAW = DataNonKaryawan::where('badge_parent', $dataKaryawan['id_badge'])->get();
+
         $dataKeluarga = [
             'pasangan' => [],
             'anak' => [],
         ];
-        $dataKeluarga['pasangan'][] = [
-            'nama' => 'Fulanah',
-            'NIK' => '12313112123',
-            'status' => 'istri',
-            'badge_parent' => $dataKaryawan['id_badge'],
-        ];
-        $dataKeluarga['anak'][] = [
-            'nama' => 'Fulanah',
-            'NIK' => '12313112123',
-            'status' => 'anak',
-            'tgl_lahir' => '14 Agustus',
-            'badge_parent' => $dataKaryawan['id_badge'],
-        ];
-        $dataKeluarga['anak'][] = [
-            'nama' => 'Fulan',
-            'NIK' => '5645646456',
-            'status' => 'anak',
-            'badge_parent' => $dataKaryawan['id_badge'],
-        ];
+
+        foreach ($dataKeluargaRAW as $key => $value) {
+            if ($value->hubungan_keluarga === 'suami' || $value->hubungan_keluarga === 'istri') {
+                $dataKeluarga['pasangan'][] = $value;
+            } else {
+                $dataKeluarga['anak'][] = $value;
+
+            }
+        }
         $dataKaryawan['keluarga'] = $dataKeluarga;
+
+
         $dataImages = [
-            [
-                'name' => 'KTP',
-                'url' => 'https://picsum.photos/id/237/200/300'
-            ],
-            [
-                'name' => 'KK',
-                'url' => 'https://picsum.photos/id/237/200/300'
-            ],
+            // [
+            //     'name' => 'KTP',
+            //     'url' => 'https://picsum.photos/id/237/200/300'
+            // ],
+            // [
+            //     'name' => 'KK',
+            //     'url' => 'https://picsum.photos/id/237/200/300'
+            // ],
         ];
         $dataKaryawan['files'] = $dataImages;
+
+        
+        // dd(
+        //     $dataKaryawan,
+        //     $dataKeluarga,
+        // );
 
         // dd($dataKaryawan);
         // dd(

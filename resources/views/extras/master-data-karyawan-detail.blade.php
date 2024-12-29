@@ -130,7 +130,11 @@
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="accordion" id="accordionExample">
                 
-                <div class="accordion-item">
+                <button type="button" class="btn btn-success w-100 mt-2 mb-4" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
+                    <i class="bi bi-plus-lg"></i> Tambah Anggota Baru
+                </button>
+
+                <div class="accordion-item mb-2">
                     <h2 class="accordion-header" id="headingOne">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                             Pasangan
@@ -138,24 +142,27 @@
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            
-                            {{-- Menampilkan Pasangan --}}
-                            @foreach($dataKaryawan['keluarga']['pasangan'] as $pasangan)
-                                <div class="col-lg-4 col-md-6 mb-4">
-                                    <div class="card shadow-sm">
-                                        <div class="card-header bg-primary text-white">
-                                            Pasangan
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $pasangan['nama'] }}</h5>
-                                            <p class="card-text">
-                                                <strong>NIK:</strong> {{ $pasangan['NIK'] }}<br>
-                                                <strong>Status:</strong> {{ ucfirst($pasangan['status']) }}<br>
-                                            </p>
+                            <div class="row">
+                                {{-- Menampilkan Pasangan --}}
+                                @foreach($dataKaryawan['keluarga']['pasangan'] as $pasangan)
+                                    <div class="col-lg-4 col-md-6 mb-4">
+                                        <div class="card shadow-sm">
+                                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                                {{ $pasangan['hubungan_keluarga'] }}
+                                                <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="handleDelete('{{ $pasangan['id_non_karyawan'] }}')"></button>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ $pasangan['nama'] }}</h5>
+                                                <p class="card-text">
+                                                    <strong>NIK:</strong> {{ $pasangan['nik'] }}<br>
+                                                    <strong>Tempat, tanggal lahir:</strong> {{ $pasangan['tempat_lahir'] }}, {{ $pasangan['tanggal_lahir'] }}<br>
+                                                    <strong>Alamat:</strong> {{ $pasangan['alamat'] }}<br>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,17 +178,19 @@
                             {{-- Menampilkan Anak --}}
                             <div class="row">
 
-                                @foreach($dataKaryawan['keluarga']['anak'] as $anak)
+                                @foreach($dataKaryawan['keluarga']['anak'] as $key => $anak)
                                     <div class="col-lg-4 col-md-6 mb-4">
                                         <div class="card shadow-sm">
-                                            <div class="card-header bg-success text-white">
-                                                Anak
+                                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                                {{  $anak['hubungan_keluarga'] }} ke-{{ $key+1 }}
+                                                <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="handleDelete('{{ $anak['id_non_karyawan'] }}')"></button>
                                             </div>
                                             <div class="card-body">
                                                 <h5 class="card-title">{{ $anak['nama'] }}</h5>
                                                 <p class="card-text">
-                                                    <strong>NIK:</strong> {{ $anak['NIK'] }}<br>
-                                                    <strong>Status:</strong> {{ ucfirst($anak['status']) }}<br>
+                                                    <strong>NIK:</strong> {{ $anak['nik'] }}<br>
+                                                    <strong>Tempat, tanggal lahir:</strong> {{ $anak['tempat_lahir'] }}, {{ $anak['tanggal_lahir'] }}<br>
+                                                    <strong>Alamat:</strong> {{ $anak['alamat'] }}<br>
                                                 </p>
                                             </div>
                                         </div>
@@ -199,9 +208,6 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card shadow-sm mt-2">
-                        <div class="card-header">
-                            <h2>Manajemen Berkas Fulan</h2>
-                        </div>
                         <div class="card-body">
                             <div class="row">
                                 @foreach($dataKaryawan['files'] as $value)
@@ -248,10 +254,143 @@
         </div>
     </div>
 </div>
+
+
+<!-- MODAL ADD -->
+<div class="modal fade" id="addKaryawanModal"  aria-labelledby="addKaryawanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/admin/master_data_non_karyawan/tambah" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 d-none">
+                            <label for="nama" class="form-label">badge parent</label>
+                            <input type="text" class="form-control" id="nama" name="badge_parent" value="{{ $dataKaryawan['id_badge'] }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nama" class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="nama" name="nama" required>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="tempat-lahir" class="form-label">Tempat Lahir</label>
+                            <input type="text" class="form-control" id="tempat-lahir" name="tempat_lahir" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="tanggal-lahir" class="form-label">Tanggal Lahir</label>
+                            <input type="date" class="form-control" id="tanggal-lahir" name="tanggal_lahir" required>
+                        </div>
+
+                        
+                        <div class="col-md-4">
+                            <label for="nik" class="form-label">NIK</label>
+                            <input type="text" class="form-control" id="nik" name="nik" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="pekerjaan" class="form-label">Pekerjaan</label>
+                            <input type="text" class="form-control" id="pekerjaan" name="pekerjaan" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="hubungan" class="form-label">Hubungan Keluarga</label>
+                            <select class="form-select" id="hubungan" name="hubungan_keluarga" required>
+                                <option value="suami">Suami</option>
+                                <option value="istri">Istri</option>
+                                <option value="anak">anak</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                            <select class="form-select" id="jenis_kelamin" name="jenis_kelamin" required>
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="pendidikan" class="form-label">Jenjang Pendidikan</label>
+                            <select class="form-select" id="pendidikan" name="pendidikan" required>
+                                <option value="SD">SD</option>
+                                <option value="SMP">SMP</option>
+                                <option value="SMA">SMA</option>
+                                <option value="D3">D3</option>
+                                <option value="S1">S1</option>
+                                <option value="S2">S2</option>
+                                <option value="S3">S3</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="agama" class="form-label">Agama</label>
+                            <select class="form-select" id="agama" name="agama" required>
+                                <option value="Islam">Islam</option>
+                                <option value="Kristen">Kristen</option>
+                                <option value="Katolik">Katolik</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddha">Buddha</option>
+                                <option value="Konghucu">Konghucu</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-12">
+                            <label for="alamat" class="form-label">Alamat</label>
+                            <textarea class="form-control" id="alamat" name="alamat" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div id="attachmentDropzone" class="dropzone">
+                                <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                            </div>
+                        </div>          
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="" method="GET" style="display: none;">
+    @csrf
+</form>
 @endsection
 
 <script>
+
+    function handleDelete(id) {
+        console.log("ID to delete:", id); // Debugging line to check the ID
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Anda tidak akan dapat mengembalikan data ini!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Set the action attribute of the form to the delete URL
+                const form = document.getElementById('deleteForm');
+                form.action = `/admin/master_data_non_karyawan/delete/${id}`;
+                form.submit();
+            }
+        });
+    }
     $(document).ready(function () {
+        
         // Handle form submission
         $('#upload-form').on('submit', function (e) {
             e.preventDefault();
