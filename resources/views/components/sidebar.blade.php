@@ -120,11 +120,11 @@
         
     @else
         <ul class="nav flex-column">
-            <li><a href="/dashboard" class="nav-link {{ Request::is('/dashboard') ? 'active' : '' }}">Dashboard</a></li>
-            <li><a href="/restitusi_karyawan" class="nav-link {{ Request::is('/restitusi_karyawan') ? 'active' : '' }}">Restitusi</a></li>
-            <li><a href="/ekses" class="nav-link {{ Request::is('/ekses') ? 'active' : '' }}">Ekses</a></li>
-            <li><a href="/berkas-pengobatan" class="nav-link {{ Request::is('/berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
-            <li><a href="/keluarga" class="nav-link {{ Request::is('/keluarga') ? 'active' : '' }}">Keluarga</a></li>
+            <li><a href="/dashboard" class="nav-link {{ Request::is('dashboard') ? 'active' : '' }}">Dashboard</a></li>
+            <li><a href="/restitusi_karyawan" class="nav-link {{ Request::is('restitusi_karyawan') ? 'active' : '' }}">Restitusi</a></li>
+            <li><a href="/ekses" class="nav-link {{ Request::is('ekses') ? 'active' : '' }}">Ekses</a></li>
+            <li><a href="/berkas-pengobatan" class="nav-link {{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
+            {{-- <li><a href="/keluarga" class="nav-link {{ Request::is('keluarga') ? 'active' : '' }}">Keluarga</a></li> --}}
         </ul>
 
         <div class="accordion" id="sidebarAccordion">
@@ -138,22 +138,22 @@
                 <div
                     id="collapseInsurance" 
                     class="accordion-collapse collapse {{ request()->is(
-                        '/klaim_pengobatan',
-                        '/klaim_kecelakaan',
-                        '/klaim_kematian',
-                        '/klaim_purna-jabatan',
-                        '/klaim_lumpsum-kacamata',
-                        '/klaim_lumpsum-lahiran') ? 'show' : '' }}" 
+                        'klaim-pengobatan',
+                        'klaim-kecelakaan',
+                        'klaim-kematian',
+                        'klaim-purna-jabatan',
+                        'klaim-lumpsum-kacamata',
+                        'klaim-lumpsum-lahiran') ? 'show' : '' }}" 
                     aria-labelledby="headingInsurance" 
                     data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body">
                         <ul class="nav flex-column">
-                            <li><a href="/klaim_pengobatan" class="nav-link {{ request()->is('/klaim_pengobatan') ? 'active' : '' }}">Pengobatan</a></li>
-                            <li><a href="/klaim_kecelakaan" class="nav-link {{ request()->is('/klaim_kecelakaan') ? 'active' : '' }}">Kecelakaan</a></li>
-                            <li><a href="/klaim_kematian" class="nav-link {{ request()->is('/klaim_kematian') ? 'active' : '' }}">Kematian</a></li>
-                            <li><a href="/klaim_purna-jabatan" class="nav-link {{ request()->is('/klaim_purna-jabatan') ? 'active' : '' }}">Purna Jabatan</a></li>
-                            <li><a href="/klaim_lumpsum-kacamata" class="nav-link {{ request()->is('/klaim_lumpsum-kacamata') ? 'active' : '' }}">Lumpsum Kacamata</a></li>
-                            <li><a href="/klaim_lumpsum-lahiran" class="nav-link {{ request()->is('/klaim_lumpsum-lahiran') ? 'active' : '' }}">Lumpsum Lahiran</a></li>
+                            <li><a href="/klaim-pengobatan" class="nav-link {{ request()->is('klaim-pengobatan') ? 'active' : '' }}">Pengobatan</a></li>
+                            <li><a href="/klaim-kecelakaan" class="nav-link {{ request()->is('klaim-kecelakaan') ? 'active' : '' }}">Kecelakaan</a></li>
+                            <li><a href="/klaim-kematian" class="nav-link {{ request()->is('klaim-kematian') ? 'active' : '' }}">Kematian</a></li>
+                            <li><a href="/klaim-purna-jabatan" class="nav-link {{ request()->is('klaim-purna-jabatan') ? 'active' : '' }}">Purna Jabatan</a></li>
+                            <li><a href="/klaim-lumpsum-kacamata" class="nav-link {{ request()->is('klaim-lumpsum-kacamata') ? 'active' : '' }}">Lumpsum Kacamata</a></li>
+                            <li><a href="/klaim-lumpsum-lahiran" class="nav-link {{ request()->is('klaim-lumpsum-lahiran') ? 'active' : '' }}">Lumpsum Lahiran</a></li>
                         </ul>
                     </div>
                 </div>
@@ -162,6 +162,9 @@
     @endif
 
     <ul class="nav flex-column">
+        @if(auth()->check() && (auth()->user()->role === 'tko'))
+            <li><a href="/keluarga" class="nav-link {{ Request::is('/keluarga') ? 'active' : '' }}">Keluarga</a></li>
+        @endif
         {{-- <li><a href="/kepesertaan-anggota" class="nav-link {{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li> --}}
         <li><a href="/set-profil" class="nav-link {{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>
         <li><a href="/logout" class="nav-link text-danger">Logout</a></li>

@@ -49,8 +49,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('generate-code', [AuthController::class, 'generate']);
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
-    Route::get('berkas-pengobatan', [DashboardController::class, 'index']);
+    Route::get('berkas-pengobatan', [BerkasPengobatanController::class, 'index']);
     Route::get('restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
+
+    
+    Route::get('/klaim-pengobatan', [KlaimPengobatanController::class, 'index']);
+    Route::get('/klaim-kecelakaan', [KlaimKecelakaanController::class, 'index']);
+    Route::get('/klaim-kematian', [KlaimKematianController::class, 'index']);
+    Route::get('/klaim-purna-jabatan', [KlaimPurnaJabatanController::class, 'index']);
+    Route::get('/klaim-lumpsum-kacamata', [KlaimLumpsumKacamataController::class, 'index']);
+    Route::get('/klaim-lumpsum-lahiran', [KlaimLumpsumKelahiranController::class, 'index']);
+
+
+
+
 
     //Admin dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
@@ -172,7 +184,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Klaim Restitusi Karyawan / Pengajuana Reimburse
     Route::get('/admin/restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
-    Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store'])->name('pengajuan-klaim-purnajabatan.store');
+    Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
     Route::delete('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
@@ -203,6 +215,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
+    Route::get('/keluarga', [MasterDataKaryawanController::class, 'keluarga']);
     Route::get('set-profil', function () {
         return view('extras/set-profil');
     });

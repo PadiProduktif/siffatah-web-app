@@ -11,5 +11,17 @@ class Ekses extends Model
 
     protected $table = 'ekses';
     protected $primaryKey = 'id_ekses';
-    protected $fillable = ['id_ekses','id_member','id_badge','nama_karyawan','unit_kerja','nama_karyawan','unit_kerja','nama_pasien','deskripsi','tanggal_pengajuan','jumlah_ekses','filename','file_url'];
+    // Menghapus duplikasi dan memastikan hanya field yang diperlukan
+    protected $fillable = [
+        'id_member',
+        'id_badge',
+        'nama_karyawan',
+        'unit_kerja',
+        'nama_pasien',
+        'deskripsi',
+        'tanggal_pengajuan',
+        'jumlah_ekses',
+        'filename',
+        'file_url'
+    ];
 }
