@@ -18,28 +18,38 @@
 
                 <th>ID Badge</th>
                 <th>Nama Karyawan</th>
-                <th>Unit Kerja</th>
-                <th>Asuransi</th>
-                <th>Rumah Sakit/Klinik</th>
-                <th>Tanggal Pengajuan</th>
-                <th>Nominal</th>
-                <th>Deskripsi</th>
+                <th>Jabatan Karyawan</th>
+                <th>Nama Anggota Keluarga</th>
+                <th>Hubungan Keluarga</th>
+                <th>nominal</th>
+                <th>RS/Klinik</th>
+                <th>Urgensi</th>
+                <th>No Surat RS</th>
+                <th>Tanggal Pengobatan</th>
+                <th>Status</th>
+                <th>Keterangan</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($obat as $key1 => $value1)
                 <tr>
-                    <td>{{ $key1+1 }}</td>
+                    {{-- <td>{{ $key1+1 }}</td> --}}
+                    <td><input type="checkbox" class="rowCheckbox" value="{{ $value1->id_berkas_pengobatan }}"></td>
                     <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
-                    <td>{{ $value1->id_badge }}</td>
+                    <td>{{ $value1->nama_karyawan }}</td>
+                    <td>{{ $value1->jabatan_karyawan }}</td>
+                    <td>{{ $value1->nama_anggota_keluarga }}</td>
+                    <td>{{ $value1->deskripsi }}</td>
+                    <td>{{ $value1->nominal }}</td>
+                    <td>{{ $value1->rs_klinik }}</td>
+                    <td>{{ $value1->urgensi }}</td>
+                    <td>{{ $value1->no_surat_rs }}</td>
+                    <td>{{ $value1->tanggal_pengobatan }}</td>
+                    <td>{{ $value1->status }}</td>
+                    <td>{{ $value1->keterangan }}</td>
+
+
                 </tr>
             @empty
                 <tr>
@@ -73,27 +83,53 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-md-8">
+                            <label for="nama-asuransi" class="form-label">Nama Karyawan</label>
+                            <input type="text" class="form-control" id="nama-asuransi" name="nama_karyawan">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nama-asuransi" class="form-label">Jabatan Karyawan</label>
+                            <input type="text" class="form-control" id="nama-asuransi" name="jabatan_karyawan">
+                        </div>
+                        <div class="col-md-8">
+                            <label for="nama-asuransi" class="form-label">Nama Anggota Keluarga</label>
+                            <input type="text" class="form-control" id="nama-asuransi" name="nama_anggota_keluarga">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nama-asuransi" class="form-label">Hubungan Keluarga</label>
+                            <input type="text" class="form-control" id="nama-asuransi" name="hubungan_keluarga">
+                        </div>
 
-                        <div class="col-md-12">
-                            <label for="nama-asuransi" class="form-label">Asuransi</label>
-                            <input type="text" class="form-control" id="nama-asuransi" name="nama_asuransi">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="rs-klinik" class="form-label">Rumah Sakit / Klinik</label>
-                            <input type="text" class="form-control" id="rs-klinik" name="rs_klinik">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="tanggal-pengajuan" class="form-label">Tanggal Pengajuan</label>
-                            <input type="date" class="form-control" id="tanggal-pengajuan" name="tanggal_pengajuan" value="{{ date('Y-m-d') }}">
-                        </div>
                         <div class="col-md-4">
                             <label for="nominal" class="form-label">Nominal</label>
                             <input type="text" id="nominal" class="form-control" name="nominal">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="nominal" class="form-label">RS / Klinik</label>
+                            <input type="text" id="nominal" class="form-control" name="rs_klinik">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nominal" class="form-label"> Urgensi</label>
+                            <select class="form-control" id="urgensi" name="urgensi" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nominal" class="form-label"> No Surat RS</label>
+                            <input type="text" id="nominal" class="form-control" name="no_suras_rs">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="tanggal-pengajuan" class="form-label">Tanggal Pengobatan</label>
+                            <input type="date" class="form-control" id="tanggal-pengajuan" name="tanggal_pengobatan" value="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col-12">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
                             <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" ></textarea>
                         </div>
+                        
                         <div class="col-md-12">
                             <div id="attachmentDropzone" class="dropzone">
                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
@@ -516,7 +552,7 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         if (document.querySelector('#attachmentDropzone')) {
             const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/pengajuan-klaim-pengobatan/upload-temp", // Endpoint sementara untuk upload
+                url: "/berkas-pengobatan/upload-temp", // Endpoint sementara untuk upload
                 paramName: "file",
                 headers: {
                     'X-CSRF-TOKEN': token
@@ -570,7 +606,7 @@
 
                             // Kirim AJAX request untuk menghapus file di server
                             $.ajax({
-                                url: "/pengajuan-klaim-pengobatan/delete-temp",
+                                url: "/berkas-pengobatan/delete-temp",
                                 type: "POST",
                                 data: {
                                     _token: token,

@@ -76,7 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store'])->name('berkas-pengobatan.store');
     Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit'])->name('berkas-pengobatan.edit');
     Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update'])->name('berkas-pengobatan.update');
-    
     Route::post('/berkas-pengobatan/upload-temp', [BerkasPengobatanController::class, 'uploadTemp'])->name('berkas-pengobatan-upload.temp');
     Route::post('/berkas-pengobatan/delete-temp', [BerkasPengobatanController::class, 'deleteTemp'])->name('berkas-pengobatan-delete.temp');
     
@@ -168,7 +167,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Klaim Restitusi Karyawan / Pengajuana Reimburse
     Route::get('/admin/restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
-    Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
+    Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store'])->name('pengajuan-klaim-purnajabatan.store');
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
     Route::delete('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);

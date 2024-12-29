@@ -12,7 +12,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"> --}}
         {{-- <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.1/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" /> --}}
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
@@ -47,6 +48,49 @@
             .select2-dropdown {
                 z-index: 1060 !important; /* Pastikan dropdown juga lebih tinggi */
             }
+            .uploaded-file {
+                display: inline-block;
+                margin: 10px;
+                text-align: center;
+            }
+            
+            .uploaded-file img {
+                width: 150px;
+                height: 150px;
+                object-fit: cover;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+            .uploaded-file p {
+                margin-top: 5px;
+                font-size: 14px;
+            }
+            .detailRow {
+                cursor: pointer;
+            } /* Pointer berubah menjadi tangan */
+
+            .detailRow:hover {
+                background-color: #f8f9fa; /* Highlight baris ketika dihover */
+            }
+
+            .accordion-button {
+                /* background: none; */
+                /* border: none; */
+                padding: 10px;
+                /* font-size: inherit; */
+                /* color: #0d6efd; */
+                /* text-decoration: none; */
+                /* display: inline; */
+            }
+            
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                /* background-color: #00FC74; */}
         </style>
         @stack('styles')
     </head>

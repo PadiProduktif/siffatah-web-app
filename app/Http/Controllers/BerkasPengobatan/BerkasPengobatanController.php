@@ -7,6 +7,9 @@ use App\Models\BerkasPengobatan\BerkasPengobatan;
 use App\Models\MasterData\DataKaryawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class BerkasPengobatanController extends Controller
 {
@@ -43,11 +46,17 @@ class BerkasPengobatanController extends Controller
             $obat = BerkasPengobatan::create([
                 'id_berkas_pengobatan' => rand(10, 99999999),
                 'id_badge' => $request->input('id_badge'),
-                'nama_asuransi' => $request->input('nama_asuransi'),
-                'rs_klinik' => $request->input('rs_klinik'),
-                'tanggal_pengajuan' => $request->input('tanggal_pengajuan'),
-                'nominal' => $cleanedValue,
+                'nama_karyawan' => $request->input('nama_karyawan'),
+                'nama_anggot_keluarga' => $request->input('nama_anggot_keluarga'),
+                'hubungan_keluarga' => $request->input('hubungan_keluarga'),
                 'deskripsi' => $request->input('deskripsi'),
+                'nominal' => $cleanedValue,
+                'rs_klinik' => $request->input('rs_klinik'),
+                'urgensi' => $request->input('urgensi'),
+                'no_surat_rs' => $request->input('no_surat_rs'),
+                'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
+                'deskripsi' => $request->input('deskripsi'),
+                'file_url' => $request->uploaded_files,
                 'updated_at' => now(),
                 'updated_by' => auth()->user()->role,
                 'created_at' => now(),
@@ -55,9 +64,19 @@ class BerkasPengobatanController extends Controller
             ]);
             
             // Log::info("Menambah data berkas pengobatan Request Data: ", $request->all());
+            
+            Log::info("Menambah data Berkas Pengobatan Request Data: ", $request->all());
             return redirect('/admin/berkas-pengobatan/')->with('success', 'Data berhasil disimpan.');
-        } catch (\Throwable $th) {
-            return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        } catch (\Throwable $e) {
+            // return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            Log::error("Error creating data: " . $e->getMessage());
+
+            // Return error response
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create data',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
     
@@ -68,7 +87,7 @@ class BerkasPengobatanController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/berkas-pengobatan'), $fileName);
+            $file->move(public_path('uploads/BerkasPengobatan'), $fileName);
         
             return response()->json([
                 'fileName' => $fileName
@@ -88,7 +107,7 @@ class BerkasPengobatanController extends Controller
             Log::info("File Terhapus dari Public Upload Klaim Kecelakaan Temp: " . json_encode($filename));
             return response()->json(['success' => true]);
         }else{
-            $filePath = public_path("uploads/berkas-pengobatan/{$filename}");
+            $filePath = public_path("uploads/BerkasPengobatan/{$filename}");
             unlink($filePath);
             Log::info("File Terhapus dari Public Upload Klaim Pengobatan: " . json_encode($filename));
             return response()->json(['success' => true]);
