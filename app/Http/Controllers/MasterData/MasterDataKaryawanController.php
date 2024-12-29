@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use \DateTime;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class MasterDataKaryawanController extends Controller
@@ -54,17 +55,17 @@ class MasterDataKaryawanController extends Controller
         $dataKaryawan['keluarga'] = $dataKeluarga;
 
 
-        $dataImages = [
-            // [
-            //     'name' => 'KTP',
-            //     'url' => 'https://picsum.photos/id/237/200/300'
-            // ],
-            // [
-            //     'name' => 'KK',
-            //     'url' => 'https://picsum.photos/id/237/200/300'
-            // ],
-        ];
-        $dataKaryawan['files'] = $dataImages;
+        // $dataImages = [
+        //     // [
+        //     //     'name' => 'KTP',
+        //     //     'url' => 'https://picsum.photos/id/237/200/300'
+        //     // ],
+        //     // [
+        //     //     'name' => 'KK',
+        //     //     'url' => 'https://picsum.photos/id/237/200/300'
+        //     // ],
+        // ];
+        // $dataKaryawan['files'] = $dataImages;
 
         
         // dd(
@@ -78,6 +79,11 @@ class MasterDataKaryawanController extends Controller
         //     $dataKaryawan,
         // );
         return view('extras/master-data-karyawan-detail', compact('dataKaryawan'));
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Failed to retrieve data.',
+        //     'data' => $dataKaryawan
+        // ], 500);
     }
 
     public function store(Request $request)
@@ -120,6 +126,106 @@ class MasterDataKaryawanController extends Controller
         }
     }
 
+    
+    public function uploadTemp(Request $request)
+    {
+    
+        // return response()->json(['error' => 'No file uploaded'], 400);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('/uploads/MasterDataKaryawan/Attachments'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+        
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("/uploads/MasterDataKaryawan/Attachments/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
+    }
+
+    public function updateBerkas(Request $request, string $id)
+    {
+
+
+        // Log request data untuk debug
+        Log::info('Updating Attachment Data Karyawan: ' . $id . ', Request Data: ', $request->all());
+
+        // Decode uploaded_files dan removed_files
+        $uploadedFiles = $request->input('uploaded_files', '[]');
+        $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+
+        $removedFiles = $request->input('removed_files', '[]');
+        $removedFiles = json_decode($removedFiles, true) ?? [];
+
+        Log::info('Decoded Uploaded Files:', $uploadedFiles);
+        Log::info('Decoded Removed Files:', $removedFiles);
+
+        // Pastikan uploadedFiles dan removedFiles adalah array
+        $uploadedFiles = is_array($uploadedFiles) ? $uploadedFiles : [];
+        $removedFiles = is_array($removedFiles) ? $removedFiles : [];
+
+        // Ambil data klaim dari database
+        $klaim = DataKaryawan::findOrFail($id);
+        $currentFiles = json_decode($klaim->files, true);
+        if (!is_array($currentFiles)) {
+            $currentFiles = [];
+        }
+
+        // Log data awal
+        Log::info('Existing Files:', $currentFiles);
+
+        // Hapus file dari database dan server jika ada dalam $removedFiles
+        if (!empty($removedFiles)) {
+            foreach ($removedFiles as $file) {
+                $filePath = public_path('uploads/MasterDataKaryawan/Attachments/' . $file);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                    Log::info('File removed from server:', ['file' => $filePath]);
+                }
+            }
+            $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+        }
+
+        // Tambahkan file baru ke array yang ada
+        if (!empty($uploadedFiles)) {
+            $currentFiles = array_merge($currentFiles, $uploadedFiles);
+        }
+
+        // Hilangkan duplikat file dan reset index array
+        $finalFiles = array_values(array_unique($currentFiles));
+
+        // Update database
+        $klaim->update([
+            'files' => json_encode($finalFiles)
+        ]);
+
+        // Log hasil akhir
+        Log::info('Updated Files:', $finalFiles);
+
+        return redirect()->back()->with('success', 'Data berhasil di update!');
+
+        
+    }
 //     public function uploadExcel(Request $request)
 // {
 //     // Validasi file unggahan
