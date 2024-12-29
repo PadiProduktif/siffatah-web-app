@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,5 +14,28 @@ class User extends Authenticatable
     protected $table = 'is_users';
     protected $primaryKey = 'id_user';
 
-    protected $fillable = ['username','fullname','password','role','status','verify_key','active'];
+    // Kolom yang dapat diisi
+    protected $fillable = [
+        'username',
+        'fullname',
+        'password',
+        'role',
+        'status',
+        'verify_key',
+        'active',
+
+        'created_by',
+        'updated_by'
+    ];
+
+    // Kolom yang disembunyikan dari array atau JSON
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    // Tipe data yang harus di-cast
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 }
