@@ -119,7 +119,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="nominal" class="form-label"> No Surat RS</label>
-                            <input type="text" id="nominal" class="form-control" name="no_suras_rs">
+                            <input type="text" id="no_surat_rs" class="form-control" name="no_surat_rs">
                         </div>
                         <div class="col-md-4">
                             <label for="tanggal-pengajuan" class="form-label">Tanggal Pengobatan</label>
