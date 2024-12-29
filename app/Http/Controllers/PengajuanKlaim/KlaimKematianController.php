@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PengajuanKlaim\klaim_kematian;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -19,8 +20,24 @@ class KlaimKematianController extends Controller
     {
         try {       
             
-            $data['pengajuanKlaim'] = Klaim_kematian::all();
-            return view('dashboard/pengajuan-klaim/pengajuan-klaim-kematian', $data);
+            // $data['pengajuanKlaim'] = Klaim_kematian::all();
+            // return view('dashboard/pengajuan-klaim/pengajuan-klaim-kematian', $data);
+
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $Klaim_kematian = Klaim_kematian::orderBy('updated_at', 'desc');
+
+            if (auth()->user()->role === 'tko') {
+                $Klaim_kematian->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['pengajuanKlaim'] = $Klaim_kematian->get();
+            $data['karyawan'] = $karyawan->get();
+
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-kematian', [
+                'pengajuanKlaim' => $data['pengajuanKlaim'],
+                'karyawan' => $data['karyawan'],
+            ]);
 
 
         } catch (\Exception $e) {

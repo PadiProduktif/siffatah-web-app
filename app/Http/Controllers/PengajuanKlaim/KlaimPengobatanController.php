@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanKlaim\klaim_pengobatan;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -18,10 +19,22 @@ class KlaimPengobatanController extends Controller
      */
     public function index()
     {
-        try {       
-            $data['pengajuanKlaim'] = klaim_pengobatan::all();
-            return view('dashboard/pengajuan-klaim/pengajuan-klaim-pengobatan', $data);
+        try {
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $klaim_pengobatan = klaim_pengobatan::orderBy('updated_at', 'desc');
 
+            if (auth()->user()->role === 'tko') {
+                $klaim_pengobatan->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['pengajuanKlaim'] = $klaim_pengobatan->get();
+            $data['karyawan'] = $karyawan->get();
+
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-pengobatan', [
+                'pengajuanKlaim' => $data['pengajuanKlaim'],
+                'karyawan' => $data['karyawan'],
+            ]);
 
         } catch (\Exception $e) {
             // Log error for debugging

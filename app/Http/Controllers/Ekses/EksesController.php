@@ -16,11 +16,13 @@ class EksesController extends Controller
     public function index()
     {
         try {
+            $query = Ekses::orderBy('updated_at', 'desc'); // Base query with ordering
+
             if (auth()->user()->role === 'tko') {
-                $data['ekses'] = Ekses::where('id_badge', auth()->user()->username)->get();
-            } else {
-                $data['ekses'] = Ekses::all();
+                $query->where('id_badge', auth()->user()->username); // Apply condition for 'tko' role
             }
+
+            $data['ekses'] = $query->get(); // Execute the query
             
             return view('dashboard/ekses' ,$data); 
         } catch (\Exception $e) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanKlaim\klaim_lumpsum_kacamata;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -19,8 +20,25 @@ class KlaimLumpsumKacamataController extends Controller
     {
         try {       
             
-            $data['pengajuanKlaim'] = klaim_lumpsum_kacamata::all();
-            return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kacamata', $data);
+            // $data['pengajuanKlaim'] = klaim_lumpsum_kacamata::all();
+            // return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kacamata', $data);
+
+            
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $klaim_lumpsum_kacamata = klaim_lumpsum_kacamata::orderBy('updated_at', 'desc');
+
+            if (auth()->user()->role === 'tko') {
+                $klaim_lumpsum_kacamata->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['pengajuanKlaim'] = $klaim_lumpsum_kacamata->get();
+            $data['karyawan'] = $karyawan->get();
+
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kacamata', [
+                'pengajuanKlaim' => $data['pengajuanKlaim'],
+                'karyawan' => $data['karyawan'],
+            ]);
 
 
         } catch (\Exception $e) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PengajuanKlaim;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanKlaim\klaim_lumpsum_kelahiran;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -19,8 +20,26 @@ class KlaimLumpsumKelahiranController extends Controller
     {
         try {       
             
-            $data['pengajuanKlaim'] = klaim_lumpsum_kelahiran::all();
-            return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kelahiran', $data);
+            // $data['pengajuanKlaim'] = klaim_lumpsum_kelahiran::all();
+            // return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kelahiran', $data);
+
+            
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $klaim_lumpsum_kelahiran = klaim_lumpsum_kelahiran::orderBy('updated_at', 'desc');
+
+            if (auth()->user()->role === 'tko') {
+                $klaim_lumpsum_kelahiran->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['pengajuanKlaim'] = $klaim_lumpsum_kelahiran->get();
+            $data['karyawan'] = $karyawan->get();
+
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-lumpsum-kelahiran', [
+                'pengajuanKlaim' => $data['pengajuanKlaim'],
+                'karyawan' => $data['karyawan'],
+            ]);
+
 
 
         } catch (\Exception $e) {

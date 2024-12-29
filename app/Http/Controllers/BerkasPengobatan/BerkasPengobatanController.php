@@ -16,13 +16,24 @@ class BerkasPengobatanController extends Controller
     public function index()
     {
         try {
-            $obat = BerkasPengobatan::orderBy('id_berkas_pengobatan', 'desc')->get();
-            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->get();
-    
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $obat = BerkasPengobatan::orderBy('updated_at', 'desc');
+
+            if (auth()->user()->role === 'tko') {
+                $obat->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['obat'] = $obat->get(); // Execute the query
+            $data['karyawan'] = $karyawan->get(); // Execute the query
+
+            // dd(
+            //     $data['obat']
+            // );
             // Mengembalikan view dengan data yang diambil
             return view('dashboard.berkas-pengobatan', [
-                'obat' => $obat,
-                'karyawan' => $karyawan,
+                'obat' => $data['obat'], // Use $data['obat'] instead of $obat
+                'karyawan' => $data['karyawan'], // Use $data['obat'] instead of $obat
             ]);
         } catch (\Exception $e) {
             // Log error untuk debugging
@@ -42,11 +53,16 @@ class BerkasPengobatanController extends Controller
     {
         try {
             $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
-        
+
+            $karyawan = DataKaryawan::where('id_badge', $request->input('id_badge'))
+                ->orderBy('nama_karyawan', 'asc')
+                ->first(); // Ambil data pertama yang sesuai dengan kondisi
+
+            // dd($karyawan); // Menampilkan data karyawan
             $obat = BerkasPengobatan::create([
                 'id_berkas_pengobatan' => rand(10, 99999999),
                 'id_badge' => $request->input('id_badge'),
-                'nama_karyawan' => $request->input('nama_karyawan'),
+                'nama_karyawan' => $karyawan['nama_karyawan'],
                 'jabatan_karyawan' => $request->input('jabatan_karyawan'),
                 'nama_anggota_keluarga' => $request->input('nama_anggota_keluarga'),
                 'hubungan_keluarga' => $request->input('hubungan_keluarga'),
@@ -70,15 +86,8 @@ class BerkasPengobatanController extends Controller
             Log::info("Menambah data Berkas Pengobatan Request Data: ", $request->all());
             return redirect('/admin/berkas-pengobatan/')->with('success', 'Data berhasil disimpan.');
         } catch (\Throwable $e) {
-            // return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
-            Log::error("Error creating data: " . $e->getMessage());
 
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to create data',
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
     }
     

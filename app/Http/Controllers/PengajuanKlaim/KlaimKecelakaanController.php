@@ -21,9 +21,21 @@ class KlaimKecelakaanController extends Controller
     public function index()
     {
         try {       
-            $dataKaryawan = DataKaryawan::all(); // Ambil semua data karyawan
-            $data['pengajuanKlaim'] = Klaim_kecelakaan::all();
-            return view('dashboard/pengajuan-klaim/pengajuan-klaim-kecelakaan', $data);
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+            $Klaim_kecelakaan = Klaim_kecelakaan::orderBy('updated_at', 'desc');
+
+            if (auth()->user()->role === 'tko') {
+                $Klaim_kecelakaan->where('id_badge', auth()->user()->username);
+                $karyawan->where('id_badge', auth()->user()->username);
+            }
+
+            $data['pengajuanKlaim'] = $Klaim_kecelakaan->get();
+            $data['karyawan'] = $karyawan->get();
+
+            return view('dashboard/pengajuan-klaim/pengajuan-klaim-kecelakaan', [
+                'pengajuanKlaim' => $data['pengajuanKlaim'],
+                'karyawan' => $data['karyawan'],
+            ]);
 
 
         } catch (\Exception $e) {
