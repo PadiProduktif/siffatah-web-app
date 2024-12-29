@@ -2,21 +2,47 @@
 @section('title', 'Restitusi')
 @section('content')
 
+        {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.1/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" /> --}}
+
+<style>
+    
+    .select2-container--open {
+        z-index: 1060 !important; /* Pastikan lebih tinggi dari modal */
+    }
+    .select2-dropdown {
+        z-index: 1060 !important; /* Pastikan dropdown juga lebih tinggi */
+    }
+    
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 0.375rem; /* Sesuaikan dengan border-radius Bootstrap 5 */
+    }
+    
+    .select2-container {
+        z-index: 1050; /* Pastikan ini lebih tinggi dari modal Bootstrap */
+    }
+    .select2-dropdown {
+        z-index: 1060 !important; /* Pastikan dropdown juga lebih tinggi */
+    }
+</style>
+    
     <div class="card">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>RESTITUSI KARYAWAN</h2>
                 <span>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importKaryawanModal">
+                    {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importKaryawanModal">
                         <i class="bi bi-plus-lg"></i> Import
-                    </button>
+                    </button> --}}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
                         <i class="bi bi-plus-lg"></i> Tambah Data Baru
                     </button>
                 </span>
             </div>
         </div>
-        <div class="card-body table-responsive">
+
+        
+        <div class="card-body">
             <table id="klaimTable" class="table">
                 <thead class="table-light">
                     <tr class="text-center">
@@ -25,13 +51,14 @@
                         <th class="align-middle">Karyawan</th>
                         <th class="align-middle">Deskripsi</th>
                         <th class="align-middle">Nomor</th>
-                        <th class="align-middle">Tanggal</th>
+                        <th class="align-middle" style="width: 5vw">Tanggal</th>
                         <th class="align-middle">Nominal</th>
                         <th class="align-middle">Urgensi</th>
                         <th class="align-middle">Status</th>
                         <th class="align-middle">Opt</th>
                     </tr>
                 </thead>
+                
                 <tbody>
                     @forelse ($restitusi as $key1 => $data1)
                         <tr class="text-center ">
@@ -92,13 +119,55 @@
                                         <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="addKaryawanModalLabel">Update Data</h5>
+                                                    <h5 class="modal-title" id="addKaryawanModalLabel">Update Restitusi {{ $data1->no_surat_rs }}, a.n. {{ $data1->nama_karyawan }}</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-                                                <form action="/admin/restitusi_karyawan/tambah" method="POST">
+                                                <form action="/admin/restitusi_karyawan/update/{{ $data1->id_pengajuan }}" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
-                                                        {{ $data1->id_pengajuan }}
+                                                        <div class="row text-start">
+
+                                                            <div class="col-md-3">
+                                                                <label for="tanggal_pengobatan" class="form-label">Tanggal pengobatan</label>
+                                                                <input type="date" class="form-control" id="tanggal_pengobatan" name="tanggal_pengobatan"
+                                                                value="{{ date('Y-m-d') }}" required>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label for="no_surat_rs" class="form-label">No. Surat</label>
+                                                                <input type="text" class="form-control" id="no_surat_rs" name="no_surat_rs" value="{{ $data1->no_surat_rs }}" required>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label for="urgensi" class="form-label">Urgensi</label>
+                                                                <select class="form-control" id="urgensi" name="urgensi">
+                                                                    <option value="Low" {{ $data1->urgensi == 'Low' ? 'selected' : '' }}>Low</option>
+                                                                    <option value="Medium" {{ $data1->urgensi == 'Medium' ? 'selected' : '' }}>Medium</option>
+                                                                    <option value="High" {{ $data1->urgensi == 'High' ? 'selected' : '' }}>High</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label for="nominal" class="form-label">Nominal</label>
+                                                                <input type="number" class="form-control" id="nominal" name="nominal" step="any" value="{{ $data1->nominal }}" required>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <label for="rumah_sakit" class="form-label">Rumah sakit</label>
+                                                                <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" value="{{ $data1->rumah_sakit }}" required>
+                                                            </div>
+
+                                                            <div class="col-12">
+                                                                <label for="deskripsi" class="form-label">Deskripsi</label>
+                                                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required>{{ $data1->deskripsi }}</textarea>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
+                                                                <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
+                                                            </div>
+                                                            
+                                                            <div class="col-md-12">
+                                                                <div id="attachmentDropzone" class="dropzone">
+                                                                    <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -120,7 +189,7 @@
                                     @elseif (auth()->user()->role === 'vp_osdm' && $data1->status_pengajuan === 2)
                                         <form action="{{ route('approval-vp', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
                                             @csrf
-                                            @method('PUT') <!-- Menggunakan metode PUT -->
+                                            @method('PUT')
                                             <button type="submit" class="btn btn-sm btn-success w-100">Approve</button>
                                         </form>
                                     @endif
@@ -132,22 +201,21 @@
                                 
                             </td>
                         </tr>
-
-                        
                     @empty
                         <tr>
                             <td colspan="6" class="text-center">Tidak ada data karyawan</td>
                         </tr>
                     @endforelse
-                    
                 </tbody>
+
             </table>
-        
         </div>
+        
     </div>
 
+
     <!-- MODAL ADD -->
-    <div class="modal fade" id="addKaryawanModal" tabindex="-1" aria-labelledby="addKaryawanModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addKaryawanModal"  aria-labelledby="addKaryawanModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -155,22 +223,16 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/admin/restitusi_karyawan/tambah" method="POST">
-                {{-- <form action="{{ route('admin.restitusi_karyawan.store') }}" method="POST"> --}}
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label for="id_badge" class="form-label">ID Badge</label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="id_badge" 
-                                    name="id_badge" 
-                                    value="{{ old('id_badge', auth()->user()->role === 'tko' ? auth()->user()->username : '') }}" 
-                                    placeholder="{{ auth()->user()->role === 'tko' ? auth()->user()->username : 'Masukkan ID Badge' }}" 
-                                    {{ auth()->user()->role === 'tko' ? 'disabled' : '' }} 
-                                    required
-                                >
+                                <label for="id-badge" class="form-label">Karyawan</label>
+                                <select id="id-badge" name="id_badge" class="form-control select2">
+                                    @foreach($karyawan as $data)
+                                        <option value="{{ $data->id_badge }}">{{ $data->nama_karyawan }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             
 
@@ -209,7 +271,12 @@
                                 <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                                 <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required></textarea>
                             </div>
-
+                            
+                            <div class="col-md-12">
+                                <div id="attachmentDropzone" class="dropzone">
+                                    <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                                </div>
+                            </div>          
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -221,13 +288,18 @@
         </div>
     </div>
 
-    {{-- MODAL IMPORT --}}
+    <!-- MODAL IMPORT -->
+
+
+
 
 @endsection
 
 
 
 @push('scripts')
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         function confirmDelete(id) {
             Swal.fire({
@@ -311,5 +383,14 @@
         $('#checkAll').change(function() {
             $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
         });
+
+        
+        // $(document).ready(function() {
+        //     $('.select2').select2({
+        //         theme: 'bootstrap-5', // Pastikan tema sesuai jika menggunakan Bootstrap 5
+        //         placeholder: "Pilih Karyawan",
+        //         allowClear: true
+        //     });
+        // });
     </script>
 @endpush
