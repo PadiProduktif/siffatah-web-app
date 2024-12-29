@@ -133,7 +133,6 @@
                 <button type="button" class="btn btn-success w-100 mt-2 mb-4" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
                     <i class="bi bi-plus-lg"></i> Tambah Anggota Baru
                 </button>
-
                 <div class="accordion-item mb-2">
                     <h2 class="accordion-header" id="headingOne">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">

@@ -11,6 +11,8 @@ class DataNonKaryawan extends Model
 
     protected $table = 'table_non_karyawan';
     protected $primaryKey = 'id_non_karyawan';
+    public $timestamps = false; // Ubah ke true jika menggunakan timestamps
+
     protected $fillable = [
         'id_non_karyawan',
         'badge_parent',

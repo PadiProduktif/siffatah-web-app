@@ -34,7 +34,9 @@ class MasterDataKaryawanController extends Controller
         $dataKaryawan = DataKaryawan::findOrFail($id);
 
         // Cari data keluarga berdasarkan badge_parent
-        $dataKeluargaRAW = DataNonKaryawan::where('badge_parent', $dataKaryawan['id_badge'])->get();
+        $dataKeluargaRAW = DataNonKaryawan::where('badge_parent', $dataKaryawan['id_badge'])
+        ->orderBy('tanggal_lahir', 'desc')
+        ->get();
 
         $dataKeluarga = [
             'pasangan' => [],
