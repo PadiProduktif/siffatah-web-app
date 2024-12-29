@@ -4,105 +4,97 @@ namespace App\Http\Controllers\BerkasPengobatan;
 
 use App\Http\Controllers\Controller;
 use App\Models\BerkasPengobatan\BerkasPengobatan;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
 class BerkasPengobatanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         try {
-            
-            $obat = BerkasPengobatan::all();
+            $obat = BerkasPengobatan::orderBy('id_berkas_pengobatan', 'desc')->get();
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->get();
     
-            
-            // return response()->json([
-            //     'status' => 'success',
-            //     'message' => 'Data retrieved successfully.',
-            //     'data' => $obat
-            // ], 200);
-            return view('dashboard/berkas-pengobatan');
-            
+            // Mengembalikan view dengan data yang diambil
+            return view('dashboard.berkas-pengobatan', [
+                'obat' => $obat,
+                'karyawan' => $karyawan,
+            ]);
         } catch (\Exception $e) {
-            
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to retrieve data.',
-                'error' => $e->getMessage()
-            ], 500);
+            // Log error untuk debugging
+            \Log::error('Error fetching data in BerkasPengobatanController@index: ' . $e->getMessage());
+    
+            // Redirect ke halaman error atau tampilkan pesan ke user
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data.');
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-
+        try {
+            $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
         
-    $validatedData = $request->validate([
-        'id_badge' => 'required',
-        'nama_karyawan' => 'required',
-        'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048' 
-    ]);
-
-    try {
-        
-        $fileName = null;
+            $obat = BerkasPengobatan::create([
+                'id_berkas_pengobatan' => rand(10, 99999999),
+                'id_badge' => $request->input('id_badge'),
+                'nama_asuransi' => $request->input('nama_asuransi'),
+                'rs_klinik' => $request->input('rs_klinik'),
+                'tanggal_pengajuan' => $request->input('tanggal_pengajuan'),
+                'nominal' => $cleanedValue,
+                'deskripsi' => $request->input('deskripsi'),
+                'updated_at' => now(),
+                'updated_by' => auth()->user()->role,
+                'created_at' => now(),
+                'created_by' => auth()->user()->role,
+            ]);
+            
+            // Log::info("Menambah data berkas pengobatan Request Data: ", $request->all());
+            return redirect('/admin/berkas-pengobatan/')->with('success', 'Data berhasil disimpan.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+    
+    public function uploadTemp(Request $request)
+    {
+    
+        // return response()->json(['error' => 'No file uploaded'], 400);
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $fileName = rand(10, 99999999) . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/BerkasPengobatan/'), $fileName);
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/berkas-pengobatan'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
         }
-
         
-        $obat = BerkasPengobatan::create([
-            'id_berkas_pengobatan' => rand(10, 99999999),
-            'id_badge' => $request->input('id_badge'),
-            'nama_karyawan' => $request->input('nama_karyawan'),
-            'jabatan_karyawan' => $request->input('jabatan_karyawan'),
-            'nama_anggota_keluarga' => $request->input('nama_anggota_keluarga'),
-            'hubungan_keluarga' => $request->input('hubungan_keluarga'),
-            'deskripsi' => $request->input('deskripsi'),
-            'nominal' => $request->input('nominal'),
-            'rs_klinik' => $request->input('rs_klinik'),
-            'urgensi' => $request->input('urgensi'),
-            'no_surat_rs' => $request->input('no_surat_rs'),
-            'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
-            'status' => $request->input('status'),
-            'keterangan' => $request->input('keterangan'),
-            'file_url' => $fileName,
-        ]);
-
-        
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data has been successfully added.',
-            'file_message' => $fileName ? 'File uploaded successfully.' : 'No file uploaded.',
-            'data' => $obat
-        ], 201); 
-
-    } catch (\Exception $e) {
-        
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to add data.',
-            'error' => $e->getMessage()
-        ], 500); 
+        return response()->json(['error' => 'No file uploaded'], 400);
     }
-
-                
+    
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+    
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Kecelakaan Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/berkas-pengobatan/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Pengobatan: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['error' => 'File not found'], 404);
     }
 
     /**

@@ -46,7 +46,7 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::middleware('auth:sanctum')->group(function () {
 
     // tko viewer
-    Route::get('generate-code', [MasterDataKaryawanController::class, 'generate']);
+    Route::get('generate-code', [AuthController::class, 'generate']);
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('ekses', [EksesController::class, 'index']);
     Route::get('berkas-pengobatan', [DashboardController::class, 'index']);
