@@ -88,6 +88,78 @@
                         </div>
                     </td>
                 </tr>
+
+                
+                <div class="modal fade" id="modalUpdate-{{ $value1->id_berkas_pengobatan }}" tabindex="-1" aria-labelledby="addKaryawanModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addKaryawanModalLabel">Update Berkas {{ $value1->no_surat_rs }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="/admin/berkas-pengobatan/update/{{ $value1->id_berkas_pengobatan }}" method="POST">
+                                @csrf
+                                <div class="modal-body">
+                                    <div class="row text-start">
+
+                                        <div class="col-md-4">
+                                            <label for="nama-asuransi" class="form-label">Jabatan Karyawan</label>
+                                            <input type="text" class="form-control" id="nama-asuransi" name="jabatan_karyawan" value="{{ $value1->jabatan_karyawan }}">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="nama-asuransi" class="form-label">Nama Anggota Keluarga</label>
+                                            <input type="text" class="form-control" id="nama-asuransi" name="nama_anggota_keluarga" value="{{ $value1->nama_anggota_keluarga }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="nama-asuransi" class="form-label">Hubungan Keluarga</label>
+                                            <input type="text" class="form-control" id="nama-asuransi" name="hubungan_keluarga" value="{{ $value1->hubungan_keluarga }}">
+                                        </div>
+                
+                                        <div class="col-md-4">
+                                            <label for="nominal" class="form-label">Nominal</label>
+                                            <input type="text" id="nominal" class="form-control" name="nominal" value="{{ $value1->nominal }}">
+                                        </div>
+                
+                                        <div class="col-md-4">
+                                            <label for="nominal" class="form-label">RS / Klinik</label>
+                                            <input type="text" id="nominal" class="form-control" name="rs_klinik" value="{{ $value1->rs_klinik }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="urgensi" class="form-label">Urgensi</label>
+                                            <select class="form-control" id="urgensi" name="urgensi">
+                                                <option value="Low" {{ $value1->urgensi == 'Low' ? 'selected' : '' }}>Low</option>
+                                                <option value="Medium" {{ $value1->urgensi == 'Medium' ? 'selected' : '' }}>Medium</option>
+                                                <option value="High" {{ $value1->urgensi == 'High' ? 'selected' : '' }}>High</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="nominal" class="form-label"> No Surat RS</label>
+                                            <input type="text" id="no_surat_rs" class="form-control" name="no_surat_rs" value="{{ $value1->no_surat_rs }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="tanggal-pengajuan" class="form-label">Tanggal Pengobatan</label>
+                                            <input type="date" class="form-control" id="tanggal-pengajuan" name="tanggal_pengobatan" value="{{ $value1->tanggal_pengobatan }}">
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="deskripsi" class="form-label">Deskripsi</label>
+                                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" >value="{{ $value1->deskripsi }}"</textarea>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <div id="attachmentDropzone" class="dropzone">
+                                                <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @empty
                 <tr>
                     <td colspan="6" class="text-center">Tidak ada data</td>

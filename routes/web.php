@@ -80,7 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store'])->name('berkas-pengobatan.store');
     Route::get('/admin/berkas-pengobatan/edit/{id}', [BerkasPengobatanController::class, 'edit'])->name('berkas-pengobatan.edit');
     Route::post('/admin/berkas-pengobatan/update/{id}', [BerkasPengobatanController::class, 'update'])->name('berkas-pengobatan.update');
-    // Route::delete('/admin/berkas-pengobatan/delete/{id}', [BerkasPengobatanController::class, 'destroy'])->name('berkas-pengobatan.destroy');
+    Route::delete('/admin/berkas-pengobatan/delete/{id}', [BerkasPengobatanController::class, 'destroy'])->name('berkas-pengobatan.destroy');
     Route::post('/berkas-pengobatan/upload-temp', [BerkasPengobatanController::class, 'uploadTemp'])->name('berkas-pengobatan-upload.temp');
     Route::post('/berkas-pengobatan/delete-temp', [BerkasPengobatanController::class, 'deleteTemp'])->name('berkas-pengobatan-delete.temp');
     
