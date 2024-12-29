@@ -218,7 +218,7 @@ class BerkasPengobatanController extends Controller
     {
         try {
             $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->first();
-            $obat->delete();
+        $obat->delete();
             return redirect('/admin/berkas-pengobatan/')->with('success', 'Data berhasil disimpan.');
         } catch (\Throwable $th) {
             return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
