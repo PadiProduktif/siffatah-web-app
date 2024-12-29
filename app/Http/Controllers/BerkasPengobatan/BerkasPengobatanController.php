@@ -57,6 +57,7 @@ class BerkasPengobatanController extends Controller
                 'no_surat_rs' => $request->input('no_surat_rs'),
                 'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
                 'deskripsi' => $request->input('deskripsi'),
+                'status' => 1,
                 'file_url' => $request->uploaded_files,
                 'updated_at' => now(),
                 'updated_by' => auth()->user()->role,
@@ -215,30 +216,22 @@ class BerkasPengobatanController extends Controller
      */
     public function destroy(string $id)
     {
-        
-        $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->first();
-
-        
-        if (!$obat) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data not found.',
-            ], 404); 
+        try {
+            $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->first();
+            $obat->delete();
+            return redirect('/admin/berkas-pengobatan/')->with('success', 'Data berhasil disimpan.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
 
-        
-        if ($obat->file_url && file_exists(public_path("uploads/BerkasPengobatan/{$obat->file_url}"))) {
-            unlink(public_path("uploads/BerkasPengobatan/{$obat->file_url}"));
-        }
 
         
-        $obat->delete();
+        // if ($obat->file_url && file_exists(public_path("uploads/BerkasPengobatan/{$obat->file_url}"))) {
+        //     unlink(public_path("uploads/BerkasPengobatan/{$obat->file_url}"));
+        // }
 
         
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data deleted successfully.',
-        ], 200); 
+
     }
 
 }

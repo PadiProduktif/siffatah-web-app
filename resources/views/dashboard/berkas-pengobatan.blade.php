@@ -2,14 +2,10 @@
 @section('title', 'Berkas Pengobatan')
 @section('content')
 
-<div class="container">
     <div class="d-flex justify-content-end align-items-center mb-4">
         <h4 class="me-auto">Berkas Pengobatan</h4>
         <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
     </div>
-</div>
-
-<div class="container">
     <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
     <table id="klaimTable" class="display">
         <thead>
@@ -18,7 +14,7 @@
 
                 <th>ID Badge</th>
                 <th>Nama Karyawan</th>
-                <th>Jabatan Karyawan</th>
+                {{-- <th>Jabatan Karyawan</th> --}}
                 <th>Nama Anggota Keluarga</th>
                 <th>Hubungan Keluarga</th>
                 <th>nominal</th>
@@ -26,8 +22,8 @@
                 <th>Urgensi</th>
                 <th>No Surat RS</th>
                 <th>Tanggal Pengobatan</th>
-                <th>Status</th>
                 <th>Keterangan</th>
+                <th>Status</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -38,16 +34,59 @@
                     <td><input type="checkbox" class="rowCheckbox" value="{{ $value1->id_berkas_pengobatan }}"></td>
                     <td>{{ $value1->id_badge }}</td>
                     <td>{{ $value1->nama_karyawan }}</td>
-                    <td>{{ $value1->jabatan_karyawan }}</td>
+                    {{-- <td>{{ $value1->jabatan_karyawan }}</td> --}}
                     <td>{{ $value1->nama_anggota_keluarga }}</td>
                     <td>{{ $value1->deskripsi }}</td>
-                    <td>{{ $value1->nominal }}</td>
+                    <td>{{ format_currency($value1->nominal) }}</td>
                     <td>{{ $value1->rs_klinik }}</td>
                     <td>{{ $value1->urgensi }}</td>
                     <td>{{ $value1->no_surat_rs }}</td>
-                    <td>{{ $value1->tanggal_pengobatan }}</td>
-                    <td>{{ $value1->status }}</td>
+                    <td>{{ format_date($value1->tanggal_pengobatan) }}</td>
                     <td>{{ $value1->keterangan }}</td>
+                    <td>
+                        @if ($value1->status == 1)
+                            <span class="badge bg-secondary">Menunggu</span>
+                        @elseif ($value1->status == 2)
+                            <span class="badge bg-warning">Verifikasi DR</span>
+                        @elseif ($value1->status == 3)
+                            <span class="badge bg-success">Verifikasi VP</span>
+                        @else
+                            <span class="badge bg-danger">Tidak Diketahui</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a 
+                                        href="#" 
+                                        class="dropdown-item" 
+                                        data-bs-toggle="modal" 
+                                        {{-- data-bs-target="#modalEditBerkas-{{ $data1->id_berkas_pengobatan }}"> --}}
+                                        data-bs-target="#modalUpdate-{{ $value1->id_berkas_pengobatan }}">
+                                        <i class="bi bi-file-text me-2"></i>Lihat Berkas
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ $value1->id_berkas_pengobatan }}')">
+                                        <i class="bi bi-trash me-2"></i>Hapus
+                                    </a>
+                                    
+                                    <!-- Form tersembunyi -->
+                                    <form id="delete-form-{{ $value1->id_berkas_pengobatan }}" 
+                                        action="/admin/berkas-pengobatan/delete/{{ $value1->id_berkas_pengobatan }}" 
+                                        method="POST" 
+                                        class="d-none">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
 
 
                 </tr>
@@ -277,6 +316,85 @@
     {{-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script> --}}
+
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+        
+        // Setup - add a text input to each footer cell
+        $('#klaimTable thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#klaimTable thead');
+
+        var table = $('#klaimTable').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            pageLength: 10, // Menampilkan 10 data per halaman
+            lengthMenu: [
+                [10, 25, 50, -1], 
+                [10, 25, 50, 'Semua']
+            ],
+            processing: true, // Menampilkan pesan saat memproses
+            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
+            initComplete: function () {
+                var api = this.api();
+
+                // For each column
+                api.columns().eq(0).each(function (colIdx) {
+                    // Skip action column (misalnya kolom terakhir yang berisi tombol aksi)
+                    if (colIdx == 9) return;
+
+                    // Add input field
+                    var cell = $('.filters th').eq(colIdx);
+                    var title = $(cell).text();
+                    $(cell).html('<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />');
+
+                    // Add filter functionality
+                    $('input', $('.filters th').eq(colIdx))
+                        .on('keyup change', function () {
+                            if (api.column(colIdx).search() !== this.value) {
+                                api
+                                    .column(colIdx)
+                                    .search(this.value)
+                                    .draw();
+                            }
+                        });
+                });
+            },
+            language: {
+                search: "Pencarian:",
+                lengthMenu: "Menampilkan _MENU_ data per halaman",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ Total Data",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 Total Data",
+                infoFiltered: "(difilter dari _MAX_ total data)",
+                zeroRecords: "Tidak ada data yang cocok",
+                processing: "Sedang memproses...",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        });
+    </script>
 
     <script>
         new Cleave('#nominal', {
