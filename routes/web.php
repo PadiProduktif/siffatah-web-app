@@ -62,7 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/master_data_karyawan/update/{id}', [MasterDataKaryawanController::class, 'update']);
     Route::delete('/admin/master_data_karyawan/delete/{id}', [MasterDataKaryawanController::class, 'destroy']);
     Route::post('/admin/master_data_karyawan/upload', [MasterDataKaryawanController::class, 'uploadExcel'])->name('master-data-karyawan.upload');
+    Route::post('/master_data_karyawan/upload-temp', [MasterDataKaryawanController::class, 'uploadTemp'])->name('master_data_Karyawan_upload.temp');
+    Route::post('/master_data_karyawan/delete-temp', [MasterDataKaryawanController::class, 'deleteTemp'])->name('master_data_Karyawan_delete.temp');
+    Route::post('/admin/master_data_karyawan/detail/update_berkas/{id}', [MasterDataKaryawanController::class, 'updateBerkas'])->name('master_data_karyawan.update_berkas');
 
+    
     //Master Data Non Karyawan
     Route::get('/admin/master_data_non_karyawan', [MasterDataNonKaryawanController::class, 'index']);
     Route::post('/admin/master_data_non_karyawan/tambah', [MasterDataNonKaryawanController::class, 'store']);
