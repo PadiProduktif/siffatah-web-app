@@ -45,6 +45,8 @@ class RestitusiKaryawanController extends Controller
 
     public function store(Request $request)
     {
+
+        $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
         try {
             $validatedData = $request->validate([
                 'id_badge' => 'required|string|max:255',
@@ -55,7 +57,7 @@ class RestitusiKaryawanController extends Controller
                 'tanggal_pengobatan' => 'nullable|date',
                 'urgensi' => 'nullable|string|in:Low,Medium,High',
                 'deskripsi' => 'nullable|string',
-                'nominal' => 'nullable|numeric',
+                // 'nominal' => 'nullable|numeric',
                 'rumah_sakit' => 'nullable|string|max:255',
                 'no_surat_rs' => 'nullable|string|max:255',
                 'keterangan_pengajuan' => 'nullable|string',
@@ -73,16 +75,18 @@ class RestitusiKaryawanController extends Controller
                 // 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'deskripsi' => $validatedData['deskripsi'],
                 // 'nominal' => $validatedData['nominal'],
-                'nominal' => $validatedData['nominal'],
+                'nominal' => $cleanedValue,
                 'rumah_sakit' => $validatedData['rumah_sakit'],
                 'urgensi' => $validatedData['urgensi'],
                 'no_surat_rs' => $validatedData['no_surat_rs'],
                 'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
                 'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
+                'url_file' => $request->uploaded_files,
                 // 'url_file' => $fileName,
                 'status_pengajuan' => '1',
             ]);
             return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
@@ -170,7 +174,41 @@ class RestitusiKaryawanController extends Controller
         return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
-    public function show(string $id){}
+    public function uploadTemp(Request $request)
+    {
+
+        // return response()->json(['error' => 'No file uploaded'], 400);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/Restitusi_Karyawan'), $fileName);
+        
+            return response()->json([
+                'fileName' => $fileName
+            ]);
+        }
+        
+        return response()->json(['error' => 'No file uploaded'], 400);
+    }
+
+    public function deleteTemp(Request $request)
+    {
+        $filename = $request->input('fileName');
+        $filePath = storage_path("app/public/temp/{$filename}");
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim Purna Jabatan Temp: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }else{
+            $filePath = public_path("uploads/Restitusi_Karyawan/{$filename}");
+            unlink($filePath);
+            Log::info("File Terhapus dari Public Upload Klaim PurnaJabatan: " . json_encode($filename));
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'File not found'], 404);
+    }
 
     public function edit(string $id)
     {
@@ -197,26 +235,83 @@ class RestitusiKaryawanController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            // Validate the request data
-            $validatedData = $request->validate([
-                // 'jabatan_karyawan' => 'nullable|string|max:255',
-                // 'nama_anggota_keluarga' => 'nullable|string|max:255',
-                // 'hubungan_keluarga' => 'nullable|string|max:255',
-                'deskripsi' => 'nullable|string',
-                'nominal' => 'nullable|numeric',
-                'rumah_sakit' => 'nullable|string|max:255',
-                'urgensi' => 'nullable|string|max:255',
-                'no_surat_rs' => 'nullable|string|max:255',
-                'tanggal_pengobatan' => 'nullable|date',
-                'keterangan_pengajuan' => 'nullable|string',
-                // 'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+
+            Log::info('Updating Attachment Data Karyawan: ' . $id . ', Request Data: ', $request->all());
+
+            // Decode uploaded_files dan removed_files
+            $uploadedFiles = $request->input('uploaded_files', '[]');
+            $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+
+            $removedFiles = $request->input('removed_files', '[]');
+            $removedFiles = json_decode($removedFiles, true) ?? [];
+
+            Log::info('Decoded Uploaded Files:', $uploadedFiles);
+            Log::info('Decoded Removed Files:', $removedFiles);
+
+            // Pastikan uploadedFiles dan removedFiles adalah array
+            $uploadedFiles = is_array($uploadedFiles) ? $uploadedFiles : [];
+            $removedFiles = is_array($removedFiles) ? $removedFiles : [];
+
+            // Ambil data klaim dari database
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+            $currentFiles = json_decode($restitusi->url_file, true);
+            if (!is_array($currentFiles)) {
+                $currentFiles = [];
+            }
+
+            // Log data awal
+            Log::info('Existing Files:', $currentFiles);
+
+            // Hapus file dari database dan server jika ada dalam $removedFiles
+            if (!empty($removedFiles)) {
+                foreach ($removedFiles as $file) {
+                    $filePath = public_path('uploads/MasterDataKaryawan/Attachments/' . $file);
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                        Log::info('File removed from server:', ['file' => $filePath]);
+                    }
+                }
+                $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+            }
+
+            // Tambahkan file baru ke array yang ada
+            if (!empty($uploadedFiles)) {
+                $currentFiles = array_merge($currentFiles, $uploadedFiles);
+            }
+
+            // Hilangkan duplikat file dan reset index array
+            $finalFiles = array_values(array_unique($currentFiles));
+
+      
+            $restitusi->update([
+                'url_file' => json_encode($finalFiles),
+                'rumah_sakit' => $request->rumah_sakit,
+                'urgensi' => $request->urgensi,
+                'no_surat_rs' => $request->no_surat_rs,
+                'tanggal_pengobatan' => $request->tanggal_pengobatan,
+                'keterangan_pengajuan' => $request->keterangan_pengajuan,
+                'deskripsi' => $request->deskripsi,
             ]);
 
-            $restitusi = RestitusiKaryawan::findOrFail($id);
-            $restitusi->update($validatedData);
-            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            // $restitusi = RestitusiKaryawan::findOrFail($id);
+            // $restitusi->update($validatedData);
+            // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data berhasil diupdate.',
+                'request' => $request->all(),
+                'filesFinal'=>$restitusi,
+                
+            ]);
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data Gagal.',
+            //     'request' => $request->all(),
+            //     'message' => $th->getMessage(),
+            //     // 'filesFinal'=>$finalFiles,
+            // ]);
         }
     }
 
