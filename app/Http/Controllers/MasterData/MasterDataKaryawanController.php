@@ -42,17 +42,17 @@ class MasterDataKaryawanController extends Controller
         }
         $dataKaryawan['keluarga'] = $dataKeluarga;
 
-        $dataImages = [
-            // [
-            //     'name' => 'KTP',
-            //     'url' => 'https://picsum.photos/id/237/200/300'
-            // ],
-            // [
-            //     'name' => 'KK',
-            //     'url' => 'https://picsum.photos/id/237/200/300'
-            // ],
-        ];
-        $dataKaryawan['files'] = $dataImages;
+        // $dataImages = [
+        //     // [
+        //     //     'name' => 'KTP',
+        //     //     'url' => 'https://picsum.photos/id/237/200/300'
+        //     // ],
+        //     // [
+        //     //     'name' => 'KK',
+        //     //     'url' => 'https://picsum.photos/id/237/200/300'
+        //     // ],
+        // ];
+        // $dataKaryawan['files'] = $dataImages;
         return view('extras/master-data-karyawan-detail', compact('dataKaryawan'));
         dd(
             $dataKaryawan,
