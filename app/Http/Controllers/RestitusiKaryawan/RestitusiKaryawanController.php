@@ -265,7 +265,7 @@ class RestitusiKaryawanController extends Controller
             // Hapus file dari database dan server jika ada dalam $removedFiles
             if (!empty($removedFiles)) {
                 foreach ($removedFiles as $file) {
-                    $filePath = public_path('uploads/MasterDataKaryawan/Attachments/' . $file);
+                    $filePath = public_path('uploads/Restitusi_Karyawan/' . $file);
                     if (file_exists($filePath)) {
                         unlink($filePath);
                         Log::info('File removed from server:', ['file' => $filePath]);

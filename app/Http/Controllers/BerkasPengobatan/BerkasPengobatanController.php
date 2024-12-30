@@ -163,29 +163,55 @@ class BerkasPengobatanController extends Controller
     public function update(Request $request, string $id)
 {
     // Validate required fields
-    $validatedData = $request->validate([
-        'id_badge' => 'required',
-        'nama_karyawan' => 'required',
-        'file' => 'sometimes|file|mimes:jpeg,png,jpg,pdf|max:2048' // File validation
-    ]);
 
     try {
-        $obat = BerkasPengobatan::where('id_berkas_pengobatan', $id)->firstOrFail();
 
-        
-        $fileName = $obat->file_url; 
-        if ($request->hasFile('file')) {
-            
-            $oldFilePath = public_path("uploads/BerkasPengobatan/{$obat->file_url}");
-            if ($obat->file_url && File::exists($oldFilePath)) {
-                File::delete($oldFilePath);
+        Log::info('Updating Attachment Berkas Pengobatan: ' . $id . ', Request Data: ', $request->all());
+
+            // Decode uploaded_files dan removed_files
+            $uploadedFiles = $request->input('uploaded_files', '[]');
+            $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+
+            $removedFiles = $request->input('removed_files', '[]');
+            $removedFiles = json_decode($removedFiles, true) ?? [];
+
+            Log::info('Decoded Uploaded Files:', $uploadedFiles);
+            Log::info('Decoded Removed Files:', $removedFiles);
+
+            // Pastikan uploadedFiles dan removedFiles adalah array
+            $uploadedFiles = is_array($uploadedFiles) ? $uploadedFiles : [];
+            $removedFiles = is_array($removedFiles) ? $removedFiles : [];
+
+            // Ambil data klaim dari database
+            $obat = BerkasPengobatan::findOrFail($id);
+            $currentFiles = json_decode($obat->file_url, true);
+            if (!is_array($currentFiles)) {
+                $currentFiles = [];
             }
 
-            
-            $file = $request->file('file');
-            $fileName = rand(10,99999999) . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/BerkasPengobatan/'), $fileName);
-        }
+            // Log data awal
+            Log::info('Existing Files:', $currentFiles);
+
+            // Hapus file dari database dan server jika ada dalam $removedFiles
+            if (!empty($removedFiles)) {
+                foreach ($removedFiles as $file) {
+                    $filePath = public_path('uploads/BerkasPengobatan/' . $file);
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                        Log::info('File removed from server:', ['file' => $filePath]);
+                    }
+                }
+                $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+            }
+
+            // Tambahkan file baru ke array yang ada
+            if (!empty($uploadedFiles)) {
+                $currentFiles = array_merge($currentFiles, $uploadedFiles);
+            }
+
+            // Hilangkan duplikat file dan reset index array
+            $finalFiles = array_values(array_unique($currentFiles));
+            $duit = str_replace(['Rp', '.', ','], '', $request->nominal);
 
         
         $obat->update([
@@ -195,21 +221,24 @@ class BerkasPengobatanController extends Controller
             'nama_anggota_keluarga' => $request->input('nama_anggota_keluarga'),
             'hubungan_keluarga' => $request->input('hubungan_keluarga'),
             'deskripsi' => $request->input('deskripsi'),
-            'nominal' => $request->input('nominal'),
+            'nominal' => $duit,
             'rs_klinik' => $request->input('rs_klinik'),
             'urgensi' => $request->input('urgensi'),
             'no_surat_rs' => $request->input('no_surat_rs'),
             'tanggal_pengobatan' => $request->input('tanggal_pengobatan'),
             'status' => $request->input('status'),
             'keterangan' => $request->input('keterangan'),
-            'file_url' => $fileName,
+            'file_url' => json_encode($finalFiles),
         ]);
 
+        // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
         return response()->json([
             'status' => 'success',
-            'message' => 'Data berhasil diperbarui',
-            'data' => $obat
-        ], 200);
+            'message' => 'Data berhasil diupdate.',
+            'request' => $request->all(),
+            'filesFinal'=>$obat,
+            
+        ]);
 
     } catch (\Exception $e) {
         return response()->json([
