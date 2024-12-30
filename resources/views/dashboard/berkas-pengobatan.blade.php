@@ -164,6 +164,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-12 mt-2">
+                                        <p class="text-danger">Mohon klik "Simpan" jika sudah menghapus attachment.</p>
+                                    </div>
                                 </div>
                                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput-{{ $value1->id_berkas_pengobatan }}" value="[]">
                                 <input type="hidden" id="removedFilesInput-{{ $value1->id_berkas_pengobatan }}" name="removed_files">
