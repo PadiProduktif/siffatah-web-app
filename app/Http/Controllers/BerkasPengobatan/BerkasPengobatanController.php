@@ -231,21 +231,22 @@ class BerkasPengobatanController extends Controller
             'file_url' => json_encode($finalFiles),
         ]);
 
-        // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data berhasil diupdate.',
-            'request' => $request->all(),
-            'filesFinal'=>$obat,
+        return redirect('/admin/berkas-pengobatan')->with('success', 'Data berhasil disimpan.');
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Data berhasil diupdate.',
+        //     'request' => $request->all(),
+        //     'filesFinal'=>$obat,
             
-        ]);
+        // ]);
 
     } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to update data.',
-            'error' => $e->getMessage()
-        ], 500);
+        return redirect('/admin/berkas-pengobatan')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Failed to update data.',
+        //     'error' => $e->getMessage()
+        // ], 500);
     }
 }
 
