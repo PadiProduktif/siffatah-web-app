@@ -14,6 +14,54 @@ use Illuminate\Http\Request;
 
 class MasterDataKaryawanController extends Controller
 {
+    public function keluarga()
+    {
+        // Cari data keluarga berdasarkan badge_parent
+        $dataKaryawan = DataKaryawan::where('id_badge', auth()->user()->username)->first(); // Use first() to get a single instance
+
+        if ($dataKaryawan) {
+            $dataKeluargaRAW = DataNonKaryawan::where('badge_parent', $dataKaryawan->id_badge)
+            ->orderBy('tanggal_lahir', 'desc')
+            ->get();
+        } else {
+            $dataKeluargaRAW = []; // Handle the case where no data is found
+        }
+
+        $dataKeluarga = [
+            'pasangan' => [],
+            'anak' => [],
+        ];
+
+        foreach ($dataKeluargaRAW as $key => $value) {
+            if ($value->hubungan_keluarga === 'suami' || $value->hubungan_keluarga === 'istri') {
+                $dataKeluarga['pasangan'][] = $value;
+            } else {
+                $dataKeluarga['anak'][] = $value;
+
+            }
+        }
+        $dataKaryawan['keluarga'] = $dataKeluarga;
+
+        $dataImages = [
+            // [
+            //     'name' => 'KTP',
+            //     'url' => 'https://picsum.photos/id/237/200/300'
+            // ],
+            // [
+            //     'name' => 'KK',
+            //     'url' => 'https://picsum.photos/id/237/200/300'
+            // ],
+        ];
+        $dataKaryawan['files'] = $dataImages;
+        return view('extras/master-data-karyawan-detail', compact('dataKaryawan'));
+        dd(
+            $dataKaryawan,
+            $dataKeluargaRAW,
+            4498,
+            auth()->user()->role,
+            auth()->user()->username
+        );
+    }
     public function index()
     {
         try {
