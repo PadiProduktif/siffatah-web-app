@@ -58,7 +58,20 @@
                                             class="dropdown-item" 
                                             data-bs-toggle="modal" 
                                             {{-- data-bs-target="#modalEditBerkas-{{ $data1->id_pengajuan }}"> --}}
-                                            data-bs-target="#modalUpdate-{{ $data1->id_pengajuan }}">
+                                            data-bs-target="#modalUpdate-{{ $data1->id_pengajuan }}"
+                                            data-id="{{ $data1->id_pengajuan }}" 
+                                            data-id_badge="{{ $data1->id_badge }}" 
+                                            data-nama_karyawan="{{ $data1->nik }}" 
+                                            data-unit_kerja="{{ $data1->unit_kerja }}"
+                                            data-asuransi="{{ $data1->deskripsi }}"
+                                            data-rumah_sakit="{{ $data1->nominal }}"
+                                            data-tanggal_wafat="{{ $data1->rumah_sakit }}"
+                                            data-ahli_waris="{{ $data1->urgensi }}"
+                                            data-hubungan="{{ $data1->no_surat_rs }}"
+                                            data-no_polis="{{ $data1->tanggal_pengobatan }}"
+                                            data-file_url="{{ $data1->keterangan_pengajuan }}"
+                                            data-file_url="{{ $data1->url_file }}"
+                                            >
                                             <i class="bi bi-file-text me-2"></i>Lihat Berkas
                                         </a>
                                     </li>
@@ -133,8 +146,8 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="nominal" class="form-label">Nominal</label>
-                                            <input type="number" class="form-control" id="nominal" name="nominal" step="any" value="{{ $data1->nominal }}" required>
+                                            <label for="gelar_belakang" class="form-label">Nominal</label>
+                                            <input type="text" id="nominal" class="form-control" name="nominal">
                                         </div>
                                         <div class="col-md-12">
                                             <label for="rumah_sakit" class="form-label">Rumah sakit</label>
@@ -151,12 +164,31 @@
                                         </div>
                                         
                                         <div class="col-md-12">
-                                            <div id="attachmentDropzone" class="dropzone">
+                                            <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)'>
                                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
+                                            </div>
+                                            <div class="col-md-12 mt-3">
+                                                <h6>Daftar File Sebelumnya:</h6>
+                                                <ul id="attachmentList-{{ $data1->id_pengajuan }}" class="list-group">
+                                                    @foreach (json_decode($data1->url_file ?? '[]') as $file)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <img
+                                                        style="max-width:300px " src="/uploads/Restitusi_Karyawan/{{ $file }}" alt="{{ $file }}" class="custom-thumbnail">
+                                                        <a href="/uploads/Restitusi_Karyawan/{{ $file }}" target="_blank">{{ $file }}</a>
+                                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile('{{ $file }}', '{{ $data1->id_pengajuan }}')">Hapus</button>
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-12 mt-2">
+                                        <p class="text-danger">Mohon klik "Simpan" jika sudah menghapus attachment.</p>
+                                    </div>
                                 </div>
+                                <input type="hidden" name="uploaded_files" id="uploadedFilesInput-{{ $data1->id_pengajuan }}" value="[]">
+                                <input type="hidden" id="removedFilesInput-{{ $data1->id_pengajuan }}" name="removed_files">
+                                
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                     <button type="submit" class="btn btn-primary">Simpan</button>
@@ -182,7 +214,7 @@
                 <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="dataForm" action="admin/restitusi_karyawan/tambah" method="POST" enctype="multipart/form-data" >
+            <form id="dataForm" action="restitusi_karyawan/tambah" method="POST" enctype="multipart/form-data" >
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -237,6 +269,8 @@
                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
                             </div>
                         </div>
+                        <!-- Daftar file sebelumnya -->
+                        
                     </div>
                 </div>
                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
@@ -330,9 +364,7 @@
                                 <div class="dz-message">Drag & Drop files here or click to upload</div>
                             </div>
                             <!-- Tampilkan file lama -->
-                            <div id="editAttachmentList">
-                                <!-- File lama akan dimuat melalui JavaScript -->
-                            </div>
+                            
                         </div>              
                     </div>
                 </div>
@@ -515,6 +547,8 @@
     </script>
 
     <script>
+
+        
         $(document).ready(function () {
         // Event listener untuk klik baris tabel
         // $('#tableAdmin tbody').on('click', 'tr', function (event) {
@@ -733,7 +767,7 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         if (document.querySelector('#attachmentDropzone')) {
             const attachmentDropzone = new Dropzone("#attachmentDropzone", {
-                url: "/berkas-pengobatan/upload-temp", // Endpoint sementara untuk upload
+                url: "/restitusi_karyawan/upload-temp", // Endpoint sementara untuk upload
                 paramName: "file",
                 headers: {
                     'X-CSRF-TOKEN': token
@@ -787,7 +821,7 @@
 
                             // Kirim AJAX request untuk menghapus file di server
                             $.ajax({
-                                url: "/berkas-pengobatan/delete-temp",
+                                url: "/restitusi_karyawan/delete-temp",
                                 type: "POST",
                                 data: {
                                     _token: token,
@@ -817,112 +851,229 @@
 
         let uploadedFiles = []; // Menyimpan nama file yang sudah diupload ke server
         let existingFiles1 = []; // Menyimpan nama file yang sudah ada di database
+        // const dropzoneId = "";
 
-        // Konfigurasi Dropzone
-        let editAttachmentDropzone = new Dropzone("#editAttachmentDropzone", {
-            url: "/pengajuan-klaim-pengobatan/upload-temp", // Endpoint sementara untuk upload file
-            paramName: "file",
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            maxFilesize: 5, // 5MB
-            acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
-            addRemoveLinks: true,
-            dictRemoveFile: "Hapus File",
 
-            // Event saat file berhasil di-upload
-            success: function (file, response) {
-                if (response && response.fileName) {
-                    console.log("File uploaded successfully:", response);
-
-                    // Hanya tambahkan file ke array jika berhasil diupload
-
-                    uploadedFiles.push(response.fileName);
-                    console.log("Uploaded Files Array:", uploadedFiles);
-
-                    // Simpan nama file di elemen Dropzone
-                    file.serverFileName = response.fileName;
-
-                    // Update input hidden
-                    updateHiddenInput();
-                } else {
-                    console.error("File upload failed or invalid response:", response);
-                }
-            },
-
-            // Event saat file dihapus
-            removedfile: function (file) {
-                console.log("Removing file:", file);
-
-                // Periksa apakah file adalah file baru atau file lama
-                if (file.serverFileName) {
-                    // Jika file sudah di-upload (file baru), kirim request untuk hapus file
-                    $.ajax({
-                        url: "/pengajuan-klaim-pengobatan/delete-temp",
-                        method: "POST",
-                        data: {
-                            _token: $('meta[name="csrf-token"]').attr('content'),
-                            fileName: file.serverFileName
-                        },
-                        success: function () {
-                            console.log("File removed from server:", file.serverFileName);
-
-                            // Hapus file dari array uploadedFiles
-                            uploadedFiles = uploadedFiles.filter(f => f !== file.serverFileName);
-                            console.log("Updated Uploaded Files Array:", uploadedFiles);
-
-                            // Update input hidden
-                            updateHiddenInput();
-                        },
-                        error: function () {
-                            console.error("Failed to remove file from server:", file.serverFileName);
-                        }
-                    });
-                } else if (file.name) {
-                    // Jika file adalah file lama
-                    console.log("Mark file for removal:", file.name);
-                    existingFiles1 = existingFiles1.filter(f => f !== file.name);
-
-                    // Update input hidden untuk file lama yang dihapus
-                    $('#removedFilesInput').val(JSON.stringify(existingFiles1));
-                    console.log("Updated Removed Files Input:", existingFiles1);
-                }
-
-                // Hapus file dari tampilan Dropzone
-                file.previewElement.remove();
-            },
-
-            init: function () {
-                // Ambil data-file dari elemen Dropzone
-                let existingFilesFromServer = $('#editAttachmentDropzone').data('files') || '[]';
-
-                // Pastikan data adalah string JSON valid
-                try {
-                    existingFiles = JSON.parse(existingFilesFromServer);
-                } catch (error) {
-                    console.error("Invalid JSON in data-files:", error);
-                    existingFiles = []; // Default ke array kosong jika error
-                }
-
-                // Tampilkan file lama di Dropzone
-                if (Array.isArray(existingFiles)) {
-                    existingFiles.forEach(file => {
-                        let mockFile = { name: file, size: 12345, serverFileName: file };
-                        this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Pengobatan/${file}`);
-                        this.emit("complete", mockFile);
-                    });
-                } else {
-                    console.warn("No valid files to display.");
-                }
-            }
-        });
 
         // Fungsi untuk memperbarui input hidden
-        function updateHiddenInput() {
-            $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-            console.log("Updated Uploaded Files Input:", $('#uploadedFilesInput').val());
+        // function updateHiddenInput() {
+        //     $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
+        //     console.log("Updated Uploaded Files Input:", $('#uploadedFilesInput').val());
+        // }
+
+
+        // document.querySelectorAll('.modal').forEach(modal => {
+        //     modal.addEventListener('shown.bs.modal', function () {
+        //         const modalId = modal.getAttribute('id');
+        //         if (!modalId || !modalId.includes('-')) {
+        //             console.error("Invalid modal ID:", modalId);
+        //             return;
+        //         }
+
+        //         const parsedModalId = modalId.split('-')[1];
+        //         const dropzoneId = `#editAttachmentDropzone-${parsedModalId}`;
+        //         const dropzoneElement = document.querySelector(dropzoneId);
+
+        //         if (!dropzoneElement) {
+        //             console.error("Dropzone element not found:", dropzoneId);
+        //             return;
+        //         }
+
+        //         if (!Dropzone.instances.find(dz => dz.element.id === dropzoneElement.id)) {
+        //             console.log(`Initializing Dropzone for: ${dropzoneId}`);
+
+        //             new Dropzone(dropzoneId, {
+        //                 url: "/restitusi_karyawan/upload-temp",
+        //                 paramName: "file",
+        //                 headers: {
+        //                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //                 },
+        //                 maxFilesize: 5,
+        //                 acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+        //                 addRemoveLinks: true,
+        //                 dictRemoveFile: "Hapus File",
+        //                 success: function (file, response) {
+        //                         if (response && response.fileName) {
+        //                             console.log("File uploaded successfully:", response);
+
+        //                             // Hanya tambahkan file ke array jika berhasil diupload
+
+        //                             uploadedFiles.push(response.fileName);
+        //                             console.log("Uploaded Files Array:", uploadedFiles);
+
+        //                             // Simpan nama file di elemen Dropzone
+        //                             file.serverFileName = response.fileName;
+
+        //                             // Update input hidden
+        //                             updateHiddenInput();
+        //                         } else {
+        //                             console.error("File upload failed or invalid response:", response);
+        //                         }
+        //                     },
+        //                     removedfile: function (file) {
+        //                             console.log("Removing file:", file);
+
+        //                             // Periksa apakah file adalah file baru atau file lama
+        //                             if (file.serverFileName) {
+        //                                 // Jika file sudah di-upload (file baru), kirim request untuk hapus file
+        //                                 $.ajax({
+        //                                     url: "/restitusi_karyawan/delete-temp",
+        //                                     method: "POST",
+        //                                     data: {
+        //                                         _token: $('meta[name="csrf-token"]').attr('content'),
+        //                                         fileName: file.serverFileName
+        //                                     },
+        //                                     success: function () {
+        //                                         console.log("File removed from server:", file.serverFileName);
+
+        //                                         // Hapus file dari array uploadedFiles
+        //                                         uploadedFiles = uploadedFiles.filter(f => f !== file.serverFileName);
+        //                                         console.log("Updated Uploaded Files Array:", uploadedFiles);
+
+        //                                         // Update input hidden
+        //                                         updateHiddenInput();
+        //                                     },
+        //                                     error: function () {
+        //                                         console.error("Failed to remove file from server:", file.serverFileName);
+        //                                     }
+        //                                 });
+        //                             } else if (file.name) {
+        //                                 // Jika file adalah file lama
+        //                                 console.log("Mark file for removal:", file.name);
+        //                                 existingFiles1 = existingFiles1.filter(f => f !== file.name);
+
+        //                                 // Update input hidden untuk file lama yang dihapus
+        //                                 $('#removedFilesInput').val(JSON.stringify(existingFiles1));
+        //                                 console.log("Updated Removed Files Input:", existingFiles1);
+        //                             }
+
+        //                             // Hapus file dari tampilan Dropzone
+        //                             file.previewElement.remove();
+        //                         },
+        //                         init: function () {
+        //                     // Ambil data-file lama berdasarkan modal
+        //                             let existingFilesFromServer = $(`#editAttachmentDropzone-${modalId}`).data('files') || '[]';
+        //                             try {
+        //                                 let existingFiles = JSON.parse(existingFilesFromServer);
+        //                                 if (Array.isArray(existingFiles)) {
+        //                                     existingFiles.forEach(file => {
+        //                                         let mockFile = { name: file, size: 12345, serverFileName: file };
+        //                                         this.emit("addedfile", mockFile);
+        //                                         this.emit("thumbnail", mockFile, `/uploads/PengajuanKlaim/klaim_Pengobatan/${file}`);
+        //                                         this.emit("complete", mockFile);
+        //                                     });
+        //                                 }
+        //                             } catch (error) {
+        //                                 console.error("Invalid JSON in data-files:", error);
+        //                             }
+        //                         }
+        //                     });
+        //         }
+        //     });
+        // });
+
+function updateHiddenInput(modalId) {
+    const uploadedFiles = window[`uploadedFiles_${modalId}`] || [];
+    const removedFiles = window[`removedFiles_${modalId}`] || [];
+    document.getElementById(`uploadedFilesInput-${modalId}`).value = JSON.stringify(uploadedFiles);
+    document.getElementById(`removedFilesInput-${modalId}`).value = JSON.stringify(removedFiles);
+    console.log(`Updated hidden inputs for modal ${modalId}:`, {
+        uploadedFiles,
+        removedFiles
+    });
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('shown.bs.modal', function () {
+        const modalId = modal.getAttribute('id').split('-')[1];
+        const dropzoneId = `editAttachmentDropzone-${modalId}`;
+        const dropzoneElement = document.querySelector(`#${dropzoneId}`);
+
+        // Inisialisasi array dinamis untuk modal ini
+        window[`uploadedFiles_${modalId}`] = window[`uploadedFiles_${modalId}`] || [];
+        window[`removedFiles_${modalId}`] = window[`removedFiles_${modalId}`] || [];
+
+        if (!dropzoneElement) {
+            console.error(`Dropzone element not found: ${dropzoneId}`);
+            return;
         }
+
+        if (!Dropzone.instances.some(dz => dz.element.id === dropzoneId)) {
+            console.log(`Initializing Dropzone for: ${dropzoneId}`);
+
+            new Dropzone(`#${dropzoneId}`, {
+                url: "/restitusi_karyawan/upload-temp",
+                paramName: "file",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                maxFilesize: 5,
+                acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+                addRemoveLinks: true,
+                dictRemoveFile: "Hapus File",
+
+                success: function (file, response) {
+                    if (response && response.fileName) {
+                        console.log(`File uploaded successfully in modal ${modalId}:`, response.fileName);
+                        window[`uploadedFiles_${modalId}`].push(response.fileName);
+                        updateHiddenInput(modalId);
+                    } else {
+                        console.error(`File upload failed for modal ${modalId}`);
+                    }
+                },
+
+                removedfile: function (file) {
+                    if (file.serverFileName) {
+                        $.ajax({
+                            url: "/restitusi_karyawan/delete-temp",
+                            method: "POST",
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                fileName: file.serverFileName
+                            },
+                            success: function () {
+                                console.log(`File removed from server for modal ${modalId}:`, file.serverFileName);
+                                window[`uploadedFiles_${modalId}`] = window[`uploadedFiles_${modalId}`].filter(f => f !== file.serverFileName);
+                                updateHiddenInput(modalId);
+                            },
+                            error: function () {
+                                console.error(`Failed to remove file from server for modal ${modalId}:`, file.serverFileName);
+                            }
+                        });
+                    } else if (file.name) {
+                        console.log(`Marking file for removal in modal ${modalId}:`, file.name);
+                        window[`removedFiles_${modalId}`].push(file.name);
+                        updateHiddenInput(modalId);
+                    }
+                    file.previewElement.remove();
+                },
+
+                init: function () {
+                    console.log(`Initializing existing files for modal ${modalId}`);
+                    const existingFilesFromServer = dropzoneElement.getAttribute('data-files') || '[]';
+                    let existingFiles = [];
+                    try {
+                        existingFiles = JSON.parse(existingFilesFromServer);
+                    } catch (error) {
+                        console.error(`Invalid JSON in data-files for modal ${modalId}:`, error);
+                    }
+
+                    existingFiles.forEach(file => {
+                        const mockFile = { name: file, size: 12345, serverFileName: file };
+                        this.emit("addedfile", mockFile);
+                        this.emit("thumbnail", mockFile, `/uploads/Restitusi_Karyawan/${file}`);
+                        this.emit("complete", mockFile);
+                    });
+                }
+            });
+        }
+    });
+});
+
+
+        console.log(`Initializing Dropzone for: ${dropzoneId}`);
+        console.log(document.querySelector(dropzoneId));
+
 
 
         // Event untuk menampilkan file lama pada modal edit
@@ -998,77 +1149,34 @@
         // });
 
 
-        $('#editAttachmentList').on('click', '.remove-old-file', function () {
-                const fileToRemove = $(this).data('file');
-
-                // Ambil value input hidden dan update
-                let removedFiles = $('#removedFilesInput').val() ? JSON.parse($('#removedFilesInput').val()) : [];
-                removedFiles.push(fileToRemove);
-                $('#removedFilesInput').val(JSON.stringify(removedFiles));
-
-                console.log("Removed Files Input:", $('#removedFilesInput').val()); // Debug
-                $(this).parent().remove(); // Hapus tampilan file
-            });
-            // let uploadedFiles = []; // Inisialisasi array global untuk file yang diunggah
-
-            editAttachmentDropzone.on("success", function (file, response) {
-                console.log("File uploaded:", response.fileName);
-
-                // Cek apakah file sudah ada dalam array
-                if (!uploadedFiles.includes(response.fileName)) {
-                    uploadedFiles.push(response.fileName); // Tambahkan ke array jika belum ada
-                    console.log("Updated uploadedFiles:", uploadedFiles);
-
-                    // Perbarui input hidden
-                    $('#uploadedFilesInput').val(JSON.stringify(uploadedFiles));
-                }
-            });
-
-
-        // Debug sebelum form submit
-        $('#editForm').on('submit', function (e) {
-            console.log("Final Uploaded Files Input:", $('#uploadedFilesInput').val());
-        });
-        console.log("Removed Files Input:", $('#removedFilesInput').val());
-        console.log("Uploaded Files Input:", $('#uploadedFilesInput').val());
-        
-        $('#editForm').on('submit', function (e) {
-            e.preventDefault();
-
-            const uploadedFilesInput = $('#uploadedFilesInput').val();
-            const removedFilesInput = $('#removedFilesInput').val();
-
-            let formData = new FormData(this);
-
-            // Tambahkan uploadedFilesInput secara manual ke FormData
-            formData.append('uploaded_files', uploadedFilesInput);
-            formData.append('removed_files', removedFilesInput);
-
-            console.log("===== Data Form =====");
-            formData.forEach((value, key) => {
-                console.log(`${key}:`, value);
-            });
-
-            // Kirim form dengan AJAX
-            $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    Swal.fire('Berhasil!', 'Data berhasil diperbarui.', 'success');
-                    setTimeout(function () {
-                        location.reload();
-                    }, 2000);
-                },
-                error: function (error) {
-                    console.error('Error:', error);
-                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan data.', 'error');
-                }
-            });
-        });
-
+        function removeExistingFile(fileName, pengajuanId) {
+            if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+                $.ajax({
+                    url: '/restitusi_karyawan/delete-temp',
+                    method: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        fileName: fileName,
+                        pengajuanId: pengajuanId
+                    },
+                    success: function (response) {
+                        console.log("File berhasil dihapus:", response);
+                        
+                        // Tambahkan file yang dihapus ke array remove_files
+                        let removedFilesInput = $(`#removedFilesInput-${pengajuanId}`);
+                        let removedFiles = removedFilesInput.val() ? JSON.parse(removedFilesInput.val()) : [];
+                        removedFiles.push(fileName);
+                        removedFilesInput.val(JSON.stringify(removedFiles)); // Simpan kembali ke input hidden
+                        
+                        // Hapus elemen dari daftar
+                        $(`#attachmentList-${pengajuanId} li:contains('${fileName}')`).remove();
+                    },
+                    error: function (error) {
+                        console.error("Gagal menghapus file:", error);
+                    }
+                });
+            }
+        }
         
     </script>
 @endpush
