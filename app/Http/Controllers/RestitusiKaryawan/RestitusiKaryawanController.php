@@ -295,14 +295,14 @@ class RestitusiKaryawanController extends Controller
 
             // $restitusi = RestitusiKaryawan::findOrFail($id);
             // $restitusi->update($validatedData);
-            // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data berhasil diupdate.',
-                'request' => $request->all(),
-                'filesFinal'=>$restitusi,
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            // return response()->json([
+            //     'status' => 'success',
+            //     'message' => 'Data berhasil diupdate.',
+            //     'request' => $request->all(),
+            //     'filesFinal'=>$restitusi,
                 
-            ]);
+            // ]);
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
             // return response()->json([
