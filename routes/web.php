@@ -51,6 +51,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ekses', [EksesController::class, 'index']);
     Route::get('berkas-pengobatan', [BerkasPengobatanController::class, 'index']);
     Route::get('restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
+    Route::post('restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
+    Route::post('restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);
+    Route::delete('restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
 
     
     Route::get('/klaim-pengobatan', [KlaimPengobatanController::class, 'index']);
@@ -190,6 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/restitusi_karyawan/delete/{id}', [RestitusiKaryawanController::class, 'destroy']);
     // Route::patch('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr']);
     // Route::patch('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp']);
+    Route::put('/restitusi-karyawan/approval-screening/{id}', [RestitusiKaryawanController::class, 'approval_screening'])->name('approval-screening');
     Route::put('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr'])->name('approval-dr');
     Route::put('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp'])->name('approval-vp');
     Route::post('/restitusi_karyawan/upload-temp', [RestitusiKaryawanController::class, 'uploadTemp'])->name('restitusi_karyawan_upload.temp');

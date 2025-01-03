@@ -15,9 +15,9 @@
     @if(auth()->check() && (auth()->user()->role === 'superadmin' || auth()->user()->role === 'dr_hph'))
         <ul class="nav flex-column">
             <li><a href="/admin/dashboard" class="nav-link {{ Request::is('admin/dashboard') ? 'active' : '' }}">Dashboard</a></li>
-            <li><a href="/admin/restitusi_karyawan" class="nav-link {{ Request::is('admin/restitusi_karyawan') ? 'active' : '' }}">Restitusi</a></li>
-            <li><a href="/admin/ekses" class="nav-link {{ Request::is('admin/ekses') ? 'active' : '' }}">Ekses</a></li>
-            <li><a href="/admin/berkas-pengobatan" class="nav-link {{ Request::is('admin/berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
+            <li><a href="/admin/restitusi_karyawan" class="nav-link {{ Request::is('admin/restitusi_karyawan') ? 'active' : '' }}">Restitusi Karyawan</a></li>
+            {{-- <li><a href="/admin/ekses" class="nav-link {{ Request::is('admin/ekses') ? 'active' : '' }}">Ekses</a></li> --}}
+            <li><a href="/admin/berkas-pengobatan" class="nav-link {{ Request::is('admin/berkas-pengobatan') ? 'active' : '' }}">Tagihan Rumah Sakit</a></li>
         </ul>
 
         <ul class="nav flex-column">
@@ -28,8 +28,7 @@
         </ul>
         
         <div class="accordion" id="sidebarAccordion">
-            <!-- Klaim Asuransi -->
-            <div class="accordion-item">
+            {{-- <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInsurance">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance" aria-expanded="false" aria-controls="collapseInsurance">
                         Klaim Asuransi
@@ -58,7 +57,7 @@
                     </div>
                 </div>
                 
-            </div>
+            </div> --}}
             
             <!-- Perlengkapan Kerja -->
             {{-- <div class="accordion-item">
@@ -93,8 +92,7 @@
                 </div>
             </div> --}}
         </div>
-        <div class="accordion" id="sidebarAccordion2">
-            <!-- Kepersertaan BPJS -->
+        {{-- <div class="accordion" id="sidebarAccordion2">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInsurance2">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance2" aria-expanded="false" aria-controls="collapseInsurance">
@@ -115,20 +113,19 @@
                 </div>
                 
             </div>
-        </div>
+        </div> --}}
 
         
     @else
         <ul class="nav flex-column">
             <li><a href="/dashboard" class="nav-link {{ Request::is('dashboard') ? 'active' : '' }}">Dashboard</a></li>
-            <li><a href="/restitusi_karyawan" class="nav-link {{ Request::is('restitusi_karyawan') ? 'active' : '' }}">Restitusi</a></li>
-            <li><a href="/ekses" class="nav-link {{ Request::is('ekses') ? 'active' : '' }}">Ekses</a></li>
-            <li><a href="/berkas-pengobatan" class="nav-link {{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Berkas Pengobatan</a></li>
+            <li><a href="/restitusi_karyawan" class="nav-link {{ Request::is('restitusi_karyawan') ? 'active' : '' }}">Restitusi Karyawan</a></li>
+            {{-- <li><a href="/ekses" class="nav-link {{ Request::is('ekses') ? 'active' : '' }}">Ekses</a></li> --}}
+            {{-- <li><a href="/berkas-pengobatan" class="nav-link {{ Request::is('berkas-pengobatan') ? 'active' : '' }}">Tagihan Rumah Sakit</a></li> --}}
             {{-- <li><a href="/keluarga" class="nav-link {{ Request::is('keluarga') ? 'active' : '' }}">Keluarga</a></li> --}}
         </ul>
 
-        <div class="accordion" id="sidebarAccordion">
-            <!-- Klaim Asuransi -->
+        {{-- <div class="accordion" id="sidebarAccordion">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInsurance">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance" aria-expanded="false" aria-controls="collapseInsurance">
@@ -158,7 +155,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     @endif
 
     <ul class="nav flex-column">

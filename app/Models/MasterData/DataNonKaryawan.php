@@ -11,7 +11,7 @@ class DataNonKaryawan extends Model
 
     protected $table = 'table_non_karyawan';
     protected $primaryKey = 'id_non_karyawan';
-    public $timestamps = false; // Ubah ke true jika menggunakan timestamps
+    // public $timestamps = false; // Ubah ke true jika menggunakan timestamps
 
     protected $fillable = [
         'id_non_karyawan',
@@ -29,6 +29,11 @@ class DataNonKaryawan extends Model
         'nik',
         'kewarganegaraan',
         'url_foto_diri',
-        'id_karyawan_terkait'
+        'id_karyawan_terkait',
+        
+        'updated_at',
+        'updated_by',
+        'created_at',
+        'created_by',
     ];
 }
