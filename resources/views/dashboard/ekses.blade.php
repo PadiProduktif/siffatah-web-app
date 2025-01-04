@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Ekses')
 
 @section('content')
 
 
-    <div class="container">
+    <div class="container-fluid">
         <div class="d-flex justify-content-end align-items-center mb-4">
             <h4 class="me-auto">Ekses</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
             <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
@@ -26,14 +26,14 @@
     </div>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <div class="container">
+    <div class="container-fluid">
     <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
     <table id="tableAdmin" class="display">
         <thead>
             <tr>
                 <th><input type="checkbox" id="selectAll"></th> <!-- Checkbox untuk Select All -->
                 <th>Member ID</th>
-                <th>ID Badge</th>
+                <th>Badge</th>
                 <th>Nama Karyawan</th>
                 <th>Unit Kerja</th>
                 <th>Nama Pasien</th>
@@ -224,8 +224,6 @@
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
-             
-               
             </div>
         </div>
     </div>
@@ -346,11 +344,72 @@
     <script>
         $(document).ready(function () {
             // Inisialisasi DataTables
+
+            $('#tableAdmin thead tr')
+                .clone(true)
+                .addClass('filters')
+                .appendTo('#tableAdmin thead');
+
             var table = $('#tableAdmin').DataTable({
-                paging: true,
-                searching: true,
-                ordering: true,
-                info: true,
+                orderCellsTop: true,
+                fixedHeader: true,
+                pageLength: 10, // Menampilkan 10 data per halaman
+                lengthMenu: [
+                    [10, 25, 50, -1], 
+                    [10, 25, 50, 'Semua']
+                ],
+                processing: true, // Menampilkan pesan saat memproses
+                dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
+                initComplete: function () {
+                    var api = this.api();
+
+                    // For each column
+                    api.columns().eq(0).each(function (colIdx) {
+                        // Skip action column (misalnya kolom terakhir yang berisi tombol aksi)
+                        // if (colIdx == 9) return;
+                        
+                        // Skip action column (misalnya kolom terakhir yang berisi tombol aksi)
+                        if (colIdx == 9 || colIdx == 0) {
+                            // Kosongkan kolom jika colIdx == 12
+                            var cell = $('.filters th').eq(colIdx);
+                            $(cell).html(''); // Atau bisa menggunakan $(cell).html('&nbsp;'); untuk menampilkan spasi
+                            return; // Keluar dari fungsi ini
+                        }
+
+                        // Add input field
+                        var cell = $('.filters th').eq(colIdx);
+                        var title = $(cell).text();
+                        $(cell).html('<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />');
+
+                        // Add filter functionality
+                        $('input', $('.filters th').eq(colIdx))
+                            .on('keyup change', function () {
+                                if (api.column(colIdx).search() !== this.value) {
+                                    api
+                                        .column(colIdx)
+                                        .search(this.value)
+                                        .draw();
+                                }
+                            });
+                    });
+                },
+                language: {
+                    search: "Pencarian:",
+                    lengthMenu: "Menampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ Total Data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 Total Data",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    zeroRecords: "Tidak ada data yang cocok",
+                    processing: "Sedang memproses...",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
             });
     
             // Event untuk Select All Checkbox
