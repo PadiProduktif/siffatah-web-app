@@ -27,14 +27,23 @@ class RestitusiKaryawanController extends Controller
         // Tambahkan kondisi jika role adalah 'tko'
         if ($role === 'tko') {
             $query->where('table_pengajuan_reimburse.id_badge', $username);
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->where('id_badge', $username);
+        } else {
+            
+            $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
         }
 
+        if ($role === 'dr_hph') {
+            $query->where('table_pengajuan_reimburse.status_pengajuan', 2);
+        }
+        if ($role === 'vp_osdm') {
+            $query->where('table_pengajuan_reimburse.status_pengajuan', 3);
+        }
+
+        $karyawan = $karyawan->get();
         // Urutkan hasil secara descending
         $restitusi = $query->orderBy('table_pengajuan_reimburse.id_pengajuan', 'desc')->get();
 
-        // return view('dashboard/restitusi-karyawan', compact('restitusi'));
-        
-        $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->get();
         
         // Mengembalikan view dengan data yang diambil
         return view('dashboard/restitusi-karyawan', [
@@ -60,7 +69,7 @@ class RestitusiKaryawanController extends Controller
                 // 'nominal' => 'nullable|numeric',
                 'rumah_sakit' => 'nullable|string|max:255',
                 'no_surat_rs' => 'nullable|string|max:255',
-                'keterangan_pengajuan' => 'nullable|string',
+                // 'keterangan_pengajuan' => 'nullable|string',
                 'status_pengajuan' => 'nullable|numeric',
                 // 'status_pengajuan' => 'nullable|string',
                 // 'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
@@ -80,12 +89,16 @@ class RestitusiKaryawanController extends Controller
                 'urgensi' => $validatedData['urgensi'],
                 'no_surat_rs' => $validatedData['no_surat_rs'],
                 'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
-                'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
+                // 'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
                 'url_file' => $request->uploaded_files,
                 // 'url_file' => $fileName,
                 'status_pengajuan' => '1',
             ]);
-            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+
+            if (auth()->user()->role === 'superadmin') {
+                return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            } 
+            return redirect('/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
             
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
@@ -289,7 +302,7 @@ class RestitusiKaryawanController extends Controller
                 'urgensi' => $request->urgensi,
                 'no_surat_rs' => $request->no_surat_rs,
                 'tanggal_pengobatan' => $request->tanggal_pengobatan,
-                'keterangan_pengajuan' => $request->keterangan_pengajuan,
+                // 'keterangan_pengajuan' => $request->keterangan_pengajuan,
                 'deskripsi' => $request->deskripsi,
             ]);
 
@@ -339,7 +352,7 @@ class RestitusiKaryawanController extends Controller
     }
     
     
-    public function approval_dr(Request $request, $id)
+    public function approval_screening(Request $request, $id)
     {
         try {
             // Temukan data restitusi karyawan berdasarkan ID
@@ -348,6 +361,22 @@ class RestitusiKaryawanController extends Controller
             // dd($restitusi);
             // Lakukan logika persetujuan DR
             $restitusi->status_pengajuan = '2';
+            $restitusi->save();
+    
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval Screening.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+    public function approval_dr(Request $request, $id)
+    {
+        try {
+            // Temukan data restitusi karyawan berdasarkan ID
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+            // dd($restitusi);
+            // Lakukan logika persetujuan DR
+            $restitusi->status_pengajuan = '3';
             $restitusi->save();
 
             return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
@@ -364,7 +393,7 @@ class RestitusiKaryawanController extends Controller
     
             // dd($restitusi);
             // Lakukan logika persetujuan DR
-            $restitusi->status_pengajuan = '3';
+            $restitusi->status_pengajuan = '4';
             $restitusi->save();
 
             return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');

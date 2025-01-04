@@ -4,7 +4,10 @@
 
     <div class="d-flex justify-content-end align-items-center mb-4">
         <h4 class="me-auto">Berkas Pengobatan</h4>
-        <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
+        
+        @if (auth()->user()->role === 'superadmin' || auth()->user()->role === 'tko')
+            <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
+        @endif
     </div>
     <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
     <table id="klaimTable" class="display">
@@ -142,7 +145,7 @@
                                         </div>
                                         <div class="col-12">
                                             <label for="deskripsi" class="form-label">Deskripsi</label>
-                                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" >value="{{ $value1->deskripsi }}"</textarea>
+                                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" >{{ $value1->deskripsi }}</textarea>
                                         </div>
                                         
                                         <div class="col-md-12">
@@ -153,12 +156,7 @@
                                                 <h6>Daftar File Sebelumnya:</h6>
                                                 <ul id="attachmentList-{{ $value1->id_berkas_pengobatan }}" class="list-group">
                                                     @foreach (json_decode($value1->file_url ?? '[]') as $file)
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        <img
-                                                        style="max-width:300px " src="/uploads/BerkasPengobatan/{{ $file }}" alt="{{ $file }}" class="custom-thumbnail">
-                                                        <a href="/uploads/BerkasPengobatan/{{ $file }}" target="_blank">{{ $file }}</a>
-                                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile('{{ $file }}', '{{ $value1->id_berkas_pengobatan }}')">Hapus</button>
-                                                    </li>
+                                                
                                                     @endforeach
                                                 </ul>
                                             </div>

@@ -35,14 +35,13 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>MASTER DATA KARYAWAN</h2>
             <span>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importKaryawanModal">
-                    <i class="bi bi-plus-lg"></i> Import
-                </button>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addKaryawanModal">
-                    <i class="bi bi-plus-lg"></i> Tambah
+                    <i class="bi bi-plus-lg"></i> Tambah Karyawan
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importKaryawanModal">
+                    <i class="bi bi-plus-lg"></i> Import Karyawan
                 </button>
 
-                
                 <div class="modal fade" id="importKaryawanModal" tabindex="-1" aria-labelledby="modalDataExcelLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -50,20 +49,31 @@
                                 <h5 class="modal-title" id="modalDataExcelLabel">Masukan Data Excel</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
-                                <form action="{{ route('master-data-karyawan.upload') }}" method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label for="file_excel" class="form-label">Upload File Excel</label>
-                                        <input type="file" class="form-control" id="file_excel" name="file_excel" accept=".xlsx, .xls">
+                            <form action="{{ route('master-data-karyawan.upload') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="modal-body">
+
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label for="file_excel" class="form-label">Upload File Excel</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="custom-file">
+                                                        <input type="file" class="form-control" id="file_excel" name="file_excel" accept=".xlsx, .xls">
+                                                    </div>
+                                                </div>
+                                                <small class="form-text text-muted">Format lampiran: <a href="/format-import/import-master-data-karyawan.xlsx">import-master-data-karyawan.xlsx</a></small>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="modal-footer">
                                     <button type="submit" class="btn btn btn-success">Upload</button>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-
             </span>
         </div>
         <div class="table-responsive">
