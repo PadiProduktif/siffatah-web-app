@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Auth\Roles;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -120,6 +121,54 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             return redirect('/set-profil')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
+    }
+    
+    public function resetPassword($id)
+    {
+        // Cari karyawan berdasarkan ID
+        $dataKaryawan = DataKaryawan::find($id);
+        
+        if (!$dataKaryawan) {
+            return redirect()->back()->with('error', 'Karyawan tidak ditemukan.');
+        }
+        
+        $dataUser = User::select('username', 'fullname')
+        ->where('username', $dataKaryawan->id_badge)
+        ->first();
+
+
+        if ($dataUser) {
+            // Update password ke default (id_badge)
+            $dataUser->update([
+                'password' => Hash::make($dataKaryawan->id_badge),
+            ]);
+
+            // Menyimpan pesan ke session untuk ditampilkan di toast
+            Session::flash('success', 'Password ' . $dataUser->fullname . ' berhasil direset.');
+        } else {
+            // Menyimpan pesan error ke session untuk ditampilkan di toast
+            Session::flash('error', 'Pengguna tidak ditemukan.');
+        }
+
+        // Redirect kembali ke halaman yang diinginkan
+        return redirect()->back();
+        
+        // // Update password
+        // $dataUser->update([
+        //     'password' => Hash::make($request->new_password),
+        // ]);
+        // dd(
+        //     $id,
+        //     $dataUser,
+        //     $dataKaryawan->id_badge,
+        // );
+
+
+        // Reset password (misalnya set ke password default)
+        // $karyawan->password = bcrypt('password_default');
+        // $karyawan->save();
+
+        // return redirect()->back()->with('success', 'Password berhasil direset.');
     }
 }
 

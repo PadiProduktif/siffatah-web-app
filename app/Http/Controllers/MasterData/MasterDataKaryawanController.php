@@ -424,17 +424,8 @@ class MasterDataKaryawanController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    {}
     public function edit(string $id)
     {
         // Find karyawan by ID
@@ -455,9 +446,6 @@ class MasterDataKaryawanController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         // Validate the request
@@ -536,9 +524,6 @@ class MasterDataKaryawanController extends Controller
         // }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         // Find the karyawan record by ID
@@ -583,5 +568,6 @@ class MasterDataKaryawanController extends Controller
         //     'message' => 'User deleted successfully',
         // ], 200);
     }
+    
     
 }

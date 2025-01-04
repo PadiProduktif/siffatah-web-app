@@ -1,6 +1,34 @@
 @extends('layouts.app')
-@section('title', 'Dashboard')
+@section('title', 'Master Data Karyawan')
 @section('content')
+
+    @push('styles')
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
+        <style>
+            .dataTables_wrapper .dataTables_length {
+                margin-bottom: 1rem;
+            }
+            .dataTables_wrapper .dataTables_filter {
+                margin-bottom: 1rem;
+            }
+            .table thead th {
+                white-space: nowrap;
+            }
+            .table th, .table td {
+                vertical-align: middle;
+            }
+            tfoot input {
+                width: 100%;
+                padding: 3px;
+                box-sizing: border-box;
+            }
+            .dataTables_processing {
+                background: rgba(255,255,255,0.9);
+                color: #333;
+            }
+        </style>
+    @endpush
 
     <!-- Table -->
     <div class="table-container bg-white p-3 rounded shadow">
@@ -65,7 +93,19 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="/admin/master_data_karyawan/detail/{{ $k->id_karyawan }}"><i class="bi bi-file-text me-2"></i>Lihat Berkas</a></li>
+                                        <li>
+                                            <a href="#" class="dropdown-item" onclick="confirmResetPassword('{{ $k->id_karyawan }}')">
+                                                <i class="bi bi-file-text me-2"></i>Reset Password
+                                            </a>
+                                            <form id="reset-password-{{ $k->id_karyawan }}" action="{{ route('karyawan.resetPassword', $k->id_karyawan) }}" method="POST" style="display: none;">
+                                                @csrf
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('karyawan.detail', ['id' => $k->id_karyawan]) }}">
+                                                <i class="bi bi-file-text me-2"></i>Lihat Berkas
+                                            </a>
+                                        </li>
                                         <li><a class="dropdown-item" href="#"><i class="bi bi-trash me-2" onclick="confirmDelete('{{ $k->id_karyawan }}')"></i>Hapus</a></li>
                                     </ul>
                                 </div>
@@ -213,145 +253,117 @@
 
     <!-- Form hidden untuk submit -->
     <form id="delete-form-{{ $k->id_karyawan }}" 
-          action="/admin/master_data_karyawan/delete/{{ $k->id_karyawan }}" 
-          method="POST" 
-          class="d-none">
+        action="/admin/master_data_karyawan/delete/{{ $k->id_karyawan }}" 
+        method="POST" 
+        class="d-none">
         @csrf
         @method('DELETE')
     </form>
 @endsection
 
 
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
-    <style>
-        .dataTables_wrapper .dataTables_length {
-            margin-bottom: 1rem;
-        }
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 1rem;
-        }
-        .table thead th {
-            white-space: nowrap;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        tfoot input {
-            width: 100%;
-            padding: 3px;
-            box-sizing: border-box;
-        }
-        .dataTables_processing {
-            background: rgba(255,255,255,0.9);
-            color: #333;
-        }
-    </style>
-@endpush
 
 @push('scripts')
-
-<script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        });
-    }
-
-    // Tampilkan SweetAlert2 untuk pesan sukses/error dari controller
-    @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            timer: 1500,
-            showConfirmButton: false
-        });
-    @endif
-
-    @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: '{{ session('error') }}'
-        });
-    @endif
-
-    // Setup - add a text input to each footer cell
-    $('#klaimTable thead tr')
-        .clone(true)
-        .addClass('filters')
-        .appendTo('#klaimTable thead');
-
-    var table = $('#klaimTable').DataTable({
-        orderCellsTop: true,
-        fixedHeader: true,
-        pageLength: 10, // Menampilkan 10 data per halaman
-        lengthMenu: [
-            [10, 25, 50, -1], 
-            [10, 25, 50, 'Semua']
-        ],
-        processing: true, // Menampilkan pesan saat memproses
-        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
-        initComplete: function () {
-            var api = this.api();
-
-            // For each column
-            api.columns().eq(0).each(function (colIdx) {
-                // Skip action columns (if applicable)
-                if (colIdx == 9) return;
-
-                // Add input field
-                var cell = $('.filters th').eq(colIdx);
-                var title = $(cell).text();
-                $(cell).html('<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />');
-
-                // Add filter functionality
-                $('input', $('.filters th').eq(colIdx))
-                    .on('keyup change', function () {
-                        if (api.column(colIdx).search() !== this.value) {
-                            api
-                                .column(colIdx)
-                                .search(this.value)
-                                .draw();
-                        }
-                    });
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
             });
-        },
-        language: {
-            search: "Pencarian:",
-            lengthMenu: "Menampilkan _MENU_ data per halaman",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ Total Data",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 Total Data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Tidak ada data yang cocok",
-            processing: "Sedang memproses...",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Selanjutnya",
-                previous: "Sebelumnya"
-            }
         }
-    });
 
-    // Handle check all
-    $('#checkAll').change(function() {
-        $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
-    });
-</script>
+        function confirmResetPassword(karyawanId) {
+            Swal.fire({
+                title: 'Konfirmasi Reset Password',
+                text: 'Apakah Anda yakin ingin mereset password?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Reset!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reset-password-' + karyawanId).submit();
+                }
+            });
+        }
+        
+        // Handle check all
+        $('#checkAll').change(function() {
+            $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+        });
+
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $('#klaimTable thead tr')
+                .clone(true)
+                .addClass('filters')
+                .appendTo('#klaimTable thead');
+        
+            var table = $('#klaimTable').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true,
+                pageLength: 10, // Menampilkan 10 data per halaman
+                lengthMenu: [
+                    [10, 25, 50, -1], 
+                    [10, 25, 50, 'Semua']
+                ],
+                processing: true, // Menampilkan pesan saat memproses
+                dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>", // Layout DataTable
+                initComplete: function () {
+                    var api = this.api();
+        
+                    // For each column
+                    api.columns().eq(0).each(function (colIdx) {
+                        // Skip action columns (if applicable)
+                        if (colIdx == 9) return;
+        
+                        // Add input field
+                        var cell = $('.filters th').eq(colIdx);
+                        var title = $(cell).text();
+                        $(cell).html('<input type="text" class="form-control form-control-sm" placeholder="Filter ' + title + '" />');
+        
+                        // Add filter functionality
+                        $('input', $('.filters th').eq(colIdx))
+                            .on('keyup change', function () {
+                                if (api.column(colIdx).search() !== this.value) {
+                                    api
+                                        .column(colIdx)
+                                        .search(this.value)
+                                        .draw();
+                                }
+                            });
+                    });
+                },
+                language: {
+                    search: "Pencarian:",
+                    lengthMenu: "Menampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ Total Data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 Total Data",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    zeroRecords: "Tidak ada data yang cocok",
+                    processing: "Sedang memproses...",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
+            });
+        });
+    </script>
 @endpush

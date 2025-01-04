@@ -72,7 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Master Data Karyawan
     Route::get('/admin/master_data_karyawan', [MasterDataKaryawanController::class, 'index']);
     Route::post('/admin/master_data_karyawan/tambah', [MasterDataKaryawanController::class, 'store']);
-    Route::get('/admin/master_data_karyawan/detail/{id}', [MasterDataKaryawanController::class, 'detail']);
+    Route::get('/admin/master_data_karyawan/detail/{id}', [MasterDataKaryawanController::class, 'detail'])->name('karyawan.detail');
     Route::get('/admin/master_data_karyawan/edit/{id}', [MasterDataKaryawanController::class, 'edit']);
     Route::post('/admin/master_data_karyawan/update/{id}', [MasterDataKaryawanController::class, 'update']);
     Route::delete('/admin/master_data_karyawan/delete/{id}', [MasterDataKaryawanController::class, 'destroy']);
@@ -80,6 +80,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/master_data_karyawan/upload-temp', [MasterDataKaryawanController::class, 'uploadTemp'])->name('master_data_Karyawan_upload.temp');
     Route::post('/master_data_karyawan/delete-temp', [MasterDataKaryawanController::class, 'deleteTemp'])->name('master_data_Karyawan_delete.temp');
     Route::post('/admin/master_data_karyawan/detail/update_berkas/{id}', [MasterDataKaryawanController::class, 'updateBerkas'])->name('master_data_karyawan.update_berkas');
+    
+    Route::post('/admin/master_data_karyawan/reset-password/{id}', [AuthController::class, 'resetPassword'])->name('karyawan.resetPassword');
+
 
     
     //Master Data Non Karyawan
