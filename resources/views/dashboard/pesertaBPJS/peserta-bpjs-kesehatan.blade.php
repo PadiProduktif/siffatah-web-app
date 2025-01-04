@@ -593,7 +593,7 @@
                     'X-CSRF-TOKEN': token
                 },
                 maxFiles: 5,
-                maxFilesize: 5, // 5MB
+                maxFilesize: 2, // 5MB
                 acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
                 addRemoveLinks: true,
                 dictRemoveFile: "Hapus File",
