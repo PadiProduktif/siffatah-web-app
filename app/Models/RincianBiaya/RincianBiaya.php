@@ -4,6 +4,8 @@ namespace App\Models\RincianBiaya;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class RincianBiaya extends Model
 {
     use HasFactory;

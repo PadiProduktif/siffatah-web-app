@@ -5,6 +5,7 @@ namespace App\Http\Controllers\RestitusiKaryawan;
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
 use App\Models\RestitusiKaryawan\RestitusiKaryawan;
+use App\Models\RincianBiaya\RincianBiaya;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class RestitusiKaryawanController extends Controller
             'table_karyawan.nama_karyawan' // Kolom dari tabel karyawan
         )
         ->leftJoin('table_karyawan', 'table_pengajuan_reimburse.id_badge', '=', 'table_karyawan.id_badge');
-
+        
         // Tambahkan kondisi jika role adalah 'tko'
         if ($role === 'tko') {
             $query->where('table_pengajuan_reimburse.id_badge', $username);
@@ -95,13 +96,32 @@ class RestitusiKaryawanController extends Controller
                 'status_pengajuan' => '1',
             ]);
 
+
+            $biaya = RincianBiaya::create([
+                'id_rincian_biaya' => rand(10, 99999999),
+                'id_badge' => $validatedData['id_badge'],
+                'kategori' => "restitusi",
+                'nominal' => $cleanedValue,
+                'rumah_sakit' => $validatedData['rumah_sakit'],
+                'no_surat_rs' => $validatedData['no_surat_rs'],
+                'updated_by' => auth()->user()->role,
+                'created_at' => now(),
+                'created_by' => auth()->user()->role,
+            ]);
+
             if (auth()->user()->role === 'superadmin') {
                 return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
             } 
             return redirect('/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
             
         } catch (\Throwable $th) {
-            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            // return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data retrieved successfully',
+                'data' => $th->getMessage()
+            ], 200);
         }
     }
 
@@ -302,7 +322,9 @@ class RestitusiKaryawanController extends Controller
                 'urgensi' => $request->urgensi,
                 'no_surat_rs' => $request->no_surat_rs,
                 'tanggal_pengobatan' => $request->tanggal_pengobatan,
-                // 'keterangan_pengajuan' => $request->keterangan_pengajuan,
+                'keterangan_pengajuan' => $request->keterangan_pengajuan,
+                'status_pengajuan' => 1,
+                'reject_notes' => null,
                 'deskripsi' => $request->deskripsi,
             ]);
 
@@ -319,12 +341,34 @@ class RestitusiKaryawanController extends Controller
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
             // return response()->json([
-            //     'status' => 'success',
+            //     'status' => 'Failed',
             //     'message' => 'Data Gagal.',
             //     'request' => $request->all(),
             //     'message' => $th->getMessage(),
             //     // 'filesFinal'=>$finalFiles,
             // ]);
+        }
+    }
+
+
+
+    public function reject_dr(Request $request, $id)
+    {
+        try {
+            // Temukan data restitusi karyawan berdasarkan ID
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+            // dd($restitusi);
+            // Lakukan logika persetujuan DR
+            $restitusi->reject_notes = "Penolakan dari dokter : " . $request->reject_notes;
+            $restitusi->status_pengajuan = 1;
+            $restitusi->save();
+            Log::info("Request received for rejecting screening", $request->all());
+    
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Reject DR.');
+
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
     }
 
@@ -364,11 +408,20 @@ class RestitusiKaryawanController extends Controller
             $restitusi->save();
     
             return redirect('/admin/restitusi_karyawan')->with('success', 'Approval Screening.');
+            // return response()->json([
+            //     'status' => 'failed',
+            //     'message' => 'Data Gagal.',
+            //     'request' => $request->all(),
+            //     // 'message' => $th->getMessage(),
+            //     // 'filesFinal'=>$finalFiles,
+            // ]);
+
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
     }
-    public function approval_dr(Request $request, $id)
+
+    public function reject_screening(Request $request, $id)
     {
         try {
             // Temukan data restitusi karyawan berdasarkan ID
@@ -376,10 +429,73 @@ class RestitusiKaryawanController extends Controller
     
             // dd($restitusi);
             // Lakukan logika persetujuan DR
-            $restitusi->status_pengajuan = '3';
+            $restitusi->reject_notes = "Penolakan dari Screening : ". $request->reject_notes;
+            $restitusi->status_pengajuan = 0;
             $restitusi->save();
+            Log::info("Request received for rejecting screening", $request->all());
+    
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Reject Screening.');
 
-            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+    // public function approval_dr(Request $request, $id)
+    // {
+    //     try {
+    //         // Temukan data restitusi karyawan berdasarkan ID
+    //         $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+    //         // dd($restitusi);
+    //         // Lakukan logika persetujuan DR
+    //         $restitusi->status_pengajuan = '3';
+    //         $restitusi->save();
+
+    //         return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
+    //     } catch (\Throwable $th) {
+    //         return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+    //     }
+    // }
+
+    public function approval_dr(Request $request, string $id)
+    {
+        try {
+            Log::info('Uploading Attachment dari Approval Dokter: ' . $id . ', Request Data: ', $request->all());
+    
+            // Decode uploaded_files dan removed_files
+            $uploadedFiles = $request->input('uploaded_files', '[]');
+            $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+    
+            $removedFiles = $request->input('removed_files', '[]');
+            $removedFiles = json_decode($removedFiles, true) ?? [];
+    
+            Log::info('Decoded Uploaded Files:', $uploadedFiles);
+            Log::info('Decoded Removed Files:', $removedFiles);
+    
+            // Ambil data klaim dari database
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+            $currentFiles = json_decode($restitusi->url_file_dr, true) ?? [];
+    
+            // Hapus file lama
+            foreach ($removedFiles as $file) {
+                $filePath = public_path('uploads/Restitusi_Karyawan/' . $file);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+    
+            // Tambahkan file baru
+            $currentFiles = array_merge($currentFiles, $uploadedFiles);
+    
+            // Update database
+            $restitusi->update([
+                'url_file_dr' => json_encode(array_unique($currentFiles)),
+                'status_pengajuan' => 3,
+                'reject_notes' =>null
+            ]);
+    
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
@@ -396,7 +512,27 @@ class RestitusiKaryawanController extends Controller
             $restitusi->status_pengajuan = '4';
             $restitusi->save();
 
-            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Approval VP.');
+        } catch (\Throwable $th) {
+            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+
+    public function reject_vp(Request $request, $id)
+    {
+        try {
+            // Temukan data restitusi karyawan berdasarkan ID
+            $restitusi = RestitusiKaryawan::findOrFail($id);
+    
+            // dd($restitusi);
+            // Lakukan logika persetujuan DR
+            $restitusi->reject_notes = "Penolakan dari VP OSDM : ". $request->reject_notes;
+            $restitusi->status_pengajuan = 2;
+            $restitusi->save();
+            Log::info("Request received for rejecting from VP", $request->all());
+    
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Reject VP.');
+
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }

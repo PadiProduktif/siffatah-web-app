@@ -197,8 +197,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::patch('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr']);
     // Route::patch('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp']);
     Route::put('/restitusi-karyawan/approval-screening/{id}', [RestitusiKaryawanController::class, 'approval_screening'])->name('approval-screening');
+    Route::put('/restitusi-karyawan/reject-screening/{id}', [RestitusiKaryawanController::class, 'reject_screening'])->name('reject-screening');
     Route::put('/restitusi-karyawan/approval-dr/{id}', [RestitusiKaryawanController::class, 'approval_dr'])->name('approval-dr');
+    Route::put('/restitusi-karyawan/reject-dr/{id}', [RestitusiKaryawanController::class, 'reject_dr'])->name('reject-dr');
     Route::put('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp'])->name('approval-vp');
+    Route::put('/restitusi-karyawan/reject-vp/{id}', [RestitusiKaryawanController::class, 'reject_vp'])->name('reject-vp');
     Route::post('/restitusi_karyawan/upload-temp', [RestitusiKaryawanController::class, 'uploadTemp'])->name('restitusi_karyawan_upload.temp');
     Route::post('/restitusi_karyawan/delete-temp', [RestitusiKaryawanController::class, 'deleteTemp'])->name('restitusi_karyawan_delete.temp');
 

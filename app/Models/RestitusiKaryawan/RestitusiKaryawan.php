@@ -25,8 +25,9 @@ class RestitusiKaryawan extends Model
         'keterangan_pengajuan',
         'filename',
         'url_file',
+        'url_file_dr',
         'status_pengajuan',
-
+        'reject_notes',
         'created_at',
         'created_by',
         'updated_at',
