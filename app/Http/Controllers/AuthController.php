@@ -68,6 +68,7 @@ class AuthController extends Controller
             'dr_hph' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai dr_hph'],
             'vp_osdm' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai VP OSDM'],
             'tko' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai TKO'],
+            'pic' => ['url' => '/dashboard', 'message' => 'Berhasil login sebagai PIC'],
         ];
 
         // Periksa apakah role user sesuai dengan yang ada di mapping
