@@ -12,6 +12,7 @@ class RestitusiKaryawan extends Model
     protected $primaryKey = 'id_pengajuan';
     protected $fillable = [
         'id_badge',
+        'id_pengajuan',
         'nama_karyawan',
         'jabatan_karyawan',
         'nama_anggota_keluarga',

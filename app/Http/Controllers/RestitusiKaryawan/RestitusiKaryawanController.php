@@ -53,64 +53,148 @@ class RestitusiKaryawanController extends Controller
         ]);
     }
 
+    // public function store(Request $request)
+    // {
+    //     // return response()->json([
+    //     //     'status' => 'test',
+    //     //     'message' => 'Data Request Di panggil',
+    //     //     'data' => $request->all()
+    //     // ], 200);
+        
+
+    //     // $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
+    //     $id_restitusi = rand(10, 99999999);
+    //     try {
+    //         $validatedData = $request->validate([
+    //             'id_badge' => 'required|string|max:255',
+    //             // 'nama_karyawan' => 'required|string|max:255',
+    //             // 'jabatan_karyawan' => 'nullable|string|max:255',
+    //             // 'nama_anggota_keluarga' => 'nullable|string|max:255',
+    //             // 'hubungan_keluarga' => 'nullable|string|max:255',
+    //             'tanggal_pengobatan' => 'nullable|date',
+    //             'urgensi' => 'nullable|string|in:Low,Medium,High',
+    //             'deskripsi' => 'nullable|string',
+    //             // 'nominal' => 'nullable|numeric',
+    //             'rumah_sakit' => 'nullable|string|max:255',
+    //             'no_surat_rs' => 'nullable|string|max:255',
+    //             // 'keterangan_pengajuan' => 'nullable|string',
+    //             'status_pengajuan' => 'nullable|numeric',
+    //             // 'status_pengajuan' => 'nullable|string',
+    //             // 'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+    //         ]);
+    //         // Create new RestitusiKaryawan record
+    //         $restitusi = RestitusiKaryawan::create([
+    //             'id_pengajuan' => $id_restitusi,
+    //             'id_badge' => $validatedData['id_badge'],
+    //             // 'nama_karyawan' => $validatedData['nama_karyawan'],
+    //             // 'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
+    //             // 'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
+    //             // 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
+    //             'deskripsi' => $validatedData['deskripsi'],
+    //             // 'nominal' => $validatedData['nominal'],
+    //             // 'nominal' => $cleanedValue,
+    //             'rumah_sakit' => $validatedData['rumah_sakit'],
+    //             'urgensi' => $validatedData['urgensi'],
+    //             'no_surat_rs' => $validatedData['no_surat_rs'],
+    //             'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
+    //             // 'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
+    //             'url_file' => $request->uploaded_files,
+    //             // 'url_file' => $fileName,
+    //             'status_pengajuan' => '1',
+    //         ]);
+
+    //         // Simpan rincian biaya
+    //         foreach ($validatedData['nominal_pengajuan'] as $index => $nominal) {
+    //             RincianBiaya::create([
+    //                 'id_rincian_biaya' => rand(10, 99999999),
+    //                 'id_badge' => $validatedData['id_badge'], // Ambil ID badge
+    //                 'kategori' => "restitusi", // Sesuai kategori (Low, Medium, High)                    
+    //                 'id_kategori' => $id_restitusi,//untuk parent dari restitusi
+    //                 'rumah_sakit' => $validatedData['rumah_sakit'],
+    //                 'no_surat_rs' => $validatedData['no_surat_rs'],
+    //                 'deskripsi_biaya' => $validatedData['deskripsi_pengajuan'][$index] ?? '', // Deskripsi tiap rincian
+    //                 'nominal_pengajuan' => str_replace(['Rp', '.', ','], '', $nominal), // Format nominal jadi angka
+    //                 'status_rincian_biaya' => 1, // Status default
+    //                 'created_by' => auth()->user()->id_user, // ID user yang membuat
+    //                 'created_at' => now(),
+    //                 'updated_at' => now(),
+    //             ]);
+    //         }
+
+
+            
+
+    //         if (auth()->user()->role === 'superadmin') {
+    //             return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+    //         } 
+    //         return redirect('/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            
+    //     } catch (\Throwable $th) {
+    //         // return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Data gagal successfully',
+    //             'data' => $th->getMessage()
+    //         ], 200);
+    //     }
+    // }
+
     public function store(Request $request)
     {
-
-        $cleanedValue = str_replace(['Rp', '.', ','], '', $request->nominal);
+        
         try {
+            $id_restitusi = rand(10, 99999999);
             $validatedData = $request->validate([
                 'id_badge' => 'required|string|max:255',
-                // 'nama_karyawan' => 'required|string|max:255',
-                // 'jabatan_karyawan' => 'nullable|string|max:255',
-                // 'nama_anggota_keluarga' => 'nullable|string|max:255',
-                // 'hubungan_keluarga' => 'nullable|string|max:255',
                 'tanggal_pengobatan' => 'nullable|date',
                 'urgensi' => 'nullable|string|in:Low,Medium,High',
                 'deskripsi' => 'nullable|string',
-                // 'nominal' => 'nullable|numeric',
                 'rumah_sakit' => 'nullable|string|max:255',
                 'no_surat_rs' => 'nullable|string|max:255',
-                // 'keterangan_pengajuan' => 'nullable|string',
                 'status_pengajuan' => 'nullable|numeric',
-                // 'status_pengajuan' => 'nullable|string',
-                // 'file' => 'nullable|file|mimes:jpg,png,pdf|max:2048'
+                'nominal_pengajuan' => 'required|array',
+                'nominal_pengajuan.*' => 'required|string',
+                'deskripsi_pengajuan' => 'required|array',
+                'deskripsi_pengajuan.*' => 'nullable|string',
             ]);
-            // Create new RestitusiKaryawan record
+
             $restitusi = RestitusiKaryawan::create([
-                'id_pengajuan' => rand(10, 99999999),
+                'id_pengajuan' => $id_restitusi,
                 'id_badge' => $validatedData['id_badge'],
-                // 'nama_karyawan' => $validatedData['nama_karyawan'],
-                // 'jabatan_karyawan' => $validatedData['jabatan_karyawan'],
-                // 'nama_anggota_keluarga' => $validatedData['nama_anggota_keluarga'],
-                // 'hubungan_keluarga' => $validatedData['hubungan_keluarga'],
                 'deskripsi' => $validatedData['deskripsi'],
-                // 'nominal' => $validatedData['nominal'],
-                'nominal' => $cleanedValue,
                 'rumah_sakit' => $validatedData['rumah_sakit'],
                 'urgensi' => $validatedData['urgensi'],
                 'no_surat_rs' => $validatedData['no_surat_rs'],
                 'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
-                // 'keterangan_pengajuan' => $validatedData['keterangan_pengajuan'],
                 'url_file' => $request->uploaded_files,
-                // 'url_file' => $fileName,
                 'status_pengajuan' => '1',
             ]);
 
+            foreach ($validatedData['nominal_pengajuan'] as $index => $nominal) {
+                $deskripsiBiaya = $validatedData['deskripsi_pengajuan'][$index] ?? '';
+                RincianBiaya::create([
+                    'id_rincian_biaya' => rand(10, 99999999),
+                    'id_badge' => $validatedData['id_badge'],
+                    'kategori' => "restitusi",
+                    'id_kategori' => $id_restitusi,
+                    'rumah_sakit' => $validatedData['rumah_sakit'],
+                    'no_surat_rs' => $validatedData['no_surat_rs'],
+                    'deskripsi_biaya' => $deskripsiBiaya,
+                    'nominal_pengajuan' => str_replace(['Rp', '.', ','], '', $nominal),
+                    'status_rincian_biaya' => 1,
+                    'created_by' => auth()->user()->id_user,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
-            
-
-            if (auth()->user()->role === 'superadmin') {
-                return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
-            } 
-            return redirect('/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
-            
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
         } catch (\Throwable $th) {
-            // return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
-
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data retrieved successfully',
-                'data' => $th->getMessage()
+                'message' => 'Data gagal successfully',
+                'data' => $th->getMessage(),
             ], 200);
         }
     }
@@ -197,6 +281,47 @@ class RestitusiKaryawanController extends Controller
         return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
+    public function view_edit_nominal_pengajuan($id)
+    {
+        try {
+            // Ambil data restitusi berdasarkan ID
+            $restitusi = RestitusiKaryawan::where('id_pengajuan', $id)->firstOrFail();
+
+            // Ambil rincian biaya terkait
+            $rincianBiaya = RincianBiaya::where('id_kategori', $id)->get();
+
+            // Kembalikan data dalam bentuk JSON
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'restitusi' => $restitusi,
+                    'rincian_biaya' => $rincianBiaya,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getRincianBiaya($id)
+    {
+        try {
+            $rincianBiaya = RincianBiaya::where('id_kategori', $id)->get();
+    
+            return response()->json([
+                'status' => 'success',
+                'data' => $rincianBiaya
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
     public function uploadTemp(Request $request)
     {
 

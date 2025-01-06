@@ -28,7 +28,7 @@
                 <th class="align-middle">Deskripsi</th>
                 <th class="align-middle">Nomor</th>
                 <th class="align-middle" style="width: 5vw">Tanggal</th>
-                <th class="align-middle">Nominal</th>
+                <!-- <th class="align-middle">Nominal</th> -->
                 <th class="align-middle">Urgensi</th>
                 <th class="align-middle">Status</th>
                 <th class="align-middle">Opt</th>
@@ -43,7 +43,7 @@
                     <td class="text-start">{{ $data1->keterangan_pengajuan }}, {{ $data1->deskripsi }}</td>
                     <td>{{ $data1->no_surat_rs }}</td>
                     <td>{{ format_date($data1->tanggal_pengobatan) }}</td>
-                    <td class="text-end">{{ format_currency($data1->nominal) }}</td>
+                    <!-- <td class="text-end">{{ format_currency($data1->nominal) }}</td> -->
                     <td>{{ $data1->urgensi }}</td>
                     <td>
                         @if ($data1->status_pengajuan == 1)
@@ -319,7 +319,11 @@
                                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
                                         </div> -->
-                                        
+                                        <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
+                                            <!-- Rincian biaya akan di-load oleh AJAX -->
+                                        </div>
+                                        <button type="button" id="addRincianBiaya" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
+
                                         <div class="col-md-12" style="margin-top: 20px;">
                                             <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)' {{ $hidden }}>
                                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
@@ -965,8 +969,76 @@
 
 console.log("Current Uploaded Files (uploadedFilesDR):", uploadedFilesDR);
 console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput2').val());
-</script>
 
+
+</script>
+<script>
+            // Event ketika modal ditampilkan
+    $(document).on('show.bs.modal', '.modal', function (event) {
+        let button = $(event.relatedTarget); // Tombol yang memicu modal
+        let modalId = button.data('id'); // Ambil ID pengajuan
+        let modalWrapper = `#rincianBiayaWrapper-${modalId}`; // Wrapper untuk rincian biaya
+        let addButton = `#addRincianBiaya-${modalId}`; // Tombol tambah rincian biaya
+
+        // Bersihkan data rincian biaya sebelumnya
+        $(modalWrapper).empty();
+
+        // Lakukan AJAX untuk mengambil rincian biaya
+        $.ajax({
+            url: `/restitusi_karyawan/rincian/${modalId}`,
+            type: 'GET',
+            success: function (response) {
+                if (response.status === 'success') {
+                    // Tampilkan rincian biaya di dalam modal
+                    response.data.forEach((item, index) => {
+                        $(modalWrapper).append(`
+                            <div class="row mb-2" id="rincianBiayaRow-${index}">
+                                <div class="col-md-6">
+                                    <input type="text" name="nominal_pengajuan[]" class="form-control nominal" 
+                                        value="${parseInt(item.nominal_pengajuan).toLocaleString('id-ID')}" 
+                                        placeholder="Nominal">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" name="deskripsi_pengajuan[]" class="form-control" 
+                                        value="${item.deskripsi_biaya}" 
+                                        placeholder="Deskripsi">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${index})">Hapus</button>
+                                </div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    alert('Gagal memuat data rincian biaya.');
+                }
+            },
+            error: function (xhr) {
+                alert('Terjadi kesalahan saat memuat data rincian biaya.');
+            }
+        });
+
+        // Tambahkan event handler untuk tombol tambah rincian biaya
+        $(addButton).off('click').on('click', function () {
+            let newIndex = $(modalWrapper).children().length; // Hitung jumlah rincian yang ada
+            $(modalWrapper).append(`
+                <div class="row mb-2" id="rincianBiayaRow-${newIndex}">
+                    <div class="col-md-6">
+                        <input type="text" name="nominal_pengajuan[]" class="form-control nominal" placeholder="Nominal">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" name="deskripsi_pengajuan[]" class="form-control" placeholder="Deskripsi">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${newIndex})">Hapus</button>
+                    </div>
+                </div>
+            `);
+        });
+    });
+
+
+</script>
     <script>
         new Cleave('#nominal', {
             numeral: true,

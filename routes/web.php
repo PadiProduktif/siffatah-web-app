@@ -202,6 +202,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/restitusi-karyawan/reject-dr/{id}', [RestitusiKaryawanController::class, 'reject_dr'])->name('reject-dr');
     Route::put('/restitusi-karyawan/approval-vp/{id}', [RestitusiKaryawanController::class, 'approval_vp'])->name('approval-vp');
     Route::put('/restitusi-karyawan/reject-vp/{id}', [RestitusiKaryawanController::class, 'reject_vp'])->name('reject-vp');
+    Route::get('/restitusi_karyawan/view_edit_nominal_pengajuan/{id}', [RestitusiKaryawanController::class, 'view_edit_nominal_pengajuan'])->name('nominal_pengajuan.edit');
+    Route::get('/restitusi_karyawan/rincian/{id}', [RestitusiKaryawanController::class, 'getRincianBiaya'])->name('restitusi_karyawan.rincian');
     Route::post('/restitusi_karyawan/upload-temp', [RestitusiKaryawanController::class, 'uploadTemp'])->name('restitusi_karyawan_upload.temp');
     Route::post('/restitusi_karyawan/delete-temp', [RestitusiKaryawanController::class, 'deleteTemp'])->name('restitusi_karyawan_delete.temp');
 
