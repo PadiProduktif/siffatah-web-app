@@ -233,6 +233,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('set-profil', function () {
         return view('extras/set-profil');
     });
+
+    
+    Route::get('/berkas-tagihan-rumah-sakit/{id}', [BerkasPengobatanController::class, 'show'])->name('berkas-tagihan-rumah-sakit.show');
     
     //Logout
     // use App\Http\Controllers\UserController;

@@ -271,8 +271,6 @@
     </form>
 @endsection
 
-
-
 @push('scripts')
     <script>
         function confirmDelete(id) {
@@ -309,11 +307,6 @@
             });
         }
         
-        // Handle check all
-        $('#checkAll').change(function() {
-            $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
-        });
-
         $(document).ready(function () {
             // Setup - add a text input to each footer cell
             $('#klaimTable thead tr')
