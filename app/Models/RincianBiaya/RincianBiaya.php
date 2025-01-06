@@ -4,6 +4,8 @@ namespace App\Models\RincianBiaya;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class RincianBiaya extends Model
 {
     use HasFactory;
@@ -13,9 +15,14 @@ class RincianBiaya extends Model
         'id_rincian_biaya',
         'id_badge',
         'kategori',
+        'id_kategori',
         'rumah_sakit',
         'no_surat_rs',
-        'nominal',
+        'deskripsi_biaya',
+        'nominal_pengajuan',
+        'nominal_dokter',
+        'nominal_akhir',
+        'status_rincian_biaya',
         'created_at',
         'created_by',
         'updated_at',

@@ -4,10 +4,21 @@
 
 
     <div class="d-flex justify-content-end align-items-center mb-4">
-        <h4 class="me-auto">RESTITUSI KARYAWAN</h4>
+        @if(auth()->user()->role === 'superadmin')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - SCREENING</h4>
+        @elseif (auth()->user()->role === 'dr_hph')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - DOKTER</h4>
+        @elseif (auth()->user()->role === 'vp_osdm')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - VP</h4>
+        @elseif (auth()->user()->role === 'tko')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - TKO</h4>
+        @endif
+        @if (auth()->user()->role === 'tko' || auth()->user()->role === 'superadmin')
         <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
+        @endif
+        
     </div>
-    <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
+    
     <table id="klaimTable" class="display">
         <thead>
             <tr>
@@ -17,7 +28,7 @@
                 <th class="align-middle">Deskripsi</th>
                 <th class="align-middle">Nomor</th>
                 <th class="align-middle" style="width: 5vw">Tanggal</th>
-                <th class="align-middle">Nominal</th>
+                <!-- <th class="align-middle">Nominal</th> -->
                 <th class="align-middle">Urgensi</th>
                 <th class="align-middle">Status</th>
                 <th class="align-middle">Opt</th>
@@ -32,15 +43,19 @@
                     <td class="text-start">{{ $data1->keterangan_pengajuan }}, {{ $data1->deskripsi }}</td>
                     <td>{{ $data1->no_surat_rs }}</td>
                     <td>{{ format_date($data1->tanggal_pengobatan) }}</td>
-                    <td class="text-end">{{ format_currency($data1->nominal) }}</td>
+                    <!-- <td class="text-end">{{ format_currency($data1->nominal) }}</td> -->
                     <td>{{ $data1->urgensi }}</td>
                     <td>
                         @if ($data1->status_pengajuan == 1)
-                            <span class="badge bg-secondary">Menunggu</span>
+                            <span class="badge bg-secondary">Verifikasi Screening</span>
                         @elseif ($data1->status_pengajuan == 2)
                             <span class="badge bg-warning">Verifikasi DR</span>
                         @elseif ($data1->status_pengajuan == 3)
-                            <span class="badge bg-success">Verifikasi VP</span>
+                            <span class="badge bg-primary">Verifikasi VP</span>
+                        @elseif ($data1->status_pengajuan == 0)
+                            <span class="badge bg-danger">Reject Screening</span>
+                        @elseif ($data1->status_pengajuan == 4)
+                            <span class="badge bg-success">Approved</span>   
                         @else
                             <span class="badge bg-danger">Tidak Diketahui</span>
                         @endif
@@ -72,7 +87,8 @@
                                             data-file_url="{{ $data1->keterangan_pengajuan }}"
                                             data-file_url="{{ $data1->url_file }}"
                                             >
-                                            <i class="bi bi-file-text me-2"></i>Lihat Berkas
+                                            <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
+
                                         </a>
                                     </li>
                                     <li>
@@ -89,9 +105,26 @@
                                             @method('DELETE')
                                         </form>
                                     </li>
+
                                 </ul>
                             </div>
 
+                            <!-- <div class="d-flex">
+                            @if (auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 1)
+                                <form action="{{ route('approval-screening', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-sm btn-warning w-100">Approve</button>
+                                </form>
+                                <form action="{{ route('reject-screening', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                    @csrf
+                                    @method('PUT')
+                                    <button style="margin-left: 10px;" type="submit" class="btn btn-sm btn-danger  w-100">Reject</button>
+                                </form>
+     
+                            @endif
+
+                            </div> -->
                         @else
                             <div class="d-flex">
                             @if (auth()->user()->role === 'dr_hph' && $data1->status_pengajuan === 1)
@@ -109,8 +142,110 @@
                             @endif
                                 {{-- <button class="btn btn-sm btn-success w-100 mx-1">Approve</button>
                                 <button class="btn btn-sm btn-danger w-100 mx-1">Disapprove</button> --}}
-                                <button class="btn btn-sm btn-info mx-1">Berkas</button>
+                                <!-- <button class="btn btn-sm btn-info mx-1">Berkas</button> -->
                             </div>
+                        @endif
+
+                        @if (auth()->user()->role === 'dr_hph')
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a 
+                                            href="#" 
+                                            class="dropdown-item" 
+                                            data-bs-toggle="modal" 
+                                            {{-- data-bs-target="#modalEditBerkas-{{ $data1->id_pengajuan }}"> --}}
+                                            data-bs-target="#modalUpdate-{{ $data1->id_pengajuan }}"
+                                            data-id="{{ $data1->id_pengajuan }}" 
+                                            data-id_badge="{{ $data1->id_badge }}" 
+                                            data-nama_karyawan="{{ $data1->nik }}" 
+                                            data-unit_kerja="{{ $data1->unit_kerja }}"
+                                            data-asuransi="{{ $data1->deskripsi }}"
+                                            data-rumah_sakit="{{ $data1->nominal }}"
+                                            data-tanggal_wafat="{{ $data1->rumah_sakit }}"
+                                            data-ahli_waris="{{ $data1->urgensi }}"
+                                            data-hubungan="{{ $data1->no_surat_rs }}"
+                                            data-no_polis="{{ $data1->tanggal_pengobatan }}"
+                                            data-file_url="{{ $data1->keterangan_pengajuan }}"
+                                            data-file_url="{{ $data1->url_file }}"
+                                            >
+                                            <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
+
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ $data1->id_pengajuan }}')">
+                                            <i class="bi bi-trash me-2"></i>Hapus
+                                        </a>
+                                        
+                                        <!-- Form tersembunyi -->
+                                        <form id="delete-form-{{ $data1->id_pengajuan }}" 
+                                            action="/admin/restitusi_karyawan/delete/{{ $data1->id_pengajuan }}" 
+                                            method="POST" 
+                                            class="d-none">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+
+                        @endif
+
+                        @if (auth()->user()->role === 'vp_osdm')
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a 
+                                            href="#" 
+                                            class="dropdown-item" 
+                                            data-bs-toggle="modal" 
+                                            {{-- data-bs-target="#modalEditBerkas-{{ $data1->id_pengajuan }}"> --}}
+                                            data-bs-target="#modalUpdate-{{ $data1->id_pengajuan }}"
+                                            data-id="{{ $data1->id_pengajuan }}" 
+                                            data-id_badge="{{ $data1->id_badge }}" 
+                                            data-nama_karyawan="{{ $data1->nik }}" 
+                                            data-unit_kerja="{{ $data1->unit_kerja }}"
+                                            data-asuransi="{{ $data1->deskripsi }}"
+                                            data-rumah_sakit="{{ $data1->nominal }}"
+                                            data-tanggal_wafat="{{ $data1->rumah_sakit }}"
+                                            data-ahli_waris="{{ $data1->urgensi }}"
+                                            data-hubungan="{{ $data1->no_surat_rs }}"
+                                            data-no_polis="{{ $data1->tanggal_pengobatan }}"
+                                            data-file_url="{{ $data1->keterangan_pengajuan }}"
+                                            data-file_url="{{ $data1->url_file }}"
+                                            >
+                                            <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
+
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ $data1->id_pengajuan }}')">
+                                            <i class="bi bi-trash me-2"></i>Hapus
+                                        </a>
+                                        
+                                        <!-- Form tersembunyi -->
+                                        <form id="delete-form-{{ $data1->id_pengajuan }}" 
+                                            action="/admin/restitusi_karyawan/delete/{{ $data1->id_pengajuan }}" 
+                                            method="POST" 
+                                            class="d-none">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+
                         @endif
                     </td>
                 </tr>
@@ -125,58 +260,111 @@
                             </div>
                             <form action="/admin/restitusi_karyawan/update/{{ $data1->id_pengajuan }}" method="POST">
                                 @csrf
+                                @php
+                                    if (auth()->user()->role === 'dr_hph' || auth()->user()->role === 'vp_osdm') {
+                                        $form = "disabled"; // Pastikan selalu array meskipun input tidak valid
+                                        $hidden = "hidden";
+                                    }else{
+                                        $hidden = "";
+                                        $form = "required";
+                                    }
+                                @endphp
                                 <div class="modal-body">
                                     <div class="row text-start">
 
                                         <div class="col-md-3">
                                             <label for="tanggal_pengobatan" class="form-label">Tanggal pengobatan</label>
                                             <input type="date" class="form-control" id="tanggal_pengobatan" name="tanggal_pengobatan"
-                                            value="{{ date('Y-m-d') }}" required>
+                                            value="{{ date('Y-m-d') }}"  {{ $form }}>
                                         </div>
                                         <div class="col-md-3">
                                             <label for="no_surat_rs" class="form-label">No. Surat</label>
-                                            <input type="text" class="form-control" id="no_surat_rs" name="no_surat_rs" value="{{ $data1->no_surat_rs }}" required>
+                                            <input type="text" class="form-control" id="no_surat_rs" name="no_surat_rs" value="{{ $data1->no_surat_rs }}" {{ $form }}>
                                         </div>
                                         <div class="col-md-3">
                                             <label for="urgensi" class="form-label">Urgensi</label>
-                                            <select class="form-control" id="urgensi" name="urgensi">
+                                            <select class="form-control" id="urgensi" name="urgensi" {{ $form }}>
                                                 <option value="Low" {{ $data1->urgensi == 'Low' ? 'selected' : '' }}>Low</option>
                                                 <option value="Medium" {{ $data1->urgensi == 'Medium' ? 'selected' : '' }}>Medium</option>
                                                 <option value="High" {{ $data1->urgensi == 'High' ? 'selected' : '' }}>High</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        {{-- <div class="col-md-3">
                                             <label for="gelar_belakang" class="form-label">Nominal</label>
-                                            <input type="text" id="nominal" class="form-control" name="nominal">
-                                        </div>
+                                            <input type="text" id="nominal" class="form-control" name="nominal" value="{{ $data1->nominal }}" {{ $form }}>
+                                        </div> --}}
                                         <div class="col-md-12">
                                             <label for="rumah_sakit" class="form-label">Rumah sakit</label>
-                                            <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" value="{{ $data1->rumah_sakit }}" required>
+                                            <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" value="{{ $data1->rumah_sakit }}" {{ $form }}>
                                         </div>
 
                                         <div class="col-12">
                                             <label for="deskripsi" class="form-label">Deskripsi</label>
-                                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required>{{ $data1->deskripsi }}</textarea>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
-                                            <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
+                                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" {{ $form }}>{{ $data1->deskripsi }}</textarea>
                                         </div>
                                         
-                                        <div class="col-md-12">
-                                            <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)'>
+                                        <div class="col-12" >
+                                            <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
+                                            <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" {{ $form }}>{{ $data1->keterangan_pengajuan }}</textarea>
+                                        </div>
+
+                                        @if ($data1->reject_notes != null || $data1->status_pengajuan === 0)
+                                        <div class="col-12" >
+                                            <label for="keterangan_pengajuan" class="form-label">Alasan Penolakan</label>
+                                            <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="2" disabled>{{ $data1->reject_notes }}</textarea>
+                                        </div>
+                                            
+                                        @endif
+                                        <!-- <div class="col-12">
+                                            <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
+                                            <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
+                                        </div> -->
+                                        <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
+                                            <!-- Rincian biaya akan di-load oleh AJAX -->
+                                        </div>
+                                        <button type="button" id="addRincianBiaya" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
+
+                                        <div class="col-md-12" style="margin-top: 20px;">
+                                            <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)' {{ $hidden }}>
                                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
                                             </div>
                                             <div class="col-md-12 mt-3">
                                                 <h6>Daftar File Sebelumnya:</h6>
                                                 <ul id="attachmentList-{{ $data1->id_pengajuan }}" class="list-group">
-                                                    @foreach (json_decode($data1->url_file ?? '[]') as $file)
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        <img
-                                                        style="max-width:300px " src="/uploads/Restitusi_Karyawan/{{ $file }}" alt="{{ $file }}" class="custom-thumbnail">
-                                                        <a href="/uploads/Restitusi_Karyawan/{{ $file }}" target="_blank">{{ $file }}</a>
-                                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile('{{ $file }}', '{{ $data1->id_pengajuan }}')">Hapus</button>
-                                                    </li>
+                                                    
+                                                    @php
+                                                        $files = json_decode($data1->url_file ?? '[]'); // Dekode JSON dengan fallback nilai default array kosong
+                                                        if (!is_array($files)) {
+                                                            $files = []; // Pastikan selalu array meskipun input tidak valid
+                                                        }
+                                                    @endphp
+
+                                                    @foreach ($files as $file)
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <img style="max-width:300px;" src="/uploads/Restitusi_Karyawan/{{ $file }}" alt="{{ $file }}" class="custom-thumbnail">
+                                                            <a href="/uploads/Restitusi_Karyawan/{{ $file }}" target="_blank">{{ $file }}</a>
+                                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile('{{ $file }}', '{{ $data1->id_pengajuan }}')" {{ $hidden }}>Hapus</button>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-12 mt-3">
+                                                <h6>Attachment File Dari Dokter:</h6>
+                                                <ul id="attachmentListDR-{{ $data1->id_pengajuan }}" class="list-group">
+                                                    
+                                                    @php
+                                                        $files = json_decode($data1->url_file_dr ?? '[]'); // Dekode JSON dengan fallback nilai default array kosong
+                                                        if (!is_array($files)) {
+                                                            $files = []; // Pastikan selalu array meskipun input tidak valid
+                                                        }
+                                                    @endphp
+
+                                                    @foreach ($files as $file)
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <img style="max-width:300px;" src="/uploads/Restitusi_Karyawan/{{ $file }}" alt="{{ $file }}" class="custom-thumbnail">
+                                                            <a href="/uploads/Restitusi_Karyawan/{{ $file }}" target="_blank">{{ $file }}</a>
+                                                            <!-- <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile('{{ $file }}', '{{ $data1->id_pengajuan }}')" {{ $hidden }}>Hapus</button> -->
+                                                        </li>
                                                     @endforeach
                                                 </ul>
                                             </div>
@@ -188,12 +376,69 @@
                                 </div>
                                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput-{{ $data1->id_pengajuan }}" value="[]">
                                 <input type="hidden" id="removedFilesInput-{{ $data1->id_pengajuan }}" name="removed_files">
-                                
+                                @if (auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 1)
                                 <div class="modal-footer">
+                                    
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                     <button type="submit" class="btn btn-primary">Simpan</button>
                                 </div>
+                                @endif
                             </form>
+                            <div class="modal-footer">
+                            @if (auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 1)
+                                    
+                                    
+                                    <form action="javascript:void(0);" method="POST" class="w-100">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
+                                        <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-danger w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button>
+                                    </form>
+                                    <form action="{{ route('approval-screening', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                        @csrf
+                                        @method('PUT')
+                                        <!-- <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-success w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button> -->
+                                        <button style="margin-left: 10px;" type="submit" class="btn btn-sm btn-success  w-100">Aprove</button>
+                                    </form>
+            
+                            @endif
+                            @if (auth()->user()->role === 'dr_hph' && $data1->status_pengajuan === 2)
+                                    
+                                    
+                                    <form action="javascript:void(0);" method="POST" class="w-100">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
+                                        <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-danger w-100" onclick="openRejectDRModal('{{ $data1->id_pengajuan }}')">Reject</button>
+                                    </form>
+                                    <form action="javascript:void(0);" method="POST" class="w-100">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
+                                        <button style="margin-left: 10px;" type="submit" class="btn btn-sm btn-success w-100" onclick="openApproveDRModal('{{ $data1->id_pengajuan }}')">Aprove</button>
+                                    </form>
+                                    <!-- <form action="{{ route('approval-dr', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                        @csrf
+                                        @method('PUT')
+                                        
+                                    </form> -->
+            
+                            @endif
+                            @if (auth()->user()->role === 'vp_osdm' && $data1->status_pengajuan === 3)
+                                    
+                                    
+                                    <form action="javascript:void(0);" method="POST" class="w-100">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
+                                        <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-danger w-100" onclick="openRejectVPModal('{{ $data1->id_pengajuan }}')">Reject</button>
+                                    </form>
+                                    <form action="{{ route('approval-vp', ['id' => $data1->id_pengajuan]) }}" method="POST" class="w-100">
+                                        @csrf
+                                        @method('PUT')
+                                        <!-- <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-success w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button> -->
+                                        <button style="margin-left: 10px;" type="submit" class="btn btn-sm btn-success  w-100">Aprove</button>
+                                    </form>
+            
+                            @endif
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -206,10 +451,133 @@
     </table>
 </div>
 
+<!-- MODAL REJECT SCREENING -->
+<div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectReasonModalLabel">Alasan Reject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rejectForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id_pengajuan" id="rejectIdPengajuan">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Alasan Penolakan</label>
+                        <textarea class="form-control" id="rejectReason" name="reject_notes" rows="3" ></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Submit Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REJECT DOKTER -->
+<div class="modal fade" id="rejectReasonDRModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectReasonModalLabel">Alasan Reject dari Dokter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rejectDRForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id_pengajuan" id="rejectIdPengajuan">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Alasan Penolakan</label>
+                        <textarea class="form-control" id="rejectReason" name="reject_notes" rows="3" ></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Submit Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REJECT VP -->
+<div class="modal fade" id="rejectReasonVPModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectReasonModalLabel">Alasan Reject dari VP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rejectVPForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id_pengajuan" id="rejectIdPengajuan">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Alasan Penolakan</label>
+                        <textarea class="form-control" id="rejectReason" name="reject_notes" rows="3" ></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Submit Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL ADD ATTACHMENT DOKTER -->
+<div class="modal fade" id="approveDRModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ApproveModalLabel">Approval Dokter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="approveDRForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="id_pengajuan" id="approveDRIdPengajuan">
+                <input type="hidden" name="status_pengajuan" value="4">
+                
+                <div class="modal-body">
+                    {{-- <div class="col-md-12">
+                        <label for="nominal" class="form-label">Nominal Pengajuan Anggaran</label>
+                        <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" >
+                    </div> --}}
+                    <div class="col-md-12">
+                        <label for="dropzone" class="form-label">Attachment Approval</label>
+                        <div id="editAttachmentDropzone2" class="dropzone">
+                        <div class="dz-message">Drag & Drop files here or click to upload</div>
+                        </div>
+                                    <!-- Tampilkan file lama -->
+                        <div id="editAttachmentList2">
+                                        <!-- File lama akan dimuat melalui JavaScript -->
+                        </div>
+                    </div>
+                </div>  
+                <input type="hidden" name="uploaded_files" id="uploadedFilesInput2" value="[]">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- MODAL ADD --}}
 <div class="modal fade" id="modalDataBaru" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
+            
             <div class="modal-header">
                 <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -250,10 +618,10 @@
                             <label for="rumah_sakit" class="form-label">Rumah sakit</label>
                             <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" required>
                         </div>
-                        <div class="col-md-3">
+                        {{-- <div class="col-md-3">
                             <label for="nominal" class="form-label">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" step="any" required>
-                        </div>
+                            <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" required>
+                        </div> --}}
 
                         <div class="col-12">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
@@ -263,6 +631,21 @@
                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required></textarea>
                         </div>
+                        <h5>Rincian Biaya Pengajuan</h5>
+                        <div id="biayaPengajuanContainer">
+                            <div class="row biaya-pengajuan-item mb-3">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control nominal-pengajuan" name="nominal_pengajuan[]" placeholder="Nominal">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control deskripsi-pengajuan" name="deskripsi_pengajuan[]" placeholder="Deskripsi">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-remove">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addBiayaPengajuan" class="btn btn-primary mt-2">Tambah Rincian Biaya</button>
                         
                         <div class="col-md-12">
                             <div id="attachmentDropzone" class="dropzone">
@@ -271,6 +654,7 @@
                         </div>
                         <!-- Daftar file sebelumnya -->
                         
+                        
                     </div>
                 </div>
                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
@@ -283,101 +667,6 @@
     </div>
 </div>
 
-<!-- Modal Detail Data -->
-<div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalDetailLabel">Detail Informasi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>ID Badge:</strong> <span id="detailIDBadge"></span></p>
-                <p><strong>Nama Karyawan:</strong> <span id="detailNamaKaryawan"></span></p>
-                <p><strong>Unit Kerja:</strong> <span id="detailUnitKerja"></span></p>
-                <p><strong>Nama Asuransi:</strong> <span id="detailNamaAsuransi"></span></p>
-                <p><strong>Rumah Sakit:</strong> <span id="detailRumahSakit"></span></p>
-                <p><strong>Tanggal Pengajuan:</strong> <span id="detailTanggalPengajuan"></span></p>
-                <p><strong>Nominal:</strong> <span id="detailNominal"></span></p>
-                <p><strong>Deskripsi:</strong> <span id="detailDeskripsi"></span></p>
-                <p><strong>Attachments:</strong></p>
-                <div id="detailAttachment"></div> <!-- Tempat untuk file attachment -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- edit form --}}
-<div class="modal fade" id="modalEditData" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addKaryawanModalLabel">Edit Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form  id="editForm" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <!-- Informasi Dasar -->
-
-                        <!-- Informasi Dasar -->
-                        <div class="col-md-2">
-                            <label for="id_badge" class="form-label">ID Badge</label>
-                            <input type="text" class="form-control" id="editIdBadge" name="id_badge" required>
-                        </div>
-
-                        <div class="col-md-5">
-                            <label for="gelar_depan" class="form-label">Nama Karyawan</label>
-                            <input type="text" class="form-control" id="editNamaKaryawan" name="nama_karyawan">
-                        </div>
-                        <div class="col-md-5">
-                            <label for="nama_karyawan" class="form-label">Unit Kerja</label>
-                            <input type="text" class="form-control" id="editUnitKerja" name="unit_kerja" required>
-                        </div>
-                        <div class="col-md-12">
-                            <label for="gelar_belakang" class="form-label">Asuransi</label>
-                            <input type="text" class="form-control" id="editNamaAsuransi" name="nama_asuransi">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="gelar_belakang" class="form-label">Rumah Sakit / Klinik</label>
-                            <input type="text" class="form-control" id="editRumahSakit" name="rs_klinik">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="gelar_belakang" class="form-label">Tanggal Pengajuan</label>
-                            <input type="date" class="form-control" id="editTanggalPengajuan" name="tanggal_pengajuan">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="gelar_belakang" class="form-label">Nominal</label>
-                            <input type="text" id="editNominal" class="form-control" name="nominal">
-                        </div>
-                        <div class="col-12">
-                            <label for="alamat" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" id="editDeskripsi" name="deskripsi" rows="3" ></textarea>
-                        </div>
-                        <div class="col-md-12">
-                            <label for="dropzone" class="form-label">Attachment</label>
-                            <div id="editAttachmentDropzone" class="dropzone">
-                                <div class="dz-message">Drag & Drop files here or click to upload</div>
-                            </div>
-                            <!-- Tampilkan file lama -->
-                            
-                        </div>              
-                    </div>
-                </div>
-                <input type="hidden" name="uploaded_files" id="uploadedFilesInput" value="[]">
-                <input type="hidden" name="removed_files" id="removedFilesInput" value="[]">
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 {{-- MODAL IMPORT --}}
 <div class="modal fade" id="modalDataExcel" tabindex="-1" aria-labelledby="modalDataExcelLabel" aria-hidden="true">
@@ -388,6 +677,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+            
             <form action="{{ route('pengajuan-klaim-pengobatan.upload') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
@@ -412,6 +702,77 @@
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script> --}}
 
+    <script>
+         // Function to initialize Cleave.js for Rupiah format
+         function initializeCleaveForNominal() {
+            document.querySelectorAll('.nominal-pengajuan').forEach(input => {
+                if (!input.cleaveInstance) {
+                    input.cleaveInstance = new Cleave(input, {
+                        numeral: true,
+                        numeralThousandsGroupStyle: 'thousand',
+                        prefix: 'Rp ',
+                        rawValueTrimPrefix: true
+                    });
+                }
+            });
+        }
+
+        // Initialize Cleave.js on page load
+        initializeCleaveForNominal();
+
+        // Add new biaya pengajuan row
+        document.getElementById('addBiayaPengajuan').addEventListener('click', function () {
+            const container = document.getElementById('biayaPengajuanContainer');
+            const newItem = document.createElement('div');
+            newItem.classList.add('row', 'biaya-pengajuan-item', 'mb-3');
+            newItem.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control nominal-pengajuan" name="nominal_pengajuan[]" placeholder="Nominal">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control deskripsi-pengajuan" name="deskripsi_pengajuan[]" placeholder="Deskripsi">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-remove">Hapus</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+
+            // Reinitialize Cleave.js for the new input
+            initializeCleaveForNominal();
+        });
+
+        // Remove biaya pengajuan row
+        document.getElementById('biayaPengajuanContainer').addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn-remove')) {
+                e.target.closest('.biaya-pengajuan-item').remove();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('biayaPengajuanForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const biayaPengajuan = [];
+
+            // Collect biaya pengajuan data
+            const nominalFields = document.querySelectorAll('.nominal-pengajuan');
+            const deskripsiFields = document.querySelectorAll('.deskripsi-pengajuan');
+
+            for (let i = 0; i < nominalFields.length; i++) {
+                const nominal = nominalFields[i].cleave.getRawValue(); // Get raw numeric value
+                const deskripsi = deskripsiFields[i].value;
+
+                biayaPengajuan.push({
+                    nominal: nominal,
+                    deskripsi: deskripsi
+                });
+            }
+
+            console.log('Rincian Biaya Pengajuan:', biayaPengajuan);
+        });
+    </script>
     <script>
         function confirmDelete(id) {
             Swal.fire({
@@ -491,8 +852,201 @@
         });
     </script>
 
+<script>
+    // Inisialisasi Dropzone Edit
+    let uploadedFilesDR = []; // Menyimpan nama file yang sudah diupload ke server
+    let existingFiles1DR = []; // Menyimpan nama file yang sudah ada di database
+
+    // Konfigurasi Dropzone
+    let editAttachmentDropzone2 = new Dropzone("#editAttachmentDropzone2", {
+        url: "/restitusi_karyawan/upload-temp", // Endpoint sementara untuk upload file
+        paramName: "file",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        maxFilesize: 5, // 5MB
+        acceptedFiles: "image/*,.pdf,.doc,.docx,.xls,.xlsx",
+        addRemoveLinks: true,
+        dictRemoveFile: "Hapus File",
+
+        // Event saat file berhasil di-upload
+        success: function (file, response) {
+            if (response && response.fileName) {
+                console.log("File uploaded successfully:", response);
+
+                // Tambahkan file ke array uploadedFilesDR
+                uploadedFilesDR.push(response.fileName);
+                console.log("Uploaded Files Array:", uploadedFilesDR);
+
+                // Simpan nama file di elemen Dropzone
+                file.serverFileName = response.fileName;
+
+                // Update input hidden
+                updateHiddenInput2();
+            } else {
+                console.error("File upload failed or invalid response:", response);
+            }
+        },
+
+        // Event saat file dihapus
+        removedfile: function (file) {
+            console.log("Removing file:", file);
+
+            // Periksa apakah file adalah file baru atau file lama
+            if (file.serverFileName) {
+                // Jika file sudah di-upload (file baru), kirim request untuk hapus file
+                $.ajax({
+                    url: "/restitusi_karyawan/delete-temp",
+                    method: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        fileName: file.serverFileName
+                    },
+                    success: function () {
+                        console.log("File removed from server:", file.serverFileName);
+
+                        // Hapus file dari array uploadedFilesDR
+                        uploadedFilesDR = uploadedFilesDR.filter(f => f !== file.serverFileName);
+                        console.log("Updated Uploaded Files Array:", uploadedFilesDR);
+
+                        // Update input hidden
+                        updateHiddenInput2();
+                    },
+                    error: function () {
+                        console.error("Failed to remove file from server:", file.serverFileName);
+                    }
+                });
+            } else if (file.name) {
+                // Jika file adalah file lama
+                console.log("Mark file for removal:", file.name);
+                existingFiles1DR = existingFiles1DR.filter(f => f !== file.name);
+
+                // Update input hidden untuk file lama yang dihapus
+                $('#removedFilesInput').val(JSON.stringify(existingFiles1DR));
+                console.log("Updated Removed Files Input:", existingFiles1DR);
+            }
+
+            // Hapus file dari tampilan Dropzone
+            file.previewElement.remove();
+        },
+
+        init: function () {
+            // Ambil data-file dari elemen Dropzone
+            let existingFilesFromServer = $('#editAttachmentDropzone2').data('files') || '[]';
+
+            // Pastikan data adalah string JSON valid
+            try {
+                existingFiles1DR = JSON.parse(existingFilesFromServer);
+            } catch (error) {
+                console.error("Invalid JSON in data-files:", error);
+                existingFiles1DR = []; // Default ke array kosong jika error
+            }
+
+            // Tampilkan file lama di Dropzone
+            if (Array.isArray(existingFiles1DR)) {
+                existingFiles1DR.forEach(file => {
+                    let mockFile = { name: file, size: 12345, serverFileName: file };
+                    this.emit("addedfile", mockFile);
+                    this.emit("thumbnail", mockFile, `/uploads/Restitusi_Karyawan/${file}`);
+                    this.emit("complete", mockFile);
+                });
+            } else {
+                console.warn("No valid files to display.");
+            }
+        }
+    });
+
+    // Fungsi untuk memperbarui input hidden
+    function updateHiddenInput2() {
+        $('#uploadedFilesInput2').val(JSON.stringify(uploadedFilesDR));
+        console.log("Updated Uploaded Files Input:", $('#uploadedFilesInput2').val());
+    }
+
+    $('#approveDRForm').on('submit', function () {
+    updateHiddenInput2(); // Memastikan nilai input hidden terupdate sebelum submit
+    console.log("Form submitted with uploaded_files:", $('#uploadedFilesInput2').val());
+});
+
+console.log("Current Uploaded Files (uploadedFilesDR):", uploadedFilesDR);
+console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput2').val());
+
+
+</script>
+<script>
+            // Event ketika modal ditampilkan
+    $(document).on('show.bs.modal', '.modal', function (event) {
+        let button = $(event.relatedTarget); // Tombol yang memicu modal
+        let modalId = button.data('id'); // Ambil ID pengajuan
+        let modalWrapper = `#rincianBiayaWrapper-${modalId}`; // Wrapper untuk rincian biaya
+        let addButton = `#addRincianBiaya-${modalId}`; // Tombol tambah rincian biaya
+
+        // Bersihkan data rincian biaya sebelumnya
+        $(modalWrapper).empty();
+
+        // Lakukan AJAX untuk mengambil rincian biaya
+        $.ajax({
+            url: `/restitusi_karyawan/rincian/${modalId}`,
+            type: 'GET',
+            success: function (response) {
+                if (response.status === 'success') {
+                    // Tampilkan rincian biaya di dalam modal
+                    response.data.forEach((item, index) => {
+                        $(modalWrapper).append(`
+                            <div class="row mb-2" id="rincianBiayaRow-${index}">
+                                <div class="col-md-6">
+                                    <input type="text" name="nominal_pengajuan[]" class="form-control nominal" 
+                                        value="${parseInt(item.nominal_pengajuan).toLocaleString('id-ID')}" 
+                                        placeholder="Nominal">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" name="deskripsi_pengajuan[]" class="form-control" 
+                                        value="${item.deskripsi_biaya}" 
+                                        placeholder="Deskripsi">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${index})">Hapus</button>
+                                </div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    alert('Gagal memuat data rincian biaya.');
+                }
+            },
+            error: function (xhr) {
+                alert('Terjadi kesalahan saat memuat data rincian biaya.');
+            }
+        });
+
+        // Tambahkan event handler untuk tombol tambah rincian biaya
+        $(addButton).off('click').on('click', function () {
+            let newIndex = $(modalWrapper).children().length; // Hitung jumlah rincian yang ada
+            $(modalWrapper).append(`
+                <div class="row mb-2" id="rincianBiayaRow-${newIndex}">
+                    <div class="col-md-6">
+                        <input type="text" name="nominal_pengajuan[]" class="form-control nominal" placeholder="Nominal">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" name="deskripsi_pengajuan[]" class="form-control" placeholder="Deskripsi">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${newIndex})">Hapus</button>
+                    </div>
+                </div>
+            `);
+        });
+    });
+
+
+</script>
     <script>
         new Cleave('#nominal', {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand',
+            prefix: 'Rp ',
+            rawValueTrimPrefix: true
+        });
+        new Cleave('#nominal_input', {
             numeral: true,
             numeralThousandsGroupStyle: 'thousand',
             prefix: 'Rp ',
@@ -507,6 +1061,58 @@
                 checkbox.checked = source.checked;
             });
         }
+    </script>
+    <script>
+        function openRejectModal(idPengajuan) {
+            // Set nilai ID pengajuan di input hidden modal
+            document.getElementById('rejectIdPengajuan').value = idPengajuan;
+
+            // Set action form sesuai dengan ID pengajuan
+            const rejectForm = document.getElementById('rejectForm');
+            rejectForm.action = `/restitusi-karyawan/reject-screening/${idPengajuan}`;
+
+            // Tampilkan modal
+            const rejectModal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
+            rejectModal.show();
+        }
+        function openRejectDRModal(idPengajuan) {
+            // Set nilai ID pengajuan di input hidden modal
+            document.getElementById('rejectIdPengajuan').value = idPengajuan;
+
+            // Set action form sesuai dengan ID pengajuan
+            const rejectDRForm = document.getElementById('rejectDRForm');
+            rejectDRForm.action = `/restitusi-karyawan/reject-dr/${idPengajuan}`;
+
+            // Tampilkan modal
+            const rejectModal = new bootstrap.Modal(document.getElementById('rejectReasonDRModal'));
+            rejectModal.show();
+        }
+        function openApproveDRModal(idPengajuan) {
+            // Set nilai ID pengajuan di input hidden modal
+            document.getElementById('approveDRIdPengajuan').value = idPengajuan;
+
+            // Set action form sesuai dengan ID pengajuan
+            const approvalDRForm = document.getElementById('approveDRForm');
+            approvalDRForm.action = `/restitusi-karyawan/approval-dr/${idPengajuan}`;
+
+            // Tampilkan modal
+            const rejectModal = new bootstrap.Modal(document.getElementById('approveDRModal'));
+            rejectModal.show();
+        }
+        function openRejectVPModal(idPengajuan) {
+            // Set nilai ID pengajuan di input hidden modal
+            document.getElementById('rejectIdPengajuan').value = idPengajuan;
+
+            // Set action form sesuai dengan ID pengajuan
+            const rejectVPForm = document.getElementById('rejectVPForm');
+            rejectVPForm.action = `/restitusi-karyawan/reject-vp/${idPengajuan}`;
+
+            // Tampilkan modal
+            const rejectModal = new bootstrap.Modal(document.getElementById('rejectReasonVPModal'));
+            rejectModal.show();
+        }
+
+
     </script>
     <script>
         $(document).ready(function () {
