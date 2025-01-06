@@ -97,17 +97,7 @@ class RestitusiKaryawanController extends Controller
             ]);
 
 
-            $biaya = RincianBiaya::create([
-                'id_rincian_biaya' => rand(10, 99999999),
-                'id_badge' => $validatedData['id_badge'],
-                'kategori' => "restitusi",
-                'nominal' => $cleanedValue,
-                'rumah_sakit' => $validatedData['rumah_sakit'],
-                'no_surat_rs' => $validatedData['no_surat_rs'],
-                'updated_by' => auth()->user()->role,
-                'created_at' => now(),
-                'created_by' => auth()->user()->role,
-            ]);
+            
 
             if (auth()->user()->role === 'superadmin') {
                 return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
@@ -493,6 +483,19 @@ class RestitusiKaryawanController extends Controller
                 'url_file_dr' => json_encode(array_unique($currentFiles)),
                 'status_pengajuan' => 3,
                 'reject_notes' =>null
+            ]);
+
+            $biaya = RincianBiaya::create([
+                'id_rincian_biaya' => rand(10, 99999999),
+                'id_badge' => $restitusi->id_badge,
+                'kategori' => "restitusi",
+                //butuh input baru
+                'nominal' => $request->nominal,
+                'rumah_sakit' => $restitusi->rumah_sakit,
+                'no_surat_rs' => $restitusi->no_surat_rs,
+                'updated_by' => auth()->user()->role,
+                'created_at' => now(),
+                'created_by' => auth()->user()->role,
             ]);
     
             return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');

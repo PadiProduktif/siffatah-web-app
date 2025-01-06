@@ -6,11 +6,19 @@
     <div class="d-flex justify-content-end align-items-center mb-4">
         @if(auth()->user()->role === 'superadmin')
         <h4 class="me-auto">RESTITUSI KARYAWAN - SCREENING</h4>
-
+        @elseif (auth()->user()->role === 'dr_hph')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - DOKTER</h4>
+        @elseif (auth()->user()->role === 'vp_osdm')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - VP</h4>
+        @elseif (auth()->user()->role === 'tko')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - TKO</h4>
         @endif
+        @if (auth()->user()->role === 'tko' || auth()->user()->role === 'superadmin')
         <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
+        @endif
+        
     </div>
-    <button style="margin-bottom: 20px;" id="deleteSelected" class="btn btn-danger">Hapus Terpilih</button>
+    
     <table id="klaimTable" class="display">
         <thead>
             <tr>
@@ -281,10 +289,10 @@
                                                 <option value="High" {{ $data1->urgensi == 'High' ? 'selected' : '' }}>High</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        {{-- <div class="col-md-3">
                                             <label for="gelar_belakang" class="form-label">Nominal</label>
                                             <input type="text" id="nominal" class="form-control" name="nominal" value="{{ $data1->nominal }}" {{ $form }}>
-                                        </div>
+                                        </div> --}}
                                         <div class="col-md-12">
                                             <label for="rumah_sakit" class="form-label">Rumah sakit</label>
                                             <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" value="{{ $data1->rumah_sakit }}" {{ $form }}>
@@ -534,7 +542,12 @@
                 @method('PUT')
                 <input type="hidden" name="id_pengajuan" id="approveDRIdPengajuan">
                 <input type="hidden" name="status_pengajuan" value="4">
+                
                 <div class="modal-body">
+                    {{-- <div class="col-md-12">
+                        <label for="nominal" class="form-label">Nominal Pengajuan Anggaran</label>
+                        <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" >
+                    </div> --}}
                     <div class="col-md-12">
                         <label for="dropzone" class="form-label">Attachment Approval</label>
                         <div id="editAttachmentDropzone2" class="dropzone">
@@ -560,6 +573,7 @@
 <div class="modal fade" id="modalDataBaru" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
+            
             <div class="modal-header">
                 <h5 class="modal-title" id="addKaryawanModalLabel">Tambah Data Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -600,10 +614,10 @@
                             <label for="rumah_sakit" class="form-label">Rumah sakit</label>
                             <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" required>
                         </div>
-                        <div class="col-md-3">
+                        {{-- <div class="col-md-3">
                             <label for="nominal" class="form-label">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" step="any" required>
-                        </div>
+                            <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" required>
+                        </div> --}}
 
                         <div class="col-12">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
@@ -613,6 +627,21 @@
                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required></textarea>
                         </div>
+                        <h5>Rincian Biaya Pengajuan</h5>
+                        <div id="biayaPengajuanContainer">
+                            <div class="row biaya-pengajuan-item mb-3">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control nominal-pengajuan" name="nominal_pengajuan[]" placeholder="Nominal">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control deskripsi-pengajuan" name="deskripsi_pengajuan[]" placeholder="Deskripsi">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-remove">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addBiayaPengajuan" class="btn btn-primary mt-2">Tambah Rincian Biaya</button>
                         
                         <div class="col-md-12">
                             <div id="attachmentDropzone" class="dropzone">
@@ -620,6 +649,7 @@
                             </div>
                         </div>
                         <!-- Daftar file sebelumnya -->
+                        
                         
                     </div>
                 </div>
@@ -668,6 +698,77 @@
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script> --}}
 
+    <script>
+         // Function to initialize Cleave.js for Rupiah format
+         function initializeCleaveForNominal() {
+            document.querySelectorAll('.nominal-pengajuan').forEach(input => {
+                if (!input.cleaveInstance) {
+                    input.cleaveInstance = new Cleave(input, {
+                        numeral: true,
+                        numeralThousandsGroupStyle: 'thousand',
+                        prefix: 'Rp ',
+                        rawValueTrimPrefix: true
+                    });
+                }
+            });
+        }
+
+        // Initialize Cleave.js on page load
+        initializeCleaveForNominal();
+
+        // Add new biaya pengajuan row
+        document.getElementById('addBiayaPengajuan').addEventListener('click', function () {
+            const container = document.getElementById('biayaPengajuanContainer');
+            const newItem = document.createElement('div');
+            newItem.classList.add('row', 'biaya-pengajuan-item', 'mb-3');
+            newItem.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control nominal-pengajuan" name="nominal_pengajuan[]" placeholder="Nominal">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control deskripsi-pengajuan" name="deskripsi_pengajuan[]" placeholder="Deskripsi">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-remove">Hapus</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+
+            // Reinitialize Cleave.js for the new input
+            initializeCleaveForNominal();
+        });
+
+        // Remove biaya pengajuan row
+        document.getElementById('biayaPengajuanContainer').addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn-remove')) {
+                e.target.closest('.biaya-pengajuan-item').remove();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('biayaPengajuanForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const biayaPengajuan = [];
+
+            // Collect biaya pengajuan data
+            const nominalFields = document.querySelectorAll('.nominal-pengajuan');
+            const deskripsiFields = document.querySelectorAll('.deskripsi-pengajuan');
+
+            for (let i = 0; i < nominalFields.length; i++) {
+                const nominal = nominalFields[i].cleave.getRawValue(); // Get raw numeric value
+                const deskripsi = deskripsiFields[i].value;
+
+                biayaPengajuan.push({
+                    nominal: nominal,
+                    deskripsi: deskripsi
+                });
+            }
+
+            console.log('Rincian Biaya Pengajuan:', biayaPengajuan);
+        });
+    </script>
     <script>
         function confirmDelete(id) {
             Swal.fire({
@@ -868,6 +969,12 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
 
     <script>
         new Cleave('#nominal', {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand',
+            prefix: 'Rp ',
+            rawValueTrimPrefix: true
+        });
+        new Cleave('#nominal_input', {
             numeral: true,
             numeralThousandsGroupStyle: 'thousand',
             prefix: 'Rp ',
