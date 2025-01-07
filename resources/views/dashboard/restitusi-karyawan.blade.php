@@ -303,10 +303,10 @@
                                             <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" {{ $form }}>{{ $data1->deskripsi }}</textarea>
                                         </div>
                                         
-                                        <div class="col-12" >
+                                        {{-- <div class="col-12" >
                                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" {{ $form }}>{{ $data1->keterangan_pengajuan }}</textarea>
-                                        </div>
+                                        </div> --}}
 
                                         @if ($data1->reject_notes != null || $data1->status_pengajuan === 0)
                                         <div class="col-12" >
@@ -319,10 +319,12 @@
                                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
                                         </div> -->
+                                        
+                                        <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
                                         </div>
-                                        <button type="button" id="addRincianBiaya" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
+                                        <button type="button" id="addTambahanRincianBiaya-{{ $data1->id_pengajuan }}" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
 
                                         <div class="col-md-12" style="margin-top: 20px;">
                                             <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)' {{ $hidden }}>
@@ -627,10 +629,10 @@
                             <label for="deskripsi" class="form-label">Deskripsi</label>
                             <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required></textarea>
                         </div>
-                        <div class="col-12">
+                        {{-- <div class="col-12">
                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required></textarea>
-                        </div>
+                        </div> --}}
                         <h5>Rincian Biaya Pengajuan</h5>
                         <div id="biayaPengajuanContainer">
                             <div class="row biaya-pengajuan-item mb-3">
@@ -973,12 +975,27 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
 
 </script>
 <script>
+
+    function initCleave() {
+        $('.nominal:not(.cleave-initialized)').each(function () {
+            new Cleave(this, {
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                prefix: 'Rp ',
+                rawValueTrimPrefix: true,
+                numeralIntegerScale: 15,
+                numeralDecimalScale: 2
+            });
+            $(this).addClass('cleave-initialized'); // Tandai elemen sudah diinisialisasi
+        });
+    }
             // Event ketika modal ditampilkan
     $(document).on('show.bs.modal', '.modal', function (event) {
+        
         let button = $(event.relatedTarget); // Tombol yang memicu modal
         let modalId = button.data('id'); // Ambil ID pengajuan
         let modalWrapper = `#rincianBiayaWrapper-${modalId}`; // Wrapper untuk rincian biaya
-        let addButton = `#addRincianBiaya-${modalId}`; // Tombol tambah rincian biaya
+        let addButton = `#addTambahanRincianBiaya-${modalId}`; // Tombol tambah rincian biaya
 
         // Bersihkan data rincian biaya sebelumnya
         $(modalWrapper).empty();
@@ -989,17 +1006,18 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
             type: 'GET',
             success: function (response) {
                 if (response.status === 'success') {
-                    // Tampilkan rincian biaya di dalam modal
                     response.data.forEach((item, index) => {
                         $(modalWrapper).append(`
                             <div class="row mb-2" id="rincianBiayaRow-${index}">
                                 <div class="col-md-6">
-                                    <input type="text" name="nominal_pengajuan[]" class="form-control nominal" 
-                                        value="${parseInt(item.nominal_pengajuan).toLocaleString('id-ID')}" 
+                                    <input type="text" name="nominal_pengajuan[]" 
+                                        class="form-control nominal" 
+                                        value="${item.nominal_pengajuan}" 
                                         placeholder="Nominal">
                                 </div>
                                 <div class="col-md-5">
-                                    <input type="text" name="deskripsi_pengajuan[]" class="form-control" 
+                                    <input type="text" name="deskripsi_pengajuan[]" 
+                                        class="form-control" 
                                         value="${item.deskripsi_biaya}" 
                                         placeholder="Deskripsi">
                                 </div>
@@ -1009,8 +1027,9 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                             </div>
                         `);
                     });
-                } else {
-                    alert('Gagal memuat data rincian biaya.');
+
+                    // Inisialisasi Cleave.js setelah elemen ditambahkan
+                    initCleave();
                 }
             },
             error: function (xhr) {
@@ -1019,8 +1038,8 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
         });
 
         // Tambahkan event handler untuk tombol tambah rincian biaya
-        $(addButton).off('click').on('click', function () {
-            let newIndex = $(modalWrapper).children().length; // Hitung jumlah rincian yang ada
+        $(addButton).on('click', function () {
+            let newIndex = $(modalWrapper).children().length;
             $(modalWrapper).append(`
                 <div class="row mb-2" id="rincianBiayaRow-${newIndex}">
                     <div class="col-md-6">
@@ -1034,6 +1053,9 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                     </div>
                 </div>
             `);
+
+            // Inisialisasi Cleave.js untuk elemen baru
+            initCleave();
         });
     });
 
@@ -1051,6 +1073,24 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
             numeralThousandsGroupStyle: 'thousand',
             prefix: 'Rp ',
             rawValueTrimPrefix: true
+        });
+        function initializeCleave() {
+            document.querySelectorAll('.nominal').forEach(function (input) {
+                new Cleave(input, {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    delimiter: '.'
+                });
+            });
+        }
+        // Panggil fungsi setiap kali modal dibuka atau input ditambahkan
+        $(document).on('shown.bs.modal', '.modal', function () {
+            initializeCleave(); // Jalankan Cleave saat modal ditampilkan
+        });
+
+        // Tambahkan event listener untuk elemen baru
+        $(document).on('click', '.btn-primary', function () {
+            initializeCleave(); // Jalankan Cleave saat elemen baru ditambahkan
         });
     </script>
 
