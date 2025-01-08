@@ -258,7 +258,7 @@
                                 <h5 class="modal-title" id="addKaryawanModalLabel">Update Restitusi {{ $data1->no_surat_rs }}, a.n. {{ $data1->nama_karyawan }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <form action="/admin/restitusi_karyawan/update/{{ $data1->id_pengajuan }}" method="POST">
+                            <form  action="/admin/restitusi_karyawan/update/{{ $data1->id_pengajuan }}" method="POST">
                                 @csrf
                                 @php
                                     if (auth()->user()->role === 'dr_hph' || auth()->user()->role === 'vp_osdm') {
@@ -319,7 +319,9 @@
                                             <label for="keterangan_pengajuan" class="form-label">Keterangan pengajuan</label>
                                             <textarea class="form-control" id="keterangan_pengajuan" name="keterangan_pengajuan" rows="3" required>{{ $data1->keterangan_pengajuan }}</textarea>
                                         </div> -->
-                                        
+                                        <input type="hidden" id="hiddenIdRincianBiaya-{{ $data1->id_pengajuan }}" name="id_rincian_biaya[]" value="">
+                                        <input type="hidden" id="hiddenNominalPengajuan-{{ $data1->id_pengajuan }}" name="nominal_pengajuan[]" value="">
+                                        <input type="hidden" id="hiddenDeskripsiPengajuan-{{ $data1->id_pengajuan }}" name="deskripsi_pengajuan[]" value="">
                                         <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
@@ -989,18 +991,19 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
             $(this).addClass('cleave-initialized'); // Tandai elemen sudah diinisialisasi
         });
     }
-            // Event ketika modal ditampilkan
-    $(document).on('show.bs.modal', '.modal', function (event) {
-        
-        let button = $(event.relatedTarget); // Tombol yang memicu modal
-        let modalId = button.data('id'); // Ambil ID pengajuan
-        let modalWrapper = `#rincianBiayaWrapper-${modalId}`; // Wrapper untuk rincian biaya
-        let addButton = `#addTambahanRincianBiaya-${modalId}`; // Tombol tambah rincian biaya
 
-        // Bersihkan data rincian biaya sebelumnya
+    $(document).on('show.bs.modal', '.modal', function (event) {
+        const button = $(event.relatedTarget); // Tombol yang memicu modal
+        const modalId = button.data('id'); // ID pengajuan
+        const modalWrapper = `#rincianBiayaWrapper-${modalId}`;
+        const addButton = `#addTambahanRincianBiaya-${modalId}`;
+        const hiddenNominal = `#hiddenNominalPengajuan-${modalId}`;
+        const hiddenDeskripsi = `#hiddenDeskripsiPengajuan-${modalId}`;
+
+        // Bersihkan wrapper rincian biaya
         $(modalWrapper).empty();
 
-        // Lakukan AJAX untuk mengambil rincian biaya
+        // Ambil rincian biaya melalui AJAX
         $.ajax({
             url: `/restitusi_karyawan/rincian/${modalId}`,
             type: 'GET',
@@ -1009,17 +1012,12 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                     response.data.forEach((item, index) => {
                         $(modalWrapper).append(`
                             <div class="row mb-2" id="rincianBiayaRow-${index}">
+                                <input type="hidden" class="id_rincian_biaya" value="${item.id_rincian_biaya || ''}">
                                 <div class="col-md-6">
-                                    <input type="text" name="nominal_pengajuan[]" 
-                                        class="form-control nominal" 
-                                        value="${item.nominal_pengajuan}" 
-                                        placeholder="Nominal">
+                                    <input type="text" class="form-control nominal" value="${item.nominal_pengajuan}" placeholder="Nominal">
                                 </div>
                                 <div class="col-md-5">
-                                    <input type="text" name="deskripsi_pengajuan[]" 
-                                        class="form-control" 
-                                        value="${item.deskripsi_biaya}" 
-                                        placeholder="Deskripsi">
+                                    <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" placeholder="Deskripsi">
                                 </div>
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${index})">Hapus</button>
@@ -1027,38 +1025,63 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                             </div>
                         `);
                     });
-
-                    // Inisialisasi Cleave.js setelah elemen ditambahkan
-                    initCleave();
+                    initCleave(); // Inisialisasi Cleave.js
                 }
             },
-            error: function (xhr) {
-                alert('Terjadi kesalahan saat memuat data rincian biaya.');
+            error: function () {
+                alert('Gagal memuat rincian biaya.');
             }
         });
 
-        // Tambahkan event handler untuk tombol tambah rincian biaya
+        // Tambah rincian biaya
         $(addButton).on('click', function () {
-            let newIndex = $(modalWrapper).children().length;
+            const newIndex = $(modalWrapper).children().length;
             $(modalWrapper).append(`
                 <div class="row mb-2" id="rincianBiayaRow-${newIndex}">
+                    <input type="hidden" class="id_rincian_biaya" value="">
                     <div class="col-md-6">
-                        <input type="text" name="nominal_pengajuan[]" class="form-control nominal" placeholder="Nominal">
+                        <input type="text" class="form-control nominal" placeholder="Nominal">
                     </div>
                     <div class="col-md-5">
-                        <input type="text" name="deskripsi_pengajuan[]" class="form-control" placeholder="Deskripsi">
+                        <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
                     </div>
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${newIndex})">Hapus</button>
                     </div>
                 </div>
             `);
+            initCleave(); // Inisialisasi Cleave.js
+        });
 
-            // Inisialisasi Cleave.js untuk elemen baru
-            initCleave();
+        // Set nilai hidden input sebelum submit
+        $(`#modalUpdate-${modalId}`).on('submit', function () {
+            const nominalArray = [];
+            const deskripsiArray = [];
+            const idRincianArray = [];
+
+            $(modalWrapper).find('.row').each(function () {
+                const nominal = $(this).find('.nominal').val();
+                const deskripsi = $(this).find('.deskripsi').val();
+                const idRincian = $(this).find('.id_rincian_biaya').val() || null;
+
+                nominalArray.push(nominal);
+                deskripsiArray.push(deskripsi);
+                idRincianArray.push(idRincian);
+            });
+
+            // Set nilai input hidden
+            $(hiddenNominal).val(JSON.stringify(nominalArray));
+            $(hiddenDeskripsi).val(JSON.stringify(deskripsiArray));
+
+            // Jika id_rincian_biaya diperlukan
+            const hiddenIdRincian = `#hiddenIdRincianBiaya-${modalId}`;
+            $(hiddenIdRincian).val(JSON.stringify(idRincianArray));
+
+            console.log('Nominal:', nominalArray);
+            console.log('Deskripsi:', deskripsiArray);
+            console.log('ID Rincian Biaya:', idRincianArray);
         });
     });
-
 
 </script>
     <script>
