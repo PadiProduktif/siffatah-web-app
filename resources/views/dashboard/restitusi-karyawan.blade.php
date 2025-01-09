@@ -328,8 +328,17 @@
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
                                         </div>
+                                        @if ($data1->status_pengajuan === 1)
                                         <button type="button" id="addTambahanRincianBiaya-{{ $data1->id_pengajuan }}" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
-
+                                        @endif
+                                        @if ($data1->status_pengajuan === 3 || $data1->status_pengajuan === 4)
+                                        <div class="col-12 mt-4">
+                                            <label style="margin-top: 10px;" for="biayaDisetujuiDokter" class="form-label">Biaya yang Diapprove Dokter</label>
+                                            <div id="rincianApprovedBiayaWrapper-{{ $data1->id_pengajuan }}">
+                                                <!-- Data biaya yang diapprove dokter akan dimuat melalui JavaScript -->
+                                            </div>
+                                        </div>
+                                        @endif
                                         <div class="col-md-12" style="margin-top: 20px;">
                                             <div id="editAttachmentDropzone-{{ $data1->id_pengajuan }}" class="dropzone" data-files='@json($data1->files)' {{ $hidden }}>
                                                 <div class="dz-message">Drag & Drop your files here or click to upload</div>
@@ -540,7 +549,7 @@
 
 
 <!-- MODAL ADD ATTACHMENT DOKTER -->
-<div class="modal fade" id="approveDRModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="approveDRModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -552,31 +561,22 @@
                 @method('PUT')
                 <input type="hidden" name="id_pengajuan" id="approveDRIdPengajuan">
                 <input type="hidden" name="status_pengajuan" value="4">
-                <input type="hidden" id="hiddenIdRincianBiaya-{{ $data1->id_pengajuan }}" name="id_rincian_biaya[]" value="">
-                <input type="hidden" id="hiddenNominalPengajuan-{{ $data1->id_pengajuan }}" name="nominal_pengajuan[]" value="">
-                <input type="hidden" id="hiddenDeskripsiPengajuan-{{ $data1->id_pengajuan }}" name="deskripsi_pengajuan[]" value="">
-                <input type="hidden" id="hiddenRemovedRincianBiaya-{{ $data1->id_pengajuan }}" name="removed_rincian_biaya" value="[]">
+
 
                 
                 <div class="modal-body">
-                    {{-- <div class="col-md-12">
-                        <label for="nominal" class="form-label">Nominal Pengajuan Anggaran</label>
-                        <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" >
-                    </div> --}}
+
                     <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
-                    <div id="rincianBiayaDRWrapper-{{ $data1->id_pengajuan }}">
-                                            <!-- Rincian biaya akan di-load oleh AJAX -->
-                    </div>
-                <button type="button" id="addTambahanRincianBiayaDR-{{ $data1->id_pengajuan }}" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
+
                     <div class="col-md-12">
                         <label for="dropzone" class="form-label">Attachment Approval</label>
                         <div id="editAttachmentDropzone2" class="dropzone">
                         <div class="dz-message">Drag & Drop files here or click to upload</div>
-                        </div>
+                        </div> -->
                                     <!-- Tampilkan file lama -->
-                        <div id="editAttachmentList2">
+                        <!-- <div id="editAttachmentList2"> -->
                                         <!-- File lama akan dimuat melalui JavaScript -->
-                        </div>
+                        <!-- </div>
                     </div>
                 </div>  
                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput2" value="[]">
@@ -587,7 +587,64 @@
             </form>
         </div>
     </div>
-</div>
+</div> -->
+
+        <!-- MODAL ADD ATTACHMENT DOKTER -->
+        <div class="modal fade" id="approveDRModal" tabindex="-1" aria-labelledby="approveDRModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="approveDRModalLabel">Approval Dokter</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="approveDRForm" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="id_pengajuan" id="approveDRIdPengajuan">
+                        <input type="hidden" name="status_pengajuan" value="4">
+                        <input type="hidden" name="id_rincian_biaya" id="idRincianBiayaInput">
+                        <input type="hidden" name="nominal_dokter" id="nominalDokterInput">
+
+                        <div class="modal-body">
+                            <div class="col-md-12">
+                                <label for="pengajuanBiayaKaryawan" class="form-label">Pengajuan Biaya</label>
+                                <div id="pengajuanBiayaKaryawanWrapper">
+                                    <!-- Data pengajuan biaya sebelumnya akan dimuat melalui JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- <div class="col-md-12 mt-3">
+                                <label for="pengajuanBiayaDokter" class="form-label">Pengajuan Biaya Dokter</label>
+                                <div id="pengajuanBiayaDokterWrapper">
+                                </div>
+                                <button type="button" id="addBiayaDokter" class="btn btn-primary btn-sm mt-2">Tambah Biaya Dokter</button>
+                            </div> -->
+
+                            <div class="col-md-12 mt-3">
+                                <label for="attachmentApproval" class="form-label">Attachment Approval</label>
+                                <div id="editAttachmentDropzone2" class="dropzone">
+                                    <div class="dz-message">Drag & Drop files here or click to upload</div>
+                                </div>
+                                <div id="editAttachmentList2">
+                                    <!-- File lama akan dimuat melalui JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="uploaded_files" id="uploadedFilesInput2" value="[]">
+                        <input type="hidden" name="approved_biaya" id="approvedBiayaInput">
+                        <input type="hidden" name="new_biaya_dokter" id="newBiayaDokterInput">
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+
 
 {{-- MODAL ADD --}}
 <div class="modal fade" id="modalDataBaru" tabindex="-1" aria-labelledby="modalDataBaruLabel" aria-hidden="true">
@@ -748,9 +805,11 @@
                 <div class="col-md-5">
                     <input type="text" class="form-control deskripsi-pengajuan" name="deskripsi_pengajuan[]" placeholder="Deskripsi">
                 </div>
+                
                 <div class="col-md-2">
                     <button type="button" class="btn btn-danger btn-remove">Hapus</button>
                 </div>
+                
             `;
             container.appendChild(newItem);
 
@@ -983,9 +1042,152 @@
     console.log("Form submitted with uploaded_files:", $('#uploadedFilesInput2').val());
 });
 
-console.log("Current Uploaded Files (uploadedFilesDR):", uploadedFilesDR);
-console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput2').val());
+    console.log("Current Uploaded Files (uploadedFilesDR):", uploadedFilesDR);
+    console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput2').val());
 
+    $(document).on('show.bs.modal', '#approveDRModal', function (event) {
+        const modal = $(this);
+        const modalId = modal.find('#approveDRIdPengajuan').val(); // ID pengajuan
+        const pengajuanBiayaKaryawanWrapper = '#pengajuanBiayaKaryawanWrapper';
+        const pengajuanBiayaDokterWrapper = '#pengajuanBiayaDokterWrapper';
+
+        // Kosongkan wrapper sebelum memuat data
+        $(pengajuanBiayaKaryawanWrapper).empty();
+        $(pengajuanBiayaDokterWrapper).empty();
+
+        // Ambil data pengajuan biaya karyawan melalui AJAX
+        $.ajax({
+            url: `/restitusi_karyawan/rincian/${modalId}`,
+            type: 'GET',
+            success: function (response) {
+                if (response.status === 'success') {
+                    response.data.forEach((item, index) => {
+                        $(pengajuanBiayaKaryawanWrapper).append(`
+                            <div class="row mb-2" id="pengajuanBiayaKaryawanRow-${index}">
+                                <div class="col-md-3">
+                                    <label for="keterangan_pengajuan" class="form-label">Pengajuan Karyawan</label>
+                                    <input type="text" class="form-control nominal_karyawan" value="${item.nominal_pengajuan}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="keterangan_pengajuan" class="form-label">Pengajuan Dokter</label>
+                                    <input type="text" class="form-control nominal_dokter" data-id="${item.id_rincian_biaya}" placeholder="Pengajuan oleh dokter">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="keterangan_pengajuan" class="form-label">Deskripsi</label>
+                                    <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" readonly>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-center">
+                                    <label for="keterangan_pengajuan" class="form-label">Approve</label>
+                                    <input type="checkbox" class="form-check-input approve-dokter" data-id="${item.id_rincian_biaya}">
+                                </div>
+                            </div>
+                        `);
+
+                        // Ambil data nominal_akhir dan deskripsi_biaya untuk bagian Biaya yang Diapprove Dokter
+
+
+                        // Inisialisasi Cleave.js untuk input nominal dokter
+                        new Cleave(`#pengajuanBiayaKaryawanRow-${index} .nominal_dokter`, {
+                            numeral: true,
+                            numeralThousandsGroupStyle: 'thousand',
+                            prefix: 'Rp ',
+                            rawValueTrimPrefix: true,
+                            numeralIntegerScale: 15,
+                            numeralDecimalScale: 2
+                        });
+                        new Cleave(`#pengajuanBiayaKaryawanRow-${index} .nominal_karyawan`, {
+                            numeral: true,
+                            numeralThousandsGroupStyle: 'thousand',
+                            prefix: 'Rp ',
+                            rawValueTrimPrefix: true,
+                            numeralIntegerScale: 15,
+                            numeralDecimalScale: 2
+                        });
+                    });
+
+                    // Tambahkan event listener untuk auto-check pada checkbox
+                    $(pengajuanBiayaKaryawanWrapper).find('.nominal_dokter').on('input', function () {
+                        const checkbox = $(this).closest('.row').find('.approve-dokter');
+                        if ($(this).val().trim() !== "") {
+                            checkbox.prop('checked', true);
+                        } else {
+                            checkbox.prop('checked', false);
+                        }
+                    });
+                }
+            },
+            error: function () {
+                alert('Gagal memuat data pengajuan biaya karyawan.');
+            }
+        });
+
+        // Tambahkan form input untuk pengajuan biaya dokter
+        $('#addBiayaDokter').on('click', function () {
+            const newIndex = $(pengajuanBiayaDokterWrapper).children().length;
+            $(pengajuanBiayaDokterWrapper).append(`
+                <div class="row mb-2" id="pengajuanBiayaDokterRow-${newIndex}">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control nominal_karyawan" placeholder="Nominal Karyawan">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control nominal_dokter" placeholder="Nominal Dokter">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm btn-remove">Hapus</button>
+                    </div>
+                </div>
+            `);
+
+            // Inisialisasi Cleave.js untuk input baru
+            new Cleave(`#pengajuanBiayaDokterRow-${newIndex} .nominal_dokter`, {
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                prefix: 'Rp ',
+                rawValueTrimPrefix: true,
+                numeralIntegerScale: 15,
+                numeralDecimalScale: 2
+            });
+        });
+
+        // Hapus form input biaya dokter
+        $(document).on('click', '.btn-remove', function () {
+            $(this).closest('.row').remove();
+        });
+
+        // Proses data sebelum submit
+        $('#approveDRForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const approvedBiaya = [];
+            const idRincianBiaya = [];
+            const nominalDokter = [];
+            const newBiayaDokter = [];
+
+            // Ambil data persetujuan dari checkbox
+            $(pengajuanBiayaKaryawanWrapper).find('.approve-dokter:checked').each(function () {
+                approvedBiaya.push($(this).data('id'));
+            });
+
+            // Ambil data id_rincian_biaya dan nominal_dokter
+            $(pengajuanBiayaKaryawanWrapper).find('.nominal_dokter').each(function () {
+                const id = $(this).data('id');
+                const nominal = $(this).val();
+                idRincianBiaya.push(id || null);
+                nominalDokter.push(nominal || null);
+            });
+
+            // Set data ke hidden input sebelum submit
+            $('#idRincianBiayaInput').val(JSON.stringify(idRincianBiaya));
+            $('#nominalDokterInput').val(JSON.stringify(nominalDokter));
+            $('#approvedBiayaInput').val(JSON.stringify(approvedBiaya));
+
+            // Submit form
+            this.submit();
+        });
+    });
 
 </script>
 <script>
@@ -1008,6 +1210,7 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
         const button = $(event.relatedTarget); // Tombol yang memicu modal
         const modalId = button.data('id'); // ID pengajuan
         const modalWrapper = `#rincianBiayaWrapper-${modalId}`;
+        const modalApproveBiayaWrapper = `#rincianApprovedBiayaWrapper-${modalId}`;
         const addButton = `#addTambahanRincianBiaya-${modalId}`;
         const hiddenNominal = `#hiddenNominalPengajuan-${modalId}`;
         const hiddenDeskripsi = `#hiddenDeskripsiPengajuan-${modalId}`;
@@ -1017,6 +1220,7 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
 
         // Bersihkan wrapper rincian biaya
         $(modalWrapper).empty();
+        $(modalApproveBiayaWrapper).empty();
 
         // Ambil rincian biaya melalui AJAX
         $.ajax({
@@ -1034,8 +1238,50 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                                 <div class="col-md-5">
                                     <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" placeholder="Deskripsi">
                                 </div>
+                                @if ($data1->status_pengajuan === 1)
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="${item.id_rincian_biaya}">Hapus</button>
+                                </div>
+                                @endif
+                            </div>
+                        `);
+                    });
+                    initCleave(); // Inisialisasi Cleave.js
+                }
+            },
+            error: function () {
+                alert('Gagal memuat rincian biaya.');
+            }
+        });
+        $.ajax({
+            url: `/restitusi_karyawan/rincian/${modalId}`,
+            type: 'GET',
+            success: function (response) {
+                if (response.status === 'success') {
+                    response.data.forEach((item, index) => {
+                        // Tentukan label berdasarkan status_rincian_biaya
+                        let statusLabel = '';
+                        if (item.status_rincian_biaya === 3) {
+                            statusLabel = '<span class="badge bg-success">Approved</span>';
+                        } else if (item.status_rincian_biaya === 2 || item.status_rincian_biaya === 1) {
+                            statusLabel = '<span class="badge bg-danger">Not Approved</span>';
+                        } else if (item.status_rincian_biaya === 4) {
+                            statusLabel = '<span class="badge bg-primary">Approved VP</span>';
+                        } else {
+                            statusLabel = '<span class="badge bg-secondary">Unknown</span>';
+                        }
+
+                        $(modalApproveBiayaWrapper).append(`
+                            <div class="row mb-2" id="rincianBiayaApprovedRow-${index}">
+                                <input type="hidden" class="id_rincian_biaya" value="${item.id_rincian_biaya || ''}">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control nominal" value="${item.nominal_akhir || 'N/A'}" readonly>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya || 'N/A'}" readonly>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-center">
+                                    ${statusLabel}
                                 </div>
                             </div>
                         `);
@@ -1047,6 +1293,7 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                 alert('Gagal memuat rincian biaya.');
             }
         });
+
 
         // Tambah rincian biaya
         $(addButton).on('click', function () {
@@ -1060,9 +1307,11 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                     <div class="col-md-5">
                         <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
                     </div>
+                    @if ($data1->status_pengajuan === 1)
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="">Hapus</button>
                     </div>
+                    @endif
                 </div>
             `);
             initCleave(); // Inisialisasi Cleave.js

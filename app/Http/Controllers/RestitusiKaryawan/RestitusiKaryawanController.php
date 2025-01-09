@@ -639,25 +639,79 @@ class RestitusiKaryawanController extends Controller
     //     }
     // }
 
-    public function approval_dr(Request $request, string $id)
+    // public function approval_dr(Request $request, string $id)
+    // {
+    //     //  return response()->json([
+    //     //         'status' => 'Debugging',
+    //     //         'message' => 'Data Response berhasil diproses.',
+    //     //         'request' => $request->all(),
+
+    //     //     ]);
+    //     try {
+    //         Log::info('Uploading Attachment dari Approval Dokter: ' . $id . ', Request Data: ', $request->all());
+    
+    //         // Decode uploaded_files dan removed_files
+    //         $uploadedFiles = $request->input('uploaded_files', '[]');
+    //         $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
+    
+    //         $removedFiles = $request->input('removed_files', '[]');
+    //         $removedFiles = json_decode($removedFiles, true) ?? [];
+    
+    //         Log::info('Decoded Uploaded Files:', $uploadedFiles);
+    //         Log::info('Decoded Removed Files:', $removedFiles);
+    
+    //         // Ambil data klaim dari database
+    //         $restitusi = RestitusiKaryawan::findOrFail($id);
+    //         $currentFiles = json_decode($restitusi->url_file_dr, true) ?? [];
+    
+    //         // Hapus file lama
+    //         foreach ($removedFiles as $file) {
+    //             $filePath = public_path('uploads/Restitusi_Karyawan/' . $file);
+    //             if (file_exists($filePath)) {
+    //                 unlink($filePath);
+    //             }
+    //         }
+    //         $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
+    
+    //         // Tambahkan file baru
+    //         $currentFiles = array_merge($currentFiles, $uploadedFiles);
+    
+    //         // Update database
+    //         $restitusi->update([
+    //             'url_file_dr' => json_encode(array_unique($currentFiles)),
+    //             'status_pengajuan' => 3,
+    //             'reject_notes' =>null
+    //         ]);
+
+
+    //      return response()->json([
+    //                 'status' => 'Debugging',
+    //                 'message' => 'Data Response berhasil diproses.',
+    //                 'request' => $request->all(),
+
+    //             ]);
+    //         // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+    //     } catch (\Throwable $th) {
+    //         return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+    //     }
+    // }
+
+        public function approval_dr(Request $request, string $id)
     {
         try {
             Log::info('Uploading Attachment dari Approval Dokter: ' . $id . ', Request Data: ', $request->all());
-    
+            
             // Decode uploaded_files dan removed_files
-            $uploadedFiles = $request->input('uploaded_files', '[]');
-            $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
-    
-            $removedFiles = $request->input('removed_files', '[]');
-            $removedFiles = json_decode($removedFiles, true) ?? [];
-    
-            Log::info('Decoded Uploaded Files:', $uploadedFiles);
-            Log::info('Decoded Removed Files:', $removedFiles);
-    
+            $uploadedFiles = json_decode($request->input('uploaded_files', '[]'), true) ?? [];
+            $removedFiles = json_decode($request->input('removed_files', '[]'), true) ?? [];
+            $approvedBiaya = json_decode($request->input('approved_biaya', '[]'), true) ?? [];
+            $idRincianBiaya = json_decode($request->input('id_rincian_biaya', '[]'), true) ?? [];
+            $nominalDokter = json_decode($request->input('nominal_dokter', '[]'), true) ?? [];
+
             // Ambil data klaim dari database
             $restitusi = RestitusiKaryawan::findOrFail($id);
             $currentFiles = json_decode($restitusi->url_file_dr, true) ?? [];
-    
+
             // Hapus file lama
             foreach ($removedFiles as $file) {
                 $filePath = public_path('uploads/Restitusi_Karyawan/' . $file);
@@ -666,33 +720,62 @@ class RestitusiKaryawanController extends Controller
                 }
             }
             $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
-    
+
             // Tambahkan file baru
             $currentFiles = array_merge($currentFiles, $uploadedFiles);
-    
-            // Update database
+
+            // Update data rincian biaya
+            // Update data rincian biaya
+            foreach ($idRincianBiaya as $index => $idRincian) {
+                $nominal = $nominalDokter[$index] ?? null;
+
+                // Abaikan data jika nominal dokter hanya berisi "Rp" atau kosong
+                if (empty($nominal) || trim($nominal) === "Rp") {
+                    // Update hanya jika checkbox di-check
+                    if (in_array($idRincian, $approvedBiaya)) {
+                        $rincian = RincianBiaya::findOrFail($idRincian);
+                        RincianBiaya::where('id_rincian_biaya', $idRincian)->update([
+                            'nominal_akhir' => $rincian->nominal_pengajuan, // Jika diapprove, gunakan nominal pengajuan
+                            'status_rincian_biaya' => 3, // Status disetujui
+                            'updated_by' => auth()->user()->id_user,
+                            'updated_at' => now(),
+                        ]);
+                    }
+                    continue;
+                }
+
+                // Jika nominal dokter valid, update data rincian biaya
+                $nominalDokterCleaned = str_replace(['Rp', '.', ','], '', $nominal); // Membersihkan string nominal dokter
+                RincianBiaya::where('id_rincian_biaya', $idRincian)->update([
+                    'nominal_akhir' => $nominalDokterCleaned, // Gunakan nominal dokter sebagai nominal akhir
+                    'nominal_dokter' => $nominalDokterCleaned, // Update kolom nominal dokter
+                    'status_rincian_biaya' => 3, // Status disetujui
+                    'updated_by' => auth()->user()->id_user,
+                    'updated_at' => now(),
+                ]);
+            }
+
+
+            // Update database restitusi
             $restitusi->update([
                 'url_file_dr' => json_encode(array_unique($currentFiles)),
-                'status_pengajuan' => 3,
-                'reject_notes' =>null
+                'status_pengajuan' => 3, // Status disetujui dokter
+                'reject_notes' => null,
             ]);
 
-            $biaya = RincianBiaya::create([
-                'id_rincian_biaya' => rand(10, 99999999),
-                'id_badge' => $restitusi->id_badge,
-                'kategori' => "restitusi",
-                //butuh input baru
-                'nominal' => $request->nominal,
-                'rumah_sakit' => $restitusi->rumah_sakit,
-                'no_surat_rs' => $restitusi->no_surat_rs,
-                'updated_by' => auth()->user()->role,
-                'created_at' => now(),
-                'created_by' => auth()->user()->role,
-            ]);
-    
-            return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
+            // return response()->json([
+            //     'status' => 'Debugging',
+            //     'message' => 'Data Response berhasil diproses.',
+            //     'request' => $request->all(),
+            // ]);
+            return redirect('/admin/restitusi_karyawan')->with('success', 'Approve by DR.');
         } catch (\Throwable $th) {
-            return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            Log::error('Error in approval_dr:', ['error' => $th->getMessage()]);
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'Terjadi kesalahan.',
+                'error' => $th->getMessage(),
+            ], 500);
         }
     }
 
@@ -706,6 +789,13 @@ class RestitusiKaryawanController extends Controller
             // Lakukan logika persetujuan DR
             $restitusi->status_pengajuan = '4';
             $restitusi->save();
+
+            $rincian_update = RincianBiaya::where('id_kategori', $restitusi->id_pengajuan)
+            ->where('status_rincian_biaya', 3)
+            ->update([
+                'status_rincian_biaya' => 4, // Status disetujui
+            ]);
+
 
             return redirect('/admin/restitusi_karyawan')->with('success', 'Approval VP.');
         } catch (\Throwable $th) {
