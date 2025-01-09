@@ -387,6 +387,16 @@ class RestitusiKaryawanController extends Controller
 
     public function update(Request $request, string $id)
     {
+        // return response()->json([
+        //         'status' => 'Debugging',
+        //         'message' => 'Data Response berhasil diproses.',
+        //         'request' => $request->all(),
+        //         // 'decoded_id_rincian_biaya' => count($idRincianBiaya),
+        //         // 'decoded_nominal_pengajuan' => count($nominalPengajuan),
+        //         // 'decoded_deskripsi_pengajuan' => count($deskripsiPengajuan),
+        //         // 'data_restitusi' => $restitusi
+        //     ]);
+
         try {
             Log::info('Updating Attachment Data Karyawan: ' . $id . ', Request Data: ', $request->all());
     
@@ -433,62 +443,94 @@ class RestitusiKaryawanController extends Controller
             // Hilangkan duplikat file dan reset index array
             $finalFiles = array_values(array_unique($currentFiles));
     
+            if (auth()->user()->role === "superadmin") {
+                $restitusi->update([
+                    'url_file' => json_encode($finalFiles),
+                    'rumah_sakit' => $request->rumah_sakit,
+                    'urgensi' => $request->urgensi,
+                    'no_surat_rs' => $request->no_surat_rs,
+                    'tanggal_pengobatan' => $request->tanggal_pengobatan,
+                    'keterangan_pengajuan' => $request->keterangan_pengajuan,
+                    'status_pengajuan' => 1,
+                    'reject_notes' => null,
+                    'deskripsi' => $request->deskripsi,
+                ]);
+            }
             // Update data restitusi
-            $restitusi->update([
-                'url_file' => json_encode($finalFiles),
-                'rumah_sakit' => $request->rumah_sakit,
-                'urgensi' => $request->urgensi,
-                'no_surat_rs' => $request->no_surat_rs,
-                'tanggal_pengobatan' => $request->tanggal_pengobatan,
-                'keterangan_pengajuan' => $request->keterangan_pengajuan,
-                'status_pengajuan' => 1,
-                'reject_notes' => null,
-                'deskripsi' => $request->deskripsi,
-            ]);
+            
     
             // Update rincian biaya
-            $idRincianBiaya = $request->input('id_rincian_biaya', []); // Tidak perlu json_decode
-            $nominalPengajuan = $request->input('nominal_pengajuan', []); // Tidak perlu json_decode
-            $deskripsiPengajuan = $request->input('deskripsi_pengajuan', []); // Tidak perlu json_decode
-    
+            // Ambil data dari request
+            $idRincianBiayaRaw = $request->input('id_rincian_biaya', []);
+            $nominalPengajuanRaw = $request->input('nominal_pengajuan', []);
+            $deskripsiPengajuanRaw = $request->input('deskripsi_pengajuan', []);
+            $removedRincianBiaya = $request->input('removed_rincian_biaya', []);
+            if (!empty($removedRincianBiaya)) {
+                $removedRincianBiaya = json_decode($removedRincianBiaya, true);
+                RincianBiaya::whereIn('id_rincian_biaya', $removedRincianBiaya)->delete();
+            }
+
+            // Proses data menjadi array PHP
+            $idRincianBiaya = !empty($idRincianBiayaRaw) ? json_decode($idRincianBiayaRaw[0], true) : [];
+            $nominalPengajuan = !empty($nominalPengajuanRaw) ? json_decode($nominalPengajuanRaw[0], true) : [];
+            $deskripsiPengajuan = !empty($deskripsiPengajuanRaw) ? json_decode($deskripsiPengajuanRaw[0], true) : [];
+
+            if (count($idRincianBiaya) !== count($nominalPengajuan) || count($idRincianBiaya) !== count($deskripsiPengajuan)) {
+                throw new \Exception('Panjang array id_rincian_biaya, nominal_pengajuan, dan deskripsi_pengajuan tidak sesuai.');
+            }
+
+            Log::info('Data ID Rincian Biaya:', $idRincianBiaya);
+            Log::info('Data Nominal Pengajuan:', $nominalPengajuan);
+            Log::info('Data Deskripsi Pengajuan:', $deskripsiPengajuan);
+
             foreach ($idRincianBiaya as $index => $idRincian) {
-                if ($idRincian == null) {
-                    // Update existing rincian biaya
-                    
-                    $buat_rincian = RincianBiaya::create([
-                        'id_rincian_biaya' => rand(10, 99999999),
+                if (empty($idRincian)) {
+                    // Jika ID kosong/null, buat rincian baru
+                    $rincian = RincianBiaya::create([
                         'id_badge' => $restitusi->id_badge,
                         'kategori' => "restitusi",
                         'id_kategori' => $restitusi->id_pengajuan,
                         'rumah_sakit' => $restitusi->rumah_sakit,
                         'no_surat_rs' => $restitusi->no_surat_rs,
-                        'nominal_pengajuan' => $nominalPengajuan[$index],
+                        'nominal_pengajuan' => str_replace(['Rp', '.', ','], '', $nominalPengajuan[$index]),
+                        'deskripsi_biaya' => $deskripsiPengajuan[$index],
+                        'created_at' => now(),
+                        'created_by' => auth()->user()->id_user
+                    ]);
+                    Log::info('Rincian biaya baru dibuat:', ['data' => $rincian]);
+                } else {
+                    // Jika ID ada, update rincian yang ada
+                    $updated = RincianBiaya::where('id_rincian_biaya', $idRincian)->update([
+                        'nominal_pengajuan' => str_replace(['Rp', '.', ','], '', $nominalPengajuan[$index]),
                         'deskripsi_biaya' => $deskripsiPengajuan[$index],
                         'updated_at' => now(),
                         'updated_by' => auth()->user()->id_user
                     ]);
-                    Log::info('Rincian Biaya belum ada, maka dibuat baru :', $buat_rincian);
-                    // Log::info('Rincian Biaya yang di update :', $rincian);
-                } else {
-                    // Create new rincian biaya
-                    $rincian = RincianBiaya::where('id_rincian_biaya', $idRincian)->update([
-                        'nominal_pengajuan' => $nominalPengajuan[$index],
-                        'deskripsi_biaya' => $deskripsiPengajuan[$index],
-                    ]);
-                    
+                    Log::info('Rincian biaya diupdate:', ['id' => $idRincian, 'updated' => $updated]);
                 }
             }
-    
+
+            // return response()->json([
+            //     'status' => 'Debugging',
+            //     'message' => 'Data Response berhasil diproses.',
+            //     'request' => $request->all(),
+            //     'decoded_id_rincian_biaya' => count($idRincianBiaya),
+            //     'decoded_nominal_pengajuan' => count($nominalPengajuan),
+            //     'decoded_deskripsi_pengajuan' => count($deskripsiPengajuan),
+            //     'data_restitusi' => $restitusi
+            // ]);
+            
+            
             return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
         } catch (\Throwable $th) {
             // return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
             return response()->json([
-                            'status' => 'Debugging',
-                            'message' => 'Data Renponse di ambil.',
-                            'request' => $request->all(),
-                            'pesan_error' => $th->getMessage()
-                            // 'filesFinal'=>$finalFiles,
-                    ]);
+                'status' => 'Debugging',
+                'message' => 'Data Renponse di ambil.',
+                'request' => $request->all(),
+                'pesan_error' => $th->getMessage()
+                // 'filesFinal'=>$finalFiles,
+            ]);
         }
     }
 

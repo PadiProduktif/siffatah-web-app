@@ -322,6 +322,8 @@
                                         <input type="hidden" id="hiddenIdRincianBiaya-{{ $data1->id_pengajuan }}" name="id_rincian_biaya[]" value="">
                                         <input type="hidden" id="hiddenNominalPengajuan-{{ $data1->id_pengajuan }}" name="nominal_pengajuan[]" value="">
                                         <input type="hidden" id="hiddenDeskripsiPengajuan-{{ $data1->id_pengajuan }}" name="deskripsi_pengajuan[]" value="">
+                                        <input type="hidden" id="hiddenRemovedRincianBiaya-{{ $data1->id_pengajuan }}" name="removed_rincian_biaya" value="[]">
+
                                         <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
@@ -380,7 +382,7 @@
                                 </div>
                                 <input type="hidden" name="uploaded_files" id="uploadedFilesInput-{{ $data1->id_pengajuan }}" value="[]">
                                 <input type="hidden" id="removedFilesInput-{{ $data1->id_pengajuan }}" name="removed_files">
-                                @if (auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 1)
+                                @if (auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 1 || auth()->user()->role === 'dr_hph' && $data1->status_pengajuan === 2)
                                 <div class="modal-footer">
                                     
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -550,12 +552,22 @@
                 @method('PUT')
                 <input type="hidden" name="id_pengajuan" id="approveDRIdPengajuan">
                 <input type="hidden" name="status_pengajuan" value="4">
+                <input type="hidden" id="hiddenIdRincianBiaya-{{ $data1->id_pengajuan }}" name="id_rincian_biaya[]" value="">
+                <input type="hidden" id="hiddenNominalPengajuan-{{ $data1->id_pengajuan }}" name="nominal_pengajuan[]" value="">
+                <input type="hidden" id="hiddenDeskripsiPengajuan-{{ $data1->id_pengajuan }}" name="deskripsi_pengajuan[]" value="">
+                <input type="hidden" id="hiddenRemovedRincianBiaya-{{ $data1->id_pengajuan }}" name="removed_rincian_biaya" value="[]">
+
                 
                 <div class="modal-body">
                     {{-- <div class="col-md-12">
                         <label for="nominal" class="form-label">Nominal Pengajuan Anggaran</label>
                         <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" >
                     </div> --}}
+                    <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
+                    <div id="rincianBiayaDRWrapper-{{ $data1->id_pengajuan }}">
+                                            <!-- Rincian biaya akan di-load oleh AJAX -->
+                    </div>
+                <button type="button" id="addTambahanRincianBiayaDR-{{ $data1->id_pengajuan }}" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
                     <div class="col-md-12">
                         <label for="dropzone" class="form-label">Attachment Approval</label>
                         <div id="editAttachmentDropzone2" class="dropzone">
@@ -999,6 +1011,9 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
         const addButton = `#addTambahanRincianBiaya-${modalId}`;
         const hiddenNominal = `#hiddenNominalPengajuan-${modalId}`;
         const hiddenDeskripsi = `#hiddenDeskripsiPengajuan-${modalId}`;
+        const hiddenRemoved = `#hiddenRemovedRincianBiaya-${modalId}`;
+
+let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihapus
 
         // Bersihkan wrapper rincian biaya
         $(modalWrapper).empty();
@@ -1020,7 +1035,7 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                                     <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" placeholder="Deskripsi">
                                 </div>
                                 <div class="col-md-1">
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${index})">Hapus</button>
+                                    <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="${item.id_rincian_biaya}">Hapus</button>
                                 </div>
                             </div>
                         `);
@@ -1046,11 +1061,25 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
                         <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
                     </div>
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRincian(${newIndex})">Hapus</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="">Hapus</button>
                     </div>
                 </div>
             `);
             initCleave(); // Inisialisasi Cleave.js
+        });
+
+        // Hapus rincian biaya
+        $(document).on('click', `.btn-remove`, function () {
+            const idRincian = $(this).data('id'); // Ambil ID rincian biaya
+
+            if (idRincian) {
+                removedRincianBiaya.push(idRincian); // Tambahkan ke array jika ID ada
+            }
+
+            // Hapus baris dari DOM
+            $(this).closest('.row').remove();
+
+            console.log('Removed Rincian Biaya:', removedRincianBiaya);
         });
 
         // Set nilai hidden input sebelum submit
@@ -1072,6 +1101,7 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
             // Set nilai input hidden
             $(hiddenNominal).val(JSON.stringify(nominalArray));
             $(hiddenDeskripsi).val(JSON.stringify(deskripsiArray));
+            $(hiddenRemoved).val(JSON.stringify(removedRincianBiaya)); // Tambahkan rincian yang dihapus
 
             // Jika id_rincian_biaya diperlukan
             const hiddenIdRincian = `#hiddenIdRincianBiaya-${modalId}`;
@@ -1080,6 +1110,7 @@ console.log("Hidden Input Value (#uploadedFilesInput2):", $('#uploadedFilesInput
             console.log('Nominal:', nominalArray);
             console.log('Deskripsi:', deskripsiArray);
             console.log('ID Rincian Biaya:', idRincianArray);
+            console.log('Removed Rincian Biaya:', removedRincianBiaya);
         });
     });
 
