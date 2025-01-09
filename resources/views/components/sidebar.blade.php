@@ -12,7 +12,7 @@
     <h1 class="fs-5 mb-1">SI FATAH <span class="text-muted" style="font-size: 12px;">v.01</span></h1>
     <p class="text-muted" style="font-size: 12px;">Sistem Informasi Fasilitas dan Kesehatan</p>
 
-    @if(auth()->check() && (auth()->user()->role === 'superadmin' || auth()->user()->role === 'dr_hph'))
+    @if(auth()->check() && (auth()->user()->role === 'superadmin' || auth()->user()->role === 'dr_hph' || auth()->user()->role === 'vp_osdm'))
         <ul class="nav flex-column">
             <li><a href="/admin/dashboard" class="nav-link {{ Request::is('admin/dashboard') ? 'active' : '' }}">Dashboard</a></li>
             <li><a href="/admin/restitusi_karyawan" class="nav-link {{ Request::is('admin/restitusi_karyawan') ? 'active' : '' }}">Restitusi Karyawan</a></li>
