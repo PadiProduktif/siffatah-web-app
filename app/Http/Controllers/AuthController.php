@@ -137,7 +137,6 @@ class AuthController extends Controller
         ->where('username', $dataKaryawan->id_badge)
         ->first();
 
-
         if ($dataUser) {
             // Update password ke default (id_badge)
             $dataUser->update([
@@ -153,23 +152,6 @@ class AuthController extends Controller
 
         // Redirect kembali ke halaman yang diinginkan
         return redirect()->back();
-        
-        // // Update password
-        // $dataUser->update([
-        //     'password' => Hash::make($request->new_password),
-        // ]);
-        // dd(
-        //     $id,
-        //     $dataUser,
-        //     $dataKaryawan->id_badge,
-        // );
-
-
-        // Reset password (misalnya set ke password default)
-        // $karyawan->password = bcrypt('password_default');
-        // $karyawan->save();
-
-        // return redirect()->back()->with('success', 'Password berhasil direset.');
     }
 }
 

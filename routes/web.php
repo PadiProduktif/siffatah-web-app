@@ -103,6 +103,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/berkas-pengobatan/delete-temp', [BerkasPengobatanController::class, 'deleteTemp'])->name('berkas-pengobatan-delete.temp');
     
     
+    Route::post('/admin/tagihan-baru', [BerkasPengobatanController::class, 'store_invoice'])->name('tagihan-baru.store');
+    
+
+
     //Ekses
     Route::get('/admin/ekses', [EksesController::class, 'index']);
     Route::post('/admin/ekses/tambah', [EksesController::class, 'store'])->name('ekses.store');
@@ -233,9 +237,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('set-profil', function () {
         return view('extras/set-profil');
     });
+    
+    Route::post('/get-keluarga', [MasterDataNonKaryawanController::class, 'get_keluarga_from_badge']);
+
+
 
     
-    Route::get('/berkas-tagihan-rumah-sakit/{id}', [BerkasPengobatanController::class, 'show'])->name('berkas-tagihan-rumah-sakit.show');
+    Route::get('/admin/berkas-tagihan-rumah-sakit/{id}', [BerkasPengobatanController::class, 'show'])->name('berkas-tagihan-rumah-sakit.show');
     
     //Logout
     // use App\Http\Controllers\UserController;
