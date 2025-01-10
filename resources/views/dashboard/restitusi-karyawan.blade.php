@@ -328,7 +328,7 @@
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
                                         </div>
-                                        @if ($data1->status_pengajuan === 1)
+                                        @if ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2)
                                         <button type="button" id="addTambahanRincianBiaya-{{ $data1->id_pengajuan }}" class="btn btn-primary btn-sm mt-2">Tambah Rincian Biaya</button>
                                         @endif
                                         @if ($data1->status_pengajuan === 3 || $data1->status_pengajuan === 4)
@@ -688,7 +688,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="rumah_sakit" class="form-label">Rumah sakit</label>
+                            <label for="rumah_sakit" class="form-label">Rumah Sakit / Provider</label>
                             <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" required>
                         </div>
                         {{-- <div class="col-md-3">
@@ -1076,8 +1076,17 @@
                                     <label for="keterangan_pengajuan" class="form-label">Deskripsi</label>
                                     <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" readonly>
                                 </div>
-                                <div class="col-md-1 d-flex align-items-center">
-                                    <label for="keterangan_pengajuan" class="form-label">Approve</label>
+                                <div class="col-md-2">
+                                <label for="keterangan_pengajuan" class="form-label">Persentase</label>
+                                <select class="form-select" aria-label="Default select example">
+                                    <option value="1">0%</option>
+                                    <option value="2">90%</option>
+                                    <option selected value="3">95%</option>
+                                    <option value="4">100%</option>
+                                </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="keterangan_pengajuan" class="form-label me-2">Approve</label>
                                     <input type="checkbox" class="form-check-input approve-dokter" data-id="${item.id_rincian_biaya}">
                                 </div>
                             </div>
@@ -1238,7 +1247,7 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                                 <div class="col-md-5">
                                     <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" placeholder="Deskripsi">
                                 </div>
-                                @if ($data1->status_pengajuan === 1)
+                                @if ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2)
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="${item.id_rincian_biaya}">Hapus</button>
                                 </div>
@@ -1307,7 +1316,7 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                     <div class="col-md-5">
                         <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
                     </div>
-                    @if ($data1->status_pengajuan === 1)
+                    @if ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2)
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="">Hapus</button>
                     </div>
