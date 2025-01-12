@@ -210,6 +210,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/restitusi_karyawan/rincian/{id}', [RestitusiKaryawanController::class, 'getRincianBiaya'])->name('restitusi_karyawan.rincian');
     Route::post('/restitusi_karyawan/upload-temp', [RestitusiKaryawanController::class, 'uploadTemp'])->name('restitusi_karyawan_upload.temp');
     Route::post('/restitusi_karyawan/delete-temp', [RestitusiKaryawanController::class, 'deleteTemp'])->name('restitusi_karyawan_delete.temp');
+    Route::post('/restitusi_karyawan/get-non-karyawan', [RestitusiKaryawanController::class, 'getNonKaryawan'])->name('restitusi_karyawan_delete.get_non_karyawan');
 
     //Kepesertaan BPJS  Kesehatan
     Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);

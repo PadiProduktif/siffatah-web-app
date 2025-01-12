@@ -9,6 +9,7 @@ use App\Models\RincianBiaya\RincianBiaya;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class RestitusiKaryawanController extends Controller
@@ -45,6 +46,7 @@ class RestitusiKaryawanController extends Controller
         // Urutkan hasil secara descending
         $restitusi = $query->orderBy('table_pengajuan_reimburse.id_pengajuan', 'desc')->get();
 
+
         
         // Mengembalikan view dengan data yang diambil
         return view('dashboard/restitusi-karyawan', [
@@ -52,6 +54,38 @@ class RestitusiKaryawanController extends Controller
             'karyawan' => $karyawan,
         ]);
     }
+    // public function index()
+    // {
+    //     $username = auth()->user()->username;
+    //     $role = auth()->user()->role;
+    
+    //     $query = RestitusiKaryawan::select('table_pengajuan_reimburse.*')
+    //         ->leftJoin('table_karyawan', 'table_pengajuan_reimburse.id_badge', '=', 'table_karyawan.id_badge');
+    
+    //     if ($role === 'tko') {
+    //         $query->where('table_pengajuan_reimburse.id_badge', $username);
+    //     }
+    
+    //     if ($role === 'dr_hph') {
+    //         $query->where('table_pengajuan_reimburse.status_pengajuan', 2);
+    //     }
+    
+    //     if ($role === 'vp_osdm') {
+    //         $query->where('table_pengajuan_reimburse.status_pengajuan', 3);
+    //     }
+    
+    //     $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->get();
+    //     $restitusi = $query->orderBy('table_pengajuan_reimburse.id_pengajuan', 'desc')->get();
+    
+    //     // Ambil $data1 jika diperlukan
+    //     $data1 = $query->first(); // Sesuaikan query sesuai kebutuhan Anda
+    
+    //     return view('dashboard.restitusi-karyawan', [
+    //         'restitusi' => $restitusi,
+    //         'karyawan' => $karyawan,
+    //         'data1' => $data1,
+    //     ]);
+    // }
 
 
     public function store(Request $request)
@@ -195,6 +229,34 @@ class RestitusiKaryawanController extends Controller
         return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
+    public function getNonKaryawan(Request $request)
+    {
+        $idBadge = $request->input('id_badge'); // Ambil id_badge dari request
+    
+        // Debugging untuk memastikan ID diterima
+        Log::info('ID Badge diterima: ' . $idBadge);
+    
+        // Ambil data dari table_non_karyawan berdasarkan badge_parent
+        $data = DB::table('table_non_karyawan')
+            ->where('badge_parent', $idBadge)
+            ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
+            ->get();
+    
+        // Cek jika data tidak ditemukan
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data pasien tidak ditemukan.'
+            ]);
+        }
+    
+        // Jika data ditemukan, kembalikan response
+        return response()->json([
+            'status' => 'success',
+            'data' => $data
+        ]);
+    }
+
     public function view_edit_nominal_pengajuan($id)
     {
         try {
@@ -223,6 +285,7 @@ class RestitusiKaryawanController extends Controller
     public function getRincianBiaya($id)
     {
         try {
+            
             $rincianBiaya = RincianBiaya::where('id_kategori', $id)->get();
     
             return response()->json([

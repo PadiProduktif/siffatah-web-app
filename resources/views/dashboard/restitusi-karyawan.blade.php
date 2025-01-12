@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Restitusi')
 @section('content')
-
+    <!-- Bootstrap Select CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" rel="stylesheet">
 
     <div class="d-flex justify-content-end align-items-center mb-4">
         @if(auth()->user()->role === 'superadmin')
@@ -273,7 +274,7 @@
                                     <div class="row text-start">
 
                                         <div class="col-md-3">
-                                            <label for="tanggal_pengobatan" class="form-label">Tanggal pengobatan</label>
+                                            <label for="tanggal_pengobatan" class="form-label">Tanggal Pengajuan</label>
                                             <input type="date" class="form-control" id="tanggal_pengobatan" name="tanggal_pengobatan"
                                             value="{{ date('Y-m-d') }}"  {{ $form }}>
                                         </div>
@@ -662,9 +663,18 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label for="id-badge" class="form-label">Karyawan</label>
-                            <select id="id-badge" name="id_badge" class="form-control select2">
+                            <select id="id-badge" name="id_badge" class="form-control">
+                                @foreach($karyawan as $data)
+                                    <option value="{{ $data->id_badge }}">{{ $data->nama_karyawan }} - {{ $data->id_badge }}</option>
+                                @endforeach
+                            </select>
+                        </div> -->
+                        <div class="col-md-6">
+                            <label for="id-badge" class="form-label">Karyawan</label>
+                            <select id="id-badge" name="id_badge" class="form-control selectpicker" data-live-search="true">
+                            <option value="" selected disabled>Pilih Karyawan</option>
                                 @foreach($karyawan as $data)
                                     <option value="{{ $data->id_badge }}">{{ $data->nama_karyawan }} - {{ $data->id_badge }}</option>
                                 @endforeach
@@ -673,14 +683,14 @@
                         
 
                         <div class="col-md-3">
-                            <label for="tanggal_pengobatan" class="form-label">Tanggal pengobatan</label>
+                            <label for="tanggal_pengobatan" class="form-label">Tanggal Pengajuan</label>
                             <input type="date" class="form-control" id="tanggal_pengobatan" name="tanggal_pengobatan"
                             value="{{ date('Y-m-d') }}" required>
                         </div>
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label for="no_surat_rs" class="form-label">No. Surat</label>
                             <input type="text" class="form-control" id="no_surat_rs" name="no_surat_rs" required>
-                        </div>
+                        </div> -->
                         <div class="col-md-3">
                             <label for="urgensi" class="form-label">Urgensi</label>
                             <select class="form-control" id="urgensi" name="urgensi">
@@ -690,14 +700,41 @@
                                 <option value="High">High</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <label for="rumah_sakit" class="form-label">Rumah Sakit / Provider</label>
                             <input type="text" class="form-control" id="rumah_sakit" name="rumah_sakit" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="urgensi" class="form-label">Biaya Untuk Perawatan</label>
+                            <select class="form-control" id="urgensi" name="urgensi">
+                                <option value="" selected disabled>Pilih kategori perawatan</option>
+                                <option value="rawat_inap" >Rawat Inap/R.S</option>
+                                <option value="operasi">Operasi/R.S</option>
+                                <option value="kecelakaan">Kecelakaan</option>
+                                <option value="umum">Umum</option>
+                                <option value="kaca_mata">Kaca Mata</option>
+                                <option value="persalinan_anak">Persalinan Anak</option>
+                                <option value="gigi">Gigi</option>
+                            </select>
                         </div>
                         {{-- <div class="col-md-3">
                             <label for="nominal" class="form-label">Nominal</label>
                             <input type="number" class="form-control" id="nominal_input" name="nominal" step="any" required>
                         </div> --}}
+                        <style>
+                            select[multiple] {
+                                height: auto; /* Sesuaikan tinggi berdasarkan isi */
+                                min-height: 150px; /* Tinggi minimum */
+                            }
+                        </style>
+                        <div class="col-md-12 mt-3">
+                            <label for="daftarPasien" class="form-label">Daftar Pasien</label>
+                            <div id="daftarPasienWrapper">
+                                <!-- Data pasien akan dimuat melalui JavaScript -->
+                            </div>
+                        </div>
+
+                        
 
                         <div class="col-12">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
@@ -778,6 +815,111 @@
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script> --}}
 
+    
+    <!-- jQuery -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+    <!-- Select2 JS -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+
+    <script>
+        // $(document).ready(function () {
+        //     $('#id-badge').select2({
+        //         placeholder: "Pilih Karyawan...",
+        //         allowClear: true // Menambahkan tombol hapus pilihan
+        //     });
+        // });
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker();
+        });
+        $(document).ready(function () {
+            $('.selectpicker_pasien').selectpicker();
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+    // Ketika karyawan dipilih, perbarui daftar pasien
+        $('#id-badge').on('change', function () {
+            const idBadge = $(this).val();
+            const $daftarPasien = $('#daftarPasien');
+
+            $daftarPasien.empty().append('<option value="">Memuat data...</option>');
+
+            // Ambil data pasien berdasarkan karyawan yang dipilih
+            $.ajax({
+                url: '/restitusi_karyawan/get-non-karyawan',
+                type: 'POST',
+                data: {
+                    id_badge: idBadge,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    $daftarPasien.empty();
+
+                    if (response.status === 'success') {
+                        response.data.forEach(function (item) {
+                            $daftarPasien.append(
+                                `<option value="${item.id_non_karyawan}">${item.nama_lengkap} - ${item.hubungan_keluarga}</option>`
+                            );
+                        });
+                    } else {
+                        $daftarPasien.append('<option value="">Data tidak ditemukan</option>');
+                    }
+                },
+                error: function () {
+                    $daftarPasien.empty().append('<option value="">Gagal memuat data</option>');
+                    alert('Terjadi kesalahan saat mengambil data daftar pasien.');
+                }
+            });
+        });
+    });
+
+        </script>
+
+        <script>
+        $(document).ready(function () {
+            // Ketika karyawan dipilih, perbarui daftar pasien
+            $('#id-badge').on('change', function () {
+                const idBadge = $(this).val();
+                const $daftarPasienWrapper = $('#daftarPasienWrapper');
+
+                $daftarPasienWrapper.html('<p>Memuat data...</p>');
+
+                // Ambil data pasien berdasarkan karyawan yang dipilih
+                $.ajax({
+                    url: '/restitusi_karyawan/get-non-karyawan',
+                    type: 'POST',
+                    data: {
+                        id_badge: idBadge,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        $daftarPasienWrapper.empty();
+
+                        if (response.status === 'success') {
+                            response.data.forEach(function (item) {
+                                $daftarPasienWrapper.append(`
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input daftar-pasien" id="pasien-${item.id_non_karyawan}" name="daftar_pasien[]" value="${item.id_non_karyawan}">
+                                        <label class="form-check-label" for="pasien-${item.id_non_karyawan}">
+                                            ${item.nama_lengkap} - ${item.hubungan_keluarga}
+                                        </label>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $daftarPasienWrapper.html('<p>Data tidak ditemukan</p>');
+                        }
+                    },
+                    error: function () {
+                        $daftarPasienWrapper.html('<p>Gagal memuat data</p>');
+                        alert('Terjadi kesalahan saat mengambil data daftar pasien.');
+                    }
+                });
+            });
+        });
+        </script>
     <script>
          // Function to initialize Cleave.js for Rupiah format
          function initializeCleaveForNominal() {
@@ -792,6 +934,7 @@
                 }
             });
         }
+        
 
         // Initialize Cleave.js on page load
         initializeCleaveForNominal();
@@ -1379,11 +1522,11 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                                 <div class="col-md-5">
                                     <input type="text" class="form-control deskripsi" value="${item.deskripsi_biaya}" placeholder="Deskripsi">
                                 </div>
-                                @if ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2)
+                                @if (isset($data1) && ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2))
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="${item.id_rincian_biaya}">Hapus</button>
                                 </div>
-                                @elseif($data1->status_pengajuan === "4")
+                                @elseif(isset($data1) && $data1->status_pengajuan === "4")
                                     <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="${item.id_rincian_biaya}" disabled>Hapus</button>
                                 @endif
                             </div>
@@ -1441,6 +1584,7 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
         // Tambah rincian biaya
         $(addButton).on('click', function () {
             const newIndex = $(modalWrapper).children().length;
+            
             $(modalWrapper).append(`
                 <div class="row mb-2" id="rincianBiayaRow-${newIndex}">
                     <input type="hidden" class="id_rincian_biaya" value="">
@@ -1450,11 +1594,11 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
                     <div class="col-md-5">
                         <input type="text" class="form-control deskripsi" placeholder="Deskripsi">
                     </div>
-                    @if ($data1->status_pengajuan === 1 || $data1->status_pengajuan === 2)
+                    @if ($data1?->status_pengajuan === 1 || $data1?->status_pengajuan === 2)
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="">Hapus</button>
                     </div>
-                    @elseif($data1->status_pengajuan === "4")
+                    @elseif($data1?->status_pengajuan === "4")
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger btn-sm btn-remove" data-id="" disabled>Hapus</button>
                     </div>
