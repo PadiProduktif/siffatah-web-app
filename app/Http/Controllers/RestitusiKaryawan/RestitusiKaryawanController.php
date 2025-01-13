@@ -90,7 +90,17 @@ class RestitusiKaryawanController extends Controller
 
     public function store(Request $request)
     {
-        
+        $selectedPasien = json_encode($request->input('daftar_pasien', []));
+        $no_surat_rs = $this->generateNoSuratRs();
+        // Decode JSON jika diperlukan
+        // $selectedPasien = $selectedPasien, true;
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Data Request di ambil',
+        //     'data' => $request->all(),
+        //     'selectedPasien' => $selectedPasien,
+        //     'generateNoRS' => $this->generateNoSuratRs()
+        // ], 200);
         try {
             $id_restitusi = rand(10, 99999999);
             $validatedData = $request->validate([
@@ -99,7 +109,7 @@ class RestitusiKaryawanController extends Controller
                 'urgensi' => 'nullable|string|in:Low,Medium,High',
                 'deskripsi' => 'nullable|string',
                 'rumah_sakit' => 'nullable|string|max:255',
-                'no_surat_rs' => 'nullable|string|max:255',
+                // 'no_surat_rs' => 'nullable|string|max:255',
                 'status_pengajuan' => 'nullable|numeric',
                 'nominal_pengajuan' => 'required|array',
                 'nominal_pengajuan.*' => 'required|string',
@@ -113,9 +123,11 @@ class RestitusiKaryawanController extends Controller
                 'deskripsi' => $validatedData['deskripsi'],
                 'rumah_sakit' => $validatedData['rumah_sakit'],
                 'urgensi' => $validatedData['urgensi'],
-                'no_surat_rs' => $validatedData['no_surat_rs'],
+                'no_surat_rs' => $no_surat_rs,
                 'tanggal_pengobatan' => $validatedData['tanggal_pengobatan'],
                 'url_file' => $request->uploaded_files,
+                'jenis_perawatan' => $request->kategori_perawatan,
+                'daftar_pasien' => $selectedPasien,
                 'status_pengajuan' => '1',
             ]);
 
@@ -127,7 +139,7 @@ class RestitusiKaryawanController extends Controller
                     'kategori' => "restitusi",
                     'id_kategori' => $id_restitusi,
                     'rumah_sakit' => $validatedData['rumah_sakit'],
-                    'no_surat_rs' => $validatedData['no_surat_rs'],
+                    'no_surat_rs' => $no_surat_rs,
                     'deskripsi_biaya' => $deskripsiBiaya,
                     'nominal_pengajuan' => str_replace(['Rp', '.', ','], '', $nominal),
                     'status_rincian_biaya' => 1,
@@ -145,6 +157,53 @@ class RestitusiKaryawanController extends Controller
                 'data' => $th->getMessage(),
             ], 200);
         }
+    }
+
+    public function generateNoSuratRs()
+    {
+        $baseFormat = '{no_surat}/RESTITUSI/{bulan}/{tahun}';
+        $tahun = date('Y');
+        $bulan = date('n'); // Bulan numerik
+        $bulanRomawi = $this->convertToRoman($bulan);
+
+        // Regex untuk memvalidasi format nomor surat
+        $regexFormat = '/^(\d+)\/RESTITUSI\/' . $bulanRomawi . '\/' . $tahun . '$/';
+
+        // Ambil nomor surat terbaru sesuai format
+        $latestNoSurat = DB::table('table_pengajuan_reimburse')
+            ->whereYear('created_at', $tahun)
+            ->whereMonth('created_at', $bulan)
+            ->orderBy('id_pengajuan', 'desc')
+            ->pluck('no_surat_rs') // Ambil semua no_surat_rs
+            ->filter(function ($value) use ($regexFormat) {
+                return preg_match($regexFormat, $value); // Cek kecocokan dengan format
+            })
+            ->map(function ($value) {
+                return (int) explode('/', $value)[0]; // Ekstrak nomor surat
+            })
+            ->sortDesc() // Urutkan dari terbesar ke terkecil
+            ->first(); // Ambil nomor terbesar
+
+        // Tentukan nomor berikutnya
+        $nextNumber = $latestNoSurat ? $latestNoSurat + 1 : 1;
+
+        return str_replace(
+            ['{no_surat}', '{bulan}', '{tahun}'],
+            [$nextNumber, $bulanRomawi, $tahun],
+            $baseFormat
+        );
+    }
+
+    // Fungsi untuk mengonversi bulan ke format angka Romawi
+    function convertToRoman($number)
+    {
+        $map = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V',
+            6 => 'VI', 7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X',
+            11 => 'XI', 12 => 'XII'
+        ];
+    
+        return $map[$number] ?? $number;
     }
 
     public function uploadExcel(Request $request){
@@ -686,79 +745,7 @@ class RestitusiKaryawanController extends Controller
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
         }
     }
-    // public function approval_dr(Request $request, $id)
-    // {
-    //     try {
-    //         // Temukan data restitusi karyawan berdasarkan ID
-    //         $restitusi = RestitusiKaryawan::findOrFail($id);
-    
-    //         // dd($restitusi);
-    //         // Lakukan logika persetujuan DR
-    //         $restitusi->status_pengajuan = '3';
-    //         $restitusi->save();
 
-    //         return redirect('/admin/restitusi_karyawan')->with('success', 'Approval DR.');
-    //     } catch (\Throwable $th) {
-    //         return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
-    //     }
-    // }
-
-    // public function approval_dr(Request $request, string $id)
-    // {
-    //     //  return response()->json([
-    //     //         'status' => 'Debugging',
-    //     //         'message' => 'Data Response berhasil diproses.',
-    //     //         'request' => $request->all(),
-
-    //     //     ]);
-    //     try {
-    //         Log::info('Uploading Attachment dari Approval Dokter: ' . $id . ', Request Data: ', $request->all());
-    
-    //         // Decode uploaded_files dan removed_files
-    //         $uploadedFiles = $request->input('uploaded_files', '[]');
-    //         $uploadedFiles = json_decode($uploadedFiles, true) ?? [];
-    
-    //         $removedFiles = $request->input('removed_files', '[]');
-    //         $removedFiles = json_decode($removedFiles, true) ?? [];
-    
-    //         Log::info('Decoded Uploaded Files:', $uploadedFiles);
-    //         Log::info('Decoded Removed Files:', $removedFiles);
-    
-    //         // Ambil data klaim dari database
-    //         $restitusi = RestitusiKaryawan::findOrFail($id);
-    //         $currentFiles = json_decode($restitusi->url_file_dr, true) ?? [];
-    
-    //         // Hapus file lama
-    //         foreach ($removedFiles as $file) {
-    //             $filePath = public_path('uploads/Restitusi_Karyawan/' . $file);
-    //             if (file_exists($filePath)) {
-    //                 unlink($filePath);
-    //             }
-    //         }
-    //         $currentFiles = array_values(array_diff($currentFiles, $removedFiles));
-    
-    //         // Tambahkan file baru
-    //         $currentFiles = array_merge($currentFiles, $uploadedFiles);
-    
-    //         // Update database
-    //         $restitusi->update([
-    //             'url_file_dr' => json_encode(array_unique($currentFiles)),
-    //             'status_pengajuan' => 3,
-    //             'reject_notes' =>null
-    //         ]);
-
-
-    //      return response()->json([
-    //                 'status' => 'Debugging',
-    //                 'message' => 'Data Response berhasil diproses.',
-    //                 'request' => $request->all(),
-
-    //             ]);
-    //         // return redirect('/admin/restitusi_karyawan')->with('success', 'Data berhasil disimpan.');
-    //     } catch (\Throwable $th) {
-    //         return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
-    //     }
-    // }
 
         public function approval_dr(Request $request, string $id)
     {

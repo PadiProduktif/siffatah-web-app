@@ -706,7 +706,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="urgensi" class="form-label">Biaya Untuk Perawatan</label>
-                            <select class="form-control" id="urgensi" name="urgensi">
+                            <select class="form-control" id="kategori_perawatan" name="kategori_perawatan">
                                 <option value="" selected disabled>Pilih kategori perawatan</option>
                                 <option value="rawat_inap" >Rawat Inap/R.S</option>
                                 <option value="operasi">Operasi/R.S</option>
@@ -733,7 +733,7 @@
                                 <!-- Data pasien akan dimuat melalui JavaScript -->
                             </div>
                         </div>
-
+                        <input type="hidden" name="selected_pasien" id="selectedPasienInput" value="[]">
                         
 
                         <div class="col-12">
@@ -838,13 +838,14 @@
     </script>
 
     <script>
-        $(document).ready(function () {
-    // Ketika karyawan dipilih, perbarui daftar pasien
-        $('#id-badge').on('change', function () {
-            const idBadge = $(this).val();
-            const $daftarPasien = $('#daftarPasien');
+    $(document).ready(function () {
+    const $daftarPasienWrapper = $('#daftarPasienWrapper');
+    const $selectedPasienInput = $('#selectedPasienInput');
 
-            $daftarPasien.empty().append('<option value="">Memuat data...</option>');
+    // Ketika karyawan dipilih, perbarui daftar pasien
+    $('#id-badge').on('change', function () {
+            const idBadge = $(this).val();
+            $daftarPasienWrapper.html('<p>Memuat data...</p>');
 
             // Ambil data pasien berdasarkan karyawan yang dipilih
             $.ajax({
@@ -855,24 +856,44 @@
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (response) {
-                    $daftarPasien.empty();
+                    $daftarPasienWrapper.empty();
 
                     if (response.status === 'success') {
                         response.data.forEach(function (item) {
-                            $daftarPasien.append(
-                                `<option value="${item.id_non_karyawan}">${item.nama_lengkap} - ${item.hubungan_keluarga}</option>`
-                            );
+                            $daftarPasienWrapper.append(`
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input daftar-pasien" id="pasien-${item.id_non_karyawan}" value="${item.id_non_karyawan}">
+                                    <label class="form-check-label" for="pasien-${item.id_non_karyawan}">
+                                        ${item.nama_lengkap} - ${item.hubungan_keluarga}
+                                    </label>
+                                </div>
+                            `);
                         });
+
+                        // Tambahkan event listener untuk checkbox
+                        updateHiddenInput(); // Inisialisasi nilai awal
+                        $daftarPasienWrapper.find('.daftar-pasien').on('change', updateHiddenInput);
                     } else {
-                        $daftarPasien.append('<option value="">Data tidak ditemukan</option>');
+                        $daftarPasienWrapper.html('<p>Data tidak ditemukan</p>');
                     }
                 },
                 error: function () {
-                    $daftarPasien.empty().append('<option value="">Gagal memuat data</option>');
+                    $daftarPasienWrapper.html('<p>Gagal memuat data</p>');
                     alert('Terjadi kesalahan saat mengambil data daftar pasien.');
                 }
             });
         });
+
+        // Fungsi untuk memperbarui nilai hidden input
+        function updateHiddenInput() {
+            const selectedValues = [];
+            $daftarPasienWrapper.find('.daftar-pasien:checked').each(function () {
+                selectedValues.push($(this).val());
+            });
+
+            $selectedPasienInput.val(JSON.stringify(selectedValues));
+            console.log('Selected Pasien:', selectedValues); // Debug
+        }
     });
 
         </script>
