@@ -90,7 +90,7 @@ class RestitusiKaryawanController extends Controller
 
     public function store(Request $request)
     {
-        $selectedPasien = json_encode($request->input('daftar_pasien', []));
+        $selectedPasien = $request->input('selected_pasien', []);
         $no_surat_rs = $this->generateNoSuratRs();
         // Decode JSON jika diperlukan
         // $selectedPasien = $selectedPasien, true;
@@ -158,6 +158,26 @@ class RestitusiKaryawanController extends Controller
             ], 200);
         }
     }
+    public function getDetailPasien(Request $request)
+    {
+        $pasienIds = $request->input('pasien_ids', []);
+        Log::info('Pasien IDs diterima:', $pasienIds);
+    
+        if (!is_array($pasienIds)) {
+            Log::error('Data pasien_ids bukan array atau kosong.');
+            return response()->json(['status' => 'error', 'message' => 'Invalid data format.'], 400);
+        }
+    
+        $dataPasien = DB::table('table_non_karyawan')
+            ->whereIn('id_non_karyawan', $pasienIds)
+            ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
+            ->get();
+    
+        Log::info('Data pasien ditemukan:', $dataPasien->toArray());
+    
+        return response()->json(['status' => 'success', 'data' => $dataPasien]);
+    }
+    
 
     public function generateNoSuratRs()
     {

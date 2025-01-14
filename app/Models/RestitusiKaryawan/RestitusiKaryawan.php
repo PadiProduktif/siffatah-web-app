@@ -22,6 +22,8 @@ class RestitusiKaryawan extends Model
         'rumah_sakit',
         'urgensi',
         'no_surat_rs',
+        'daftar_pasien',
+        'jenis_perawatan',
         'tanggal_pengobatan',
         'tanggal_approval_screening',
         'tanggal_approval_dokter',
