@@ -158,26 +158,50 @@ class RestitusiKaryawanController extends Controller
             ], 200);
         }
     }
+    // public function getDetailPasien(Request $request)
+    // {
+    //     $pasienIds = $request->input('pasien_ids', []);
+    //     Log::info('Pasien IDs diterima:', $pasienIds);
+    //     Log::info('Request Data :', $request);
+    //     // if (!is_array($pasienIds)) {
+    //     //     Log::error('Data pasien_ids bukan array atau kosong.');
+    //     //     return response()->json(['status' => 'error', 'message' => 'Invalid data format.'], 400);
+    //     // }
+    
+    //     // $dataPasien = DB::table('table_non_karyawan')
+    //     //     ->whereIn('id_non_karyawan', $pasienIds)
+    //     //     ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
+    //     //     ->get();
+    
+    //     // Log::info('Data pasien ditemukan:', $dataPasien->toArray());
+    
+    //     // return response()->json(['status' => 'success', 'data' => $dataPasien]);
+    // }
     public function getDetailPasien(Request $request)
     {
         $pasienIds = $request->input('pasien_ids', []);
-        Log::info('Pasien IDs diterima:', $pasienIds);
     
+        // Jika pasien_ids bukan array, ubah menjadi array
         if (!is_array($pasienIds)) {
-            Log::error('Data pasien_ids bukan array atau kosong.');
-            return response()->json(['status' => 'error', 'message' => 'Invalid data format.'], 400);
+            $pasienIds = [$pasienIds];
         }
+    
+        Log::info('Pasien IDs diterima:', ['pasien_ids' => $pasienIds]);
     
         $dataPasien = DB::table('table_non_karyawan')
             ->whereIn('id_non_karyawan', $pasienIds)
             ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
             ->get();
     
-        Log::info('Data pasien ditemukan:', $dataPasien->toArray());
+        if ($dataPasien->isEmpty()) {
+            Log::error('Data pasien tidak ditemukan.', ['pasien_ids' => $pasienIds]);
+            return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan.']);
+        }
+    
+        Log::info('Data pasien ditemukan:', ['data_pasien' => $dataPasien->toArray()]);
     
         return response()->json(['status' => 'success', 'data' => $dataPasien]);
     }
-    
 
     public function generateNoSuratRs()
     {

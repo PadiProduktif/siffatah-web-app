@@ -87,7 +87,7 @@
                                             data-no_polis="{{ $data1->tanggal_pengobatan }}"
                                             data-file_url="{{ $data1->keterangan_pengajuan }}"
                                             data-file_url="{{ $data1->url_file }}"
-                                            data-daftar-pasien="{{ $data1->daftar_pasien }}"
+                                            data-daftar-pasien="{{$data1->daftar_pasien }}"
                                             >
                                             <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
 
@@ -173,7 +173,7 @@
                                             data-no_polis="{{ $data1->tanggal_pengobatan }}"
                                             data-file_url="{{ $data1->keterangan_pengajuan }}"
                                             data-file_url="{{ $data1->url_file }}"
-                                            data-daftar-pasien="{{ $data1->daftar_pasien }}"
+                                            data-daftar-pasien="{{$data1->daftar_pasien }}"
                                             
                                             >
                                             <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
@@ -226,7 +226,7 @@
                                             data-no_polis="{{ $data1->tanggal_pengobatan }}"
                                             data-file_url="{{ $data1->keterangan_pengajuan }}"
                                             data-file_url="{{ $data1->url_file }}"
-                                            data-daftar-pasien="{{ $data1->daftar_pasien }}"
+                                            data-daftar-pasien="{{ $data1->daftar_pasien}}"
                                             >
                                             <i class="bi bi-file-text me-2"></i>Lihat Berkas & Approval
 
@@ -266,7 +266,7 @@
                             <form  action="/admin/restitusi_karyawan/update/{{ $data1->id_pengajuan }}" method="POST">
                                 @csrf
                                 @php
-                                    if (auth()->user()->role === 'dr_hph' || auth()->user()->role === 'vp_osdm') {
+                                    if (auth()->user()->role === 'dr_hph' || auth()->user()->role === 'vp_osdm' || $data1->status_pengajuan === 4) {
                                         $form = "disabled"; // Pastikan selalu array meskipun input tidak valid
                                         $hidden = "hidden";
                                     }else{
@@ -314,8 +314,7 @@
                                         </div>
                                         <div class="col-md-12 mt-3">
                                             <label for="daftarPasien" class="form-label">Daftar Pasien</label>
-                                            <label for="daftarPasien" class="form-label">{{ $data1->daftar_pasien }}</label>
-                                            <ul id="listDaftarPasien-{{ $data1->id_pengajuan }}" class="list-group">
+                                            <ul style="margin-left: 20px; margin-bottom:20px;" id="listDaftarPasien-{{ $data1->id_pengajuan }}" class="list-group">
                                                 <!-- Daftar pasien akan dimuat di sini -->
                                             </ul>
                                         </div>
@@ -864,59 +863,119 @@
     </script>
 
     <script>
-    $(document).ready(function () {
-        $(document).on('show.bs.modal', '[id^="modalUpdate-"]', function (event) {
-            const button = $(event.relatedTarget); // Tombol yang memicu modal
-            const modal = $(this); // Modal yang sedang aktif
-            const dataPasien = button.data('daftar-pasien'); // Ambil data daftar pasien (JSON string)
-            const $listDaftarPasien = modal.find('#listDaftarPasien'); // List dalam modal ini
+    // $(document).ready(function () {
+    //     $(document).on('show.bs.modal', '[id^="modalUpdate-"]', function (event) {
+    //         const button = $(event.relatedTarget); // Tombol yang memicu modal
+    //         const modal = $(this); // Modal yang sedang aktif
+    //         const dataPasien = button.data('daftar-pasien'); // Ambil data daftar pasien (JSON string)
+    //         const $listDaftarPasien = modal.find('#listDaftarPasien'); // List dalam modal ini
 
-            console.log("Data pasien sebelum parsing:", dataPasien); // Debug data pasien
+    //         console.log("Data pasien sebelum parsing:", dataPasien); // Debug data pasien
+    //         $listDaftarPasien.empty(); // Kosongkan list sebelumnya
+
+    //         if (dataPasien && dataPasien.length > 0) {
+    //             let parsedData;
+    //             try {
+    //                 parsedData = JSON.parse(dataPasien); // Parse JSON menjadi array
+    //                 console.log("Data pasien setelah parsing:", parsedData); // Debug parsed data
+    //             } catch (e) {
+    //                 console.error("Invalid JSON format for daftar pasien", e);
+    //                 $listDaftarPasien.html('<li class="list-group-item">Format data pasien tidak valid.</li>');
+    //                 return;
+    //             }
+
+    //             // Ambil data pasien berdasarkan ID dan tampilkan nama + hubungan
+    //             $.ajax({
+    //                 url: '/restitusi_karyawan/get-detail-pasien',
+    //                 type: 'POST',
+    //                 data: {
+    //                     pasien_ids: parsedData,
+    //                     _token: $('meta[name="csrf-token"]').attr('content')
+    //                 },
+    //                 success: function (response) {
+    //                     console.log("Response dari server:", response); // Debug response
+    //                     if (response.status === 'success' && response.data.length > 0) {
+    //                         response.data.forEach(function (item) {
+    //                             $listDaftarPasien.append(`
+    //                                 <li class="list-group-item">
+    //                                     ${item.nama_lengkap} - ${item.hubungan_keluarga}
+    //                                 </li>
+    //                             `);
+    //                         });
+    //                     } else {
+    //                         $listDaftarPasien.html('<li class="list-group-item">Data pasien tidak ditemukan.</li>');
+    //                     }
+    //                 },
+    //                 error: function () {
+    //                     $listDaftarPasien.html('<li class="list-group-item">Gagal memuat data pasien.</li>');
+    //                     alert('Terjadi kesalahan saat mengambil data pasien.');
+    //                 }
+    //             });
+    //         } else {
+    //             $listDaftarPasien.html('<li class="list-group-item">Tidak ada pasien yang terdaftar.</li>');
+    //         }
+    //     });
+    // });
+    $(document).ready(function () {
+        // Ketika modal update ditampilkan
+        $(document).on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget); // Tombol yang memicu modal
+            const modal = $(this); // Modal yang sedang ditampilkan
+            const idPengajuan = button.data('id'); // Ambil ID pengajuan
+            const dataPasien = button.data('daftar-pasien'); // Ambil data daftar pasien
+            const $listDaftarPasien = modal.find(`#listDaftarPasien-${idPengajuan}`); // Cari list pasien di modal spesifik
+
             $listDaftarPasien.empty(); // Kosongkan list sebelumnya
 
-            if (dataPasien && dataPasien.length > 0) {
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(dataPasien); // Parse JSON menjadi array
-                    console.log("Data pasien setelah parsing:", parsedData); // Debug parsed data
-                } catch (e) {
-                    console.error("Invalid JSON format for daftar pasien", e);
-                    $listDaftarPasien.html('<li class="list-group-item">Format data pasien tidak valid.</li>');
-                    return;
-                }
+            try {
+                // Parse JSON hanya jika dataPasien adalah string
+                let pasienArray = typeof dataPasien === 'string' ? JSON.parse(dataPasien) : dataPasien;
 
-                // Ambil data pasien berdasarkan ID dan tampilkan nama + hubungan
-                $.ajax({
-                    url: '/restitusi_karyawan/get-detail-pasien',
-                    type: 'POST',
-                    data: {
-                        pasien_ids: parsedData,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        console.log("Response dari server:", response); // Debug response
-                        if (response.status === 'success' && response.data.length > 0) {
-                            response.data.forEach(function (item) {
-                                $listDaftarPasien.append(`
-                                    <li class="list-group-item">
-                                        ${item.nama_lengkap} - ${item.hubungan_keluarga}
-                                    </li>
-                                `);
-                            });
-                        } else {
-                            $listDaftarPasien.html('<li class="list-group-item">Data pasien tidak ditemukan.</li>');
+                // Validasi apakah pasienArray adalah array
+                if (Array.isArray(pasienArray) && pasienArray.length > 0) {
+                    // Kirim AJAX untuk mengambil detail pasien berdasarkan ID
+                    $.ajax({
+                        url: '/restitusi_karyawan/get-detail-pasien',
+                        type: 'POST',
+                        data: {
+                            pasien_ids: pasienArray, // Kirim array pasien_ids
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                // Jika data pasien ditemukan, tambahkan ke list
+                                response.data.forEach(function (item) {
+                                    $listDaftarPasien.append(`
+                                        
+                                        <li>
+                                            ${item.nama_lengkap} - ${item.hubungan_keluarga}
+                                        </li>
+                                        
+                                    `);
+                                });
+                            } else {
+                                // Jika tidak ada data pasien ditemukan
+                                $listDaftarPasien.html('<li>Data pasien tidak ditemukan.</li>');
+                            }
+                        },
+                        error: function () {
+                            // Jika terjadi kesalahan saat pengambilan data
+                            $listDaftarPasien.html('<li>Gagal memuat data pasien.</li>');
+                            alert('Terjadi kesalahan saat mengambil data pasien.');
                         }
-                    },
-                    error: function () {
-                        $listDaftarPasien.html('<li class="list-group-item">Gagal memuat data pasien.</li>');
-                        alert('Terjadi kesalahan saat mengambil data pasien.');
-                    }
-                });
-            } else {
-                $listDaftarPasien.html('<li class="list-group-item">Tidak ada pasien yang terdaftar.</li>');
+                    });
+                } else {
+                    // Jika pasienArray tidak valid atau kosong
+                    $listDaftarPasien.html('<li>Tidak ada pasien yang terdaftar.</li>');
+                }
+            } catch (error) {
+                // Tangani error parsing JSON
+                console.error('Error parsing JSON:', error);
+                $listDaftarPasien.html('<li>Data pasien tidak valid.</li>');
             }
         });
     });
+
 
     </script>
     <script>
