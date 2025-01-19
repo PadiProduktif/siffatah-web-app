@@ -473,6 +473,17 @@
                                     </form>
             
                             @endif
+                            @if ((auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 4)||(auth()->user()->role === 'tko' && $data1->status_pengajuan === 4))
+                                    
+                                    
+                                    
+                                    
+                                        
+                                        <!-- <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-success w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button> -->
+                                        <a href="{{ url('/download-restitusi') }}" class="btn btn-primary">Download PDF</a>
+
+            
+                            @endif
                             </div>
 
                         </div>
@@ -2077,5 +2088,12 @@ document.querySelectorAll('.modal').forEach(modal => {
             }
         }
         
+    </script>
+
+    <script>
+        document.getElementById('download-pa-btn').addEventListener('click', function () {
+            var idPengajuan = this.getAttribute('data-id');
+            window.location.href = "/download-pa/" + idPengajuan;
+        });
     </script>
 @endpush
