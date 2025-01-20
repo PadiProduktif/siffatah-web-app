@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade as PDF;
 use File;
+use TCPDF;
+use Illuminate\Support\Facades\Storage;
 
 class RestitusiKaryawanController extends Controller
 {
@@ -808,13 +810,7 @@ class RestitusiKaryawanController extends Controller
 
     public function downloadPDF()
     {
-        // Load HTML file from public/forms directory
-        $html = file_get_contents(public_path('forms/FormPA.html'));
-    
-        // Generate PDF from HTML
-        $pdf = PDF::loadHTML($html);
-    
-        // Download the generated PDF
-        return $pdf->download('restitusi.pdf');
+        return redirect(url('forms/FormPA.html?print=1'));
     }
+
 }
