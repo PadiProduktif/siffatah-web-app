@@ -36,7 +36,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($restitusi as $key1 => $data1)
+            @foreach ($restitusi as $key1 => $data1)
                 <tr class="text-center align-top">
                     <td>{{ $key1+1 }}</td>
                     <td>{{ $data1->id_badge }}</td>
@@ -343,7 +343,7 @@
                                         <input type="hidden" id="hiddenNominalPengajuan-{{ $data1->id_pengajuan }}" name="nominal_pengajuan[]" value="">
                                         <input type="hidden" id="hiddenDeskripsiPengajuan-{{ $data1->id_pengajuan }}" name="deskripsi_pengajuan[]" value="">
                                         <input type="hidden" id="hiddenRemovedRincianBiaya-{{ $data1->id_pengajuan }}" name="removed_rincian_biaya" value="[]">
-
+                                        <input type="hidden" name="no_surat_rs" value="{{ $data1->no_surat_rs }}">
                                         <label style="margin-top: 10px;" for="rancangan_biaya" class="form-label">Pengajuan Biaya</label>
                                         <div id="rincianBiayaWrapper-{{ $data1->id_pengajuan }}">
                                             <!-- Rincian biaya akan di-load oleh AJAX -->
@@ -353,11 +353,15 @@
                                         @endif
                                         @if ($data1->status_pengajuan === 3 || $data1->status_pengajuan === 4)
                                         <div class="col-12 mt-4">
-                                            <label style="margin-top: 10px;" for="biayaDisetujuiDokter" class="form-label">Biaya yang Diapprove Dokter</label>
+                                            <label style="margin-top: 10px;" for="biayaDisetujuiDokter" class="form-label"><b>Biaya yang Diapprove Dokter</b></label>
                                             <p class="text-danger">Biaya dibawah adalah biaya yang di diajukan dan di approve sesuai presentasi oleh dokter.</p>
                                             <div id="rincianApprovedBiayaWrapper-{{ $data1->id_pengajuan }}">
                                                 <!-- Data biaya yang diapprove dokter akan dimuat melalui JavaScript -->
                                             </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label for="totalBiayaApproved" class="form-label">Total Biaya</label>
+                                            <input type="text" class="form-control" id="totalBiayaApproved-{{ $data1->id_pengajuan }}" name="totalBiayaApproved" value="Rp 0" readonly>
                                         </div>
                                         @endif
                                         <div class="col-md-12" style="margin-top: 20px;">
@@ -475,12 +479,15 @@
                             @endif
                             @if ((auth()->user()->role === 'superadmin' && $data1->status_pengajuan === 4)||(auth()->user()->role === 'tko' && $data1->status_pengajuan === 4))
                                     
-                                    
-                                    
-                                    
+                                    <form action="{{ route('print-restitusi') }}" method="POST" target="_blank">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
                                         
+                                        <button class="btn btn-primary" type="submit">Print PA Restitusi</button>
+                                    </form>
+ 
                                         <!-- <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-success w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button> -->
-                                        <a href="{{ url('/download-restitusi') }}" class="btn btn-primary">Download PDF</a>
+                                        {{-- <a href="{{ url('/download-restitusi') }}" class="btn btn-primary">Download PA</a> --}}
 
             
                             @endif
@@ -489,11 +496,8 @@
                         </div>
                     </div>
                 </div>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center">Tidak ada data karyawan</td>
-                </tr>
-            @endforelse
+
+            @endforeach
         </tbody>
     </table>
 </div>
@@ -1157,6 +1161,7 @@
         }
         
         // Setup - add a text input to each footer cell
+        
         $('#klaimTable thead tr')
             .clone(true)
             .addClass('filters')
@@ -1638,6 +1643,42 @@ let     removedRincianBiaya = []; // Array untuk menyimpan ID rincian yang dihap
             console.log('Deskripsi:', deskripsiArray);
             console.log('ID Rincian Biaya:', idRincianArray);
             console.log('Removed Rincian Biaya:', removedRincianBiaya);
+        });
+    });
+    //total biaya approval
+    $(document).ready(function () {
+    function formatRupiah(angka) {
+        return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Hitung total biaya yang diapprove dokter
+    function hitungTotalBiayaApproved(modalId) {
+            let total = 0;
+            $(`#rincianApprovedBiayaWrapper-${modalId} .nominal`).each(function () {
+                let nilai = $(this).val().replace(/\D/g, ''); // Hapus non-digit
+                if (nilai) {
+                    total += parseInt(nilai);
+                }
+            });
+
+            // Masukkan total ke input field Total Biaya yang diapprove
+            $(`#totalBiayaApproved-${modalId}`).val(formatRupiah(total));
+        }
+
+        // Panggil fungsi saat modal dibuka
+        $(document).on('show.bs.modal', '.modal', function (event) {
+            const button = $(event.relatedTarget);
+            const modalId = button.data('id'); // Ambil ID pengajuan dari tombol
+            setTimeout(() => {
+                hitungTotalBiayaApproved(modalId); // Tunggu hingga data termuat
+            }, 1000);
+        });
+
+        // Panggil fungsi saat ada perubahan nilai biaya yang diapprove
+        $(document).on('input', '.nominal', function () {
+            const modal = $(this).closest('.modal');
+            const modalId = modal.attr('id').split('-')[1]; // Ambil ID dari modal
+            hitungTotalBiayaApproved(modalId);
         });
     });
 

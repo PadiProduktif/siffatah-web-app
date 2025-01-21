@@ -496,7 +496,7 @@ class RestitusiKaryawanController extends Controller
                     'url_file' => json_encode($finalFiles),
                     'rumah_sakit' => $request->rumah_sakit,
                     'urgensi' => $request->urgensi,
-                    'no_surat_rs' => $request->no_surat_rs,
+                    
                     'tanggal_pengobatan' => $request->tanggal_pengobatan,
                     'keterangan_pengajuan' => $request->keterangan_pengajuan,
                     'status_pengajuan' => 1,
@@ -808,9 +808,17 @@ class RestitusiKaryawanController extends Controller
         }
     }
 
-    public function downloadPDF()
+    public function downloadPDF(Request $request)
     {
-        return redirect(url('forms/FormPA.html?print=1'));
+        $restitusi = RestitusiKaryawan::findOrFail($request->id_pengajuan);
+        return response()->json([
+            'status' => 'Test Request',
+            'message' => 'Request Di ambil .',
+            'data' => $request->all(),
+            'get_data' => $restitusi,
+            // 'presentase' => $presentaseDokter[0],
+        ], 500);
+        // return redirect(url('forms/FormPA.html?print=1'));
     }
 
 }
