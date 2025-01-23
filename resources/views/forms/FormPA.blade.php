@@ -1092,7 +1092,7 @@ tags will be replaced.-->
   </v:shape><![endif]--><![if !vml]><span style='mso-ignore:vglayout;
   position:absolute;z-index:1;margin-left:4px;margin-top:4px;width:97px;
   height:101px'>
-  <img src="/img/logo-pupuk-kujang-transparant.png" width="150" height="100" class="logo" alt="logo test">
+  <img src="/img/logo-pupuk-kujang-transparant.png" width="150" height="90" class="logo" alt="logo test">
 
 
   <table cellpadding=0 cellspacing=0>
@@ -1116,7 +1116,7 @@ tags will be replaced.-->
    </x:ClientData>
   </v:shape><![endif]--><![if !vml]><span style='mso-ignore:vglayout;
   position:absolute;z-index:2;margin-left:40px;margin-top:0px;width:94px;
-  height:111px'><img width=170 height=110
+  height:111px'><img width=170 height=100
   src="/img/SICS.png" v:shapes="Picture_x0020_2"></span><![endif]><span
   style='mso-ignore:vglayout2'>
   <table cellpadding=0 cellspacing=0>
@@ -1419,7 +1419,7 @@ tags will be replaced.-->
   <td class=xl742413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl722413 colspan=3 style='height:15.0pt'>No. &amp;
+  <td height=20 class=xl722413 colspan=3 style='height:15.0pt'>&nbsp;No. &amp;
   Tanggal PP</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
@@ -1450,13 +1450,13 @@ tags will be replaced.-->
   <td class=xl742413 style='border-top:none'>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl722413 colspan=2 style='height:15.0pt'>Dari Divisi/Biro</td>
+  <td height=20 class=xl722413 colspan=2 style='height:15.0pt'>&nbsp;Dari Divisi/Biro</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl742413 style='border-top:none'>&nbsp;</td>
-  <td class=xl722413 colspan=7>Departemen Operasional SDM</td>
+  <td class=xl722413 colspan=7>&nbsp;Departemen Operasional SDM</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
@@ -1475,7 +1475,7 @@ tags will be replaced.-->
   <td class=xl742413 style='border-top:none'>&nbsp;</td>
  </tr>
  <tr height=38 style='mso-height-source:userset;height:28.5pt'>
-  <td height=38 class=xl722413 colspan=4 style='height:28.5pt'>Estimasi
+  <td height=38 class=xl722413 colspan=4 style='height:28.5pt'>&nbsp;Estimasi
   Nilai<span style='mso-spacerun:yes'> </span>*)<span
   style='mso-spacerun:yes'></span></td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
@@ -1487,7 +1487,7 @@ tags will be replaced.-->
   border-left:none;width:287pt'>&nbsp;{{ $data['terbilang'] }}</td>
  </tr>
  <tr height=36 style='mso-height-source:userset;height:27.0pt'>
-  <td height=36 class=xl722413 colspan=4 style='height:27.0pt'>Untuk
+  <td height=36 class=xl722413 colspan=4 style='height:27.0pt'>&nbsp;Untuk
   Keperluan<span style='mso-spacerun:yes'> </span>*)</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
   <td class=xl732413 style='border-top:none'>&nbsp;</td>
@@ -1496,10 +1496,10 @@ tags will be replaced.-->
   border-left:none;width:407pt'>&nbsp;{{ $data['deskripsi'] }}</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl762413 colspan=6 style='height:15.0pt'>PERSETUJUAN
+  <td height=20 class=xl762413 colspan=6 style='height:15.0pt'>&nbsp;PERSETUJUAN
   PROGRAM</td>
   <td class=xl772413>&nbsp;</td>
-  <td height=20 class=xl762413 colspan=8 style='height:15.0pt'>PERSETUJUAN
+  <td height=20 class=xl762413 colspan=8 style='height:15.0pt'>&nbsp;PERSETUJUAN
    ANGGARAN</td>
   
   
@@ -1509,18 +1509,18 @@ tags will be replaced.-->
   border-left:none'>Catatan</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl802413 colspan=3 style='height:15.0pt'>Diusulkan oleh:</td>
+  <td height=20 class=xl802413 colspan=3 style='height:15.0pt'>&nbsp;Diusulkan oleh:</td>
   <td class=xl812413 style='border-top:none'>&nbsp;</td>
   <td class=xl812413 style='border-top:none'>&nbsp;</td>
   <td class=xl812413 style='border-top:none'>&nbsp;</td>
   <td class=xl822413 style='border-top:none'>1)</td>
-  <td class=xl712413 colspan=4>Disetujui/tidak</td>
+  <td class=xl712413 colspan=4>&nbsp;Disetujui/tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl832413>4)</td>
-  <td class=xl802413 colspan=4>Posting Anggaran</td>
+  <td class=xl802413 colspan=4>&nbsp;Posting Anggaran</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -1533,13 +1533,13 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=27 style='mso-height-source:userset;height:20.25pt'>
-  <td height=27 class=xl802413 colspan=2 style='height:20.25pt'>TANGGAL</td>
+  <td height=27 class=xl802413 colspan=2 style='height:20.25pt'>&nbsp;TANGGAL</td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
   <td class=xl842413 style='border-left:none'>&nbsp;</td>
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
   <td class=xl832413>&nbsp;</td>
-  <td class=xl712413 colspan=3>TANGGAL</td>
+  <td class=xl712413 colspan=3>&nbsp;TANGGAL</td>
   <td class=xl712413></td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
@@ -1578,7 +1578,7 @@ tags will be replaced.-->
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl832413>&nbsp;</td>
-  <td class=xl802413 style='border-left:none'>Nilai</td>
+  <td class=xl802413 style='border-left:none'>&nbsp;Nilai</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -1723,10 +1723,11 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td colspan=7 height=20 class=xl972413 style='border-right:.5pt solid black;
-  height:15.0pt'>Eko Guntur Sugihyanto</td>
+   <td colspan=7 height=20 class=xl1042413 style='border-right:.5pt solid black;
+  height:15.0pt;'><b><u>Eko Guntur Sugihyanto</u></b></td>
+
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
-  <td colspan=6 class=xl982413>Djatmika</td>
+  <td colspan=6 height=20 class=xl792413 ><b><u>Djatmika</u></b></td>
   <td class=xl712413></td>
   <td class=xl832413>&nbsp;</td>
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
@@ -1795,13 +1796,13 @@ tags will be replaced.-->
   <td class=xl772413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>Disetujui/Tidak</td>
+  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>&nbsp;Disetujui/Tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl832413>2)</td>
-  <td class=xl912413 style='border-top:none;border-left:none'>Disetujui/Tidak</span></td>
+  <td class=xl912413 style='border-top:none;border-left:none'>&nbsp;Disetujui/Tidak</span></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -1826,13 +1827,13 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=28 style='mso-height-source:userset;height:21.0pt'>
-  <td height=28 class=xl802413 colspan=2 style='height:21.0pt'>TANGGAL</td>
+  <td height=28 class=xl802413 colspan=2 style='height:21.0pt'>&nbsp;TANGGAL</td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
   <td class=xl842413 style='border-left:none'>&nbsp;</td>
   <td class=xl712413></td>
   <td class=xl832413>&nbsp;</td>
-  <td class=xl802413 colspan=3>TANGGAL</td>
+  <td class=xl802413 colspan=3>&nbsp;TANGGAL</td>
   <td class=xl712413></td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
@@ -1983,11 +1984,11 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td colspan=7 height=20 class=xl972413 style='border-right:.5pt solid black;
-  height:15.0pt'>Anggita Maya Septianingsih</td>
+  <td colspan=7 height=20 class=xl782413 style='border-right:.5pt solid black;
+  height:15.0pt'><b><u>Anggita Maya Septianingsih</u></b></td>
   <td class=xl922413 style='border-left:none'><u style='visibility:hidden;
   mso-ignore:visibility'>&nbsp;</u></td>
-  <td colspan=6 class=xl982413>Eka Priyatna</td>
+  <td colspan=6 class=xl792413><b><u>Eka Priyatna</u></b></td>
   <td class=xl712413></td>
   <td class=xl832413>&nbsp;</td>
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
@@ -2055,13 +2056,13 @@ tags will be replaced.-->
   <td class=xl772413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>Disetujui/Tidak</td>
+  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>&nbsp;Disetujui/Tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl832413>3)</td>
-  <td class=xl712413 colspan=4>Disetujui/Tidak</td>
+  <td class=xl712413 colspan=4>&nbsp;Disetujui/Tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -2083,13 +2084,13 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=29 style='mso-height-source:userset;height:21.75pt'>
-  <td height=29 class=xl802413 colspan=2 style='height:21.75pt'>TANGGAL</td>
+  <td height=29 class=xl802413 colspan=2 style='height:21.75pt'>&nbsp;TANGGAL</td>
   <td class=xl862413>&nbsp;</td>
   <td class=xl862413 style='border-left:none'>&nbsp;</td>
   <td class=xl842413 style='border-left:none'>&nbsp;</td>
   <td class=xl792413></td>
   <td class=xl932413>&nbsp;</td>
-  <td class=xl712413 colspan=3>TANGGAL</td>
+  <td class=xl712413 colspan=3>&nbsp;TANGGAL</td>
   <td class=xl712413></td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
@@ -2240,13 +2241,13 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td colspan=7 height=20 class=xl972413 style='border-right:.5pt solid black;
-  height:15.0pt'>Yusman Arullah</td>
+  <td colspan=7 height=20 class=xl782413 style='border-right:.5pt solid black;
+  height:15.0pt'><b><u>Yusman Arullah</u></b></td>
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
   @if ($data['rawBiaya'] >= 50000000 )
-   <td colspan=6 class=xl982413>Fera Purnama</td>
+   <td colspan=6 class=xl792413><b><u>Fera Purnama</u></b></td>
    @elseif ($data['rawBiaya'] < 50000000)
-   <td colspan=6 class=xl982413></td>
+   <td colspan=6 class=xl792413></td>
    @endif
 
   <td class=xl712413></td>
@@ -2321,7 +2322,7 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl942413 colspan=5 style='height:15.0pt'>PERSETUJUAN
+  <td height=20 class=xl942413 colspan=5 style='height:15.0pt'>&nbsp;PERSETUJUAN
   DIREKSI</td>
   <td class=xl952413 style='border-top:none'>&nbsp;</td>
   <td class=xl952413 style='border-top:none'>&nbsp;</td>
@@ -2350,13 +2351,13 @@ tags will be replaced.-->
   <td class=xl742413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>Disetujui/Tidak</td>
+  <td height=20 class=xl802413 colspan=2 style='height:15.0pt'>&nbsp;Disetujui/Tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl832413>&nbsp;</td>
-  <td class=xl712413 colspan=4>Disetujui/Tidak</td>
+  <td class=xl712413 colspan=4>&nbsp;Disetujui/Tidak</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -2378,13 +2379,13 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=29 style='mso-height-source:userset;height:21.75pt'>
-  <td height=29 class=xl802413 colspan=2 style='height:21.75pt'>TANGGAL</td>
+  <td height=29 class=xl802413 colspan=2 style='height:21.75pt'>&nbsp;TANGGAL</td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
   <td class=xl842413 style='border-left:none'>&nbsp;</td>
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
   <td class=xl832413>7)</td>
-  <td class=xl712413 colspan=3>TANGGAL</td>
+  <td class=xl712413 colspan=3>&nbsp;TANGGAL</td>
   <td class=xl712413></td>
   <td class=xl842413>&nbsp;</td>
   <td class=xl852413 style='border-left:none'>&nbsp;</td>
@@ -2567,11 +2568,19 @@ tags will be replaced.-->
   <td class=xl832413>&nbsp;</td>
  </tr>
  <tr height=20 style='height:15.0pt'>
-
-  <td colspan=7 height=20 class=xl972413 style='border-right:.5pt solid black;
-  height:15.0pt'>Yuni Setyaningrum</td>
-  <td colspan=9 class=xl972413 style='border-right:.5pt solid black;border-left:
-  none'>Yuni Setyaningrum</td>
+   @if ($data['rawBiaya'] >= 2500000000 )
+      <td colspan=7 height=20 class=xl782413 style='border-right:.5pt solid black;
+   height:15.0pt'><b><u>Yuni Setyaningrum</u></b></td>
+   <td colspan=9 class=xl782413 style='border-right:.5pt solid black;border-left:
+  none'><b><u>Yuni Setyaningrum</u></b></td>
+   @elseif ($data['rawBiaya'] < 2500000000)
+      <td colspan=7 height=20 class=xl782413 style='border-right:.5pt solid black;
+   height:15.0pt'><b><u></u></b></td>
+   <td colspan=9 class=xl782413 style='border-right:.5pt solid black;border-left:
+  none'><b><u></u></b></td>
+   @endif
+  
+  
   <td class=xl802413 style='border-left:none'>&nbsp;</td>
   <td class=xl712413></td>
   <td class=xl712413></td>
@@ -2677,6 +2686,25 @@ tags will be replaced.-->
 
 </div>
 
+<script>
+    window.onload = function () {
+        setTimeout(function () {
+            // Buka print dialog
+            let printWindow = window.print();
+
+            // Coba atur pengaturan cetak
+            if (printWindow) {
+                let printSettings = {
+                    shrinkToFit: false, // Cegah mengecilkan otomatis
+                    scale: 0.83, // Set skala ke 83%
+                    printBackground: false, // Nonaktifkan cetak background
+                };
+                
+                printWindow.document.execCommand("print", false, printSettings);
+            }
+        }, 1000); // Tunggu 1 detik sebelum print dialog muncul
+    };
+</script>
 
 <!----------------------------->
 <!--END OF OUTPUT FROM EXCEL PUBLISH AS WEB PAGE WIZARD-->
