@@ -49,7 +49,7 @@ class RestitusiKaryawanController extends Controller
 
         $karyawan = $karyawan->get();
         // Urutkan hasil secara descending
-        $restitusi = $query->orderBy('table_pengajuan_reimburse.id_pengajuan', 'desc')->get();
+        $restitusi = $query->orderBy('table_pengajuan_reimburse.created_at', 'desc')->get();
 
 
         
