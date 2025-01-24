@@ -13,8 +13,10 @@
         <h4 class="me-auto">RESTITUSI KARYAWAN - VP</h4>
         @elseif (auth()->user()->role === 'tko')
         <h4 class="me-auto">RESTITUSI KARYAWAN - TKO</h4>
+        @elseif (auth()->user()->role === 'adm_karyawan')
+        <h4 class="me-auto">RESTITUSI KARYAWAN - ADMIN KARYAWAN</h4>
         @endif
-        @if (auth()->user()->role === 'tko' || auth()->user()->role === 'superadmin')
+        @if (auth()->user()->role === 'tko' || auth()->user()->role === 'superadmin' || auth()->user()->role === 'adm_karyawan')
         <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
         @endif
         
@@ -62,7 +64,7 @@
                         @endif
                     </td>
                     <td>
-                        @if (auth()->user()->role === 'superadmin' || auth()->user()->role === 'tko')
+                        @if (auth()->user()->role === 'superadmin' || auth()->user()->role === 'tko'|| auth()->user()->role === 'adm_karyawan')
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-three-dots-vertical"></i>
@@ -719,6 +721,8 @@
                                     Karyawan Sebagai Pasien
                                 </label>
                             </div>
+                            <input type="hidden" id="hidePasienInput" name="hide_pasien" value="0">
+
                         </div>
                         
 
@@ -878,59 +882,7 @@
     </script>
 
     <script>
-    // $(document).ready(function () {
-    //     $(document).on('show.bs.modal', '[id^="modalUpdate-"]', function (event) {
-    //         const button = $(event.relatedTarget); // Tombol yang memicu modal
-    //         const modal = $(this); // Modal yang sedang aktif
-    //         const dataPasien = button.data('daftar-pasien'); // Ambil data daftar pasien (JSON string)
-    //         const $listDaftarPasien = modal.find('#listDaftarPasien'); // List dalam modal ini
 
-    //         console.log("Data pasien sebelum parsing:", dataPasien); // Debug data pasien
-    //         $listDaftarPasien.empty(); // Kosongkan list sebelumnya
-
-    //         if (dataPasien && dataPasien.length > 0) {
-    //             let parsedData;
-    //             try {
-    //                 parsedData = JSON.parse(dataPasien); // Parse JSON menjadi array
-    //                 console.log("Data pasien setelah parsing:", parsedData); // Debug parsed data
-    //             } catch (e) {
-    //                 console.error("Invalid JSON format for daftar pasien", e);
-    //                 $listDaftarPasien.html('<li class="list-group-item">Format data pasien tidak valid.</li>');
-    //                 return;
-    //             }
-
-    //             // Ambil data pasien berdasarkan ID dan tampilkan nama + hubungan
-    //             $.ajax({
-    //                 url: '/restitusi_karyawan/get-detail-pasien',
-    //                 type: 'POST',
-    //                 data: {
-    //                     pasien_ids: parsedData,
-    //                     _token: $('meta[name="csrf-token"]').attr('content')
-    //                 },
-    //                 success: function (response) {
-    //                     console.log("Response dari server:", response); // Debug response
-    //                     if (response.status === 'success' && response.data.length > 0) {
-    //                         response.data.forEach(function (item) {
-    //                             $listDaftarPasien.append(`
-    //                                 <li class="list-group-item">
-    //                                     ${item.nama_lengkap} - ${item.hubungan_keluarga}
-    //                                 </li>
-    //                             `);
-    //                         });
-    //                     } else {
-    //                         $listDaftarPasien.html('<li class="list-group-item">Data pasien tidak ditemukan.</li>');
-    //                     }
-    //                 },
-    //                 error: function () {
-    //                     $listDaftarPasien.html('<li class="list-group-item">Gagal memuat data pasien.</li>');
-    //                     alert('Terjadi kesalahan saat mengambil data pasien.');
-    //                 }
-    //             });
-    //         } else {
-    //             $listDaftarPasien.html('<li class="list-group-item">Tidak ada pasien yang terdaftar.</li>');
-    //         }
-    //     });
-    // });
     $(document).ready(function () {
         // Ketika modal update ditampilkan
         $(document).on('show.bs.modal', function (event) {
@@ -986,7 +938,7 @@
             } catch (error) {
                 // Tangani error parsing JSON
                 console.error('Error parsing JSON:', error);
-                $listDaftarPasien.html('<li>Data pasien tidak valid.</li>');
+                $listDaftarPasien.html('<li>Karyawan didaftarkan sebagai pasien.</li>');
             }
         });
     });
@@ -999,6 +951,7 @@
             const $daftarPasienWrapper = $('#daftarPasienWrapper');
             const $selectedPasienInput = $('#selectedPasienInput');
             const $hidePasienCheckbox = $('#hidePasienCheckbox');
+            const $hidePasienInput = $('#hidePasienInput'); // Hidden input
             const $daftarPasienContainer = $('#daftarPasienContainer');
 
             // Ketika karyawan dipilih, perbarui daftar pasien
@@ -1057,12 +1010,13 @@
             // Event saat checkbox "Sembunyikan Daftar Pasien" diubah
             $hidePasienCheckbox.on('change', function () {
                 if ($(this).is(':checked')) {
-                    // Sembunyikan daftar pasien
+                    $hidePasienInput.val("1"); // Simpan sebagai "1" jika dicentang
                     $daftarPasienContainer.hide();
                 } else {
-                    // Tampilkan kembali daftar pasien
+                    $hidePasienInput.val("0"); // Simpan sebagai "0" jika tidak dicentang
                     $daftarPasienContainer.show();
                 }
+                console.log('Hide Pasien:', $hidePasienInput.val()); // Debug
             });
         });
     </script>

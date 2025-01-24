@@ -21,6 +21,7 @@ class RestitusiKaryawanController extends Controller
 {
     public function index()
     {
+        
         // Ambil username dan role dari session (atau metode lainnya)
         $username = auth()->user()->username; // Pastikan 'username' tersimpan di session
         $role = auth()->user()->role; // Pastikan 'role' tersimpan di session
@@ -35,10 +36,21 @@ class RestitusiKaryawanController extends Controller
         if ($role === 'tko') {
             $query->where('table_pengajuan_reimburse.id_badge', $username);
             $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc')->where('id_badge', $username);
-        } else {
+        } elseif ($role === 'adm_karyawan') {
+            // Ambil list_karyawan dari user yang sedang login
+            $listKaryawan = json_decode(auth()->user()->list_karyawan, true);
+
+            // Query data karyawan berdasarkan id_badge
+            $karyawan = DataKaryawan::whereIn('id_badge', $listKaryawan);
+        }else {
             
             $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
         }
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Data gagal successfully',
+        //     'data' => $karyawan,
+        // ], 200);
 
         if ($role === 'dr_hph') {
             $query->where('table_pengajuan_reimburse.status_pengajuan', 2);
@@ -65,6 +77,11 @@ class RestitusiKaryawanController extends Controller
     {
         $selectedPasien = $request->input('selected_pasien', []);
         $no_surat_rs = $this->generateNoSuratRs();
+        if ($request->input('hide_pasien') === "1") {
+            $selectedPasien = null;
+        }else {
+            $selectedPasien = $request->input('selected_pasien', []);
+        }
         // Decode JSON jika diperlukan
         // $selectedPasien = $selectedPasien, true;
         // return response()->json([
