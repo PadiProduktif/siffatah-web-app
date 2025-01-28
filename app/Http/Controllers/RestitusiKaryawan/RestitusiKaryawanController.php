@@ -4,6 +4,7 @@ namespace App\Http\Controllers\RestitusiKaryawan;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
+use App\Models\Auth\DataKaryawan;
 use App\Models\RestitusiKaryawan\RestitusiKaryawan;
 use App\Models\RincianBiaya\RincianBiaya;
 use Illuminate\Support\Facades\Validator;
@@ -69,6 +70,75 @@ class RestitusiKaryawanController extends Controller
         return view('dashboard/restitusi-karyawan', [
             'restitusi' => $restitusi,
             'karyawan' => $karyawan,
+        ]);
+    }
+    
+    public function set_user_list()
+    {
+        
+        // Ambil username dan role dari session (atau metode lainnya)
+        $username = auth()->user()->username; // Pastikan 'username' tersimpan di session
+        $role = auth()->user()->role; // Pastikan 'role' tersimpan di session
+
+        $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
+        $listKaryawan = json_decode(auth()->user()->list_karyawan, true);
+        // Tambahkan kondisi jika role adalah 'tko'
+        
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Data gagal successfully',
+        //     'data' => $karyawan,
+        // ], 200);
+
+
+        $karyawan = $karyawan->get();
+        // Urutkan hasil secara descending
+        
+        // Mengembalikan view dengan data yang diambil
+        return view('extras/set_list_user', [
+            // 'restitusi' => $restitusi,
+            'karyawan' => $karyawan,
+        ]);
+    }
+
+    public function submitListUser(Request $request)
+    {
+        // // Decode JSON ke array
+
+        // $karyawan = User::findOrFail($id);
+        // Simpan ke database (misalnya ke user yang sedang login)
+        // $update = auth()->user()->update([
+        //     'list_karyawan' => $request->selected_karyawan
+        // ]);
+
+        // // return back()->with('success', 'Karyawan berhasil disimpan!');
+
+        // // $selectedPasien = $selectedPasien, true;
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Data Request di ambil',
+        //     'Selected Karyawan' => $request->selected_karyawan,
+        // ], 200);
+
+        $selectedKaryawan = json_decode($request->selected_karyawan, true);
+
+        // Pastikan data terdecode dengan benar
+        if (is_null($selectedKaryawan)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal decode JSON'
+            ]);
+        }
+    
+        // Simpan ke database (pastikan kolom list_karyawan ada di tabel user)
+        auth()->user()->update([
+            'list_karyawan' => json_encode($selectedKaryawan) // Simpan sebagai JSON
+        ]);
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Karyawan berhasil disimpan!',
+            'saved_data' => $selectedKaryawan
         ]);
     }
 

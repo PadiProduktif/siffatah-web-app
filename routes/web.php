@@ -194,6 +194,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Klaim Restitusi Karyawan / Pengajuana Reimburse
     Route::get('/admin/restitusi_karyawan', [RestitusiKaryawanController::class, 'index']);
+    Route::get('/admin/set_user_list', [RestitusiKaryawanController::class, 'set_user_list'])->name('set_user_list');
+    Route::post('/admin/set_user_submit', [RestitusiKaryawanController::class, 'submitListUser'])->name('set_user_submit');
     Route::post('/admin/restitusi_karyawan/tambah', [RestitusiKaryawanController::class, 'store']);
     Route::get('/admin/restitusi_karyawan/edit/{id}', [RestitusiKaryawanController::class, 'edit']);
     Route::post('/admin/restitusi_karyawan/update/{id}', [RestitusiKaryawanController::class, 'update']);

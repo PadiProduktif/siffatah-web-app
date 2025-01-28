@@ -1,3 +1,4 @@
+
 <div class="sidebar bg-light p-3">
     <!-- Header Sidebar -->
     <div class="d-flex align-items-center justify-content-between">
@@ -161,6 +162,9 @@
     <ul class="nav flex-column">
         @if(auth()->check() && (auth()->user()->role === 'tko'))
             <li><a href="/keluarga" class="nav-link {{ Request::is('/keluarga') ? 'active' : '' }}">Keluarga</a></li>
+        @endif
+        @if(auth()->check() && (auth()->user()->role === 'adm_karyawan'))
+            <li><a href="/admin/set_user_list" class="nav-link {{ Request::is('admin/set_user_list') ? 'active' : '' }}">Set User List</a></li>
         @endif
         {{-- <li><a href="/kepesertaan-anggota" class="nav-link {{ Request::is('kepesertaan-anggota') ? 'active' : '' }}">Kepesertaan Anggota</a></li> --}}
         <li><a href="/set-profil" class="nav-link {{ Request::is('set-profil') ? 'active' : '' }}">Pengaturan Profil</a></li>

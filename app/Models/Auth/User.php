@@ -23,7 +23,7 @@ class User extends Authenticatable
         'status',
         'verify_key',
         'active',
-
+        'list_karyawan',
         'created_by',
         'updated_by'
     ];
