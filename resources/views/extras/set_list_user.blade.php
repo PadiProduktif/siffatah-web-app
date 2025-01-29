@@ -100,8 +100,29 @@
             
                 <button type="submit" class="btn btn-primary mt-3">Simpan</button>
             </form>
-            
+            <h4 style="margin-top: 20px;">Daftar Karyawan Terdaftar</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nama Karyawan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="karyawanList">
+                    @foreach ($registeredKaryawan as $karyawan)
+                        <tr id="row-{{ $karyawan->id_badge }}">
+                            <td>{{ $karyawan->nama_karyawan }}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm btn-hapus" data-id="{{ $karyawan->id_badge }}">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+            
     </div>
 </div>
 
@@ -146,6 +167,54 @@
         if (!dropdown.contains(event.target)) {
             dropdown.classList.remove("active");
         }
+    });
+
+        $(document).ready(function () {
+        // Simpan daftar karyawan
+        $('#btnSimpan').click(function () {
+            let selectedKaryawan = $('#karyawanSelect').val();
+            if (!selectedKaryawan || selectedKaryawan.length === 0) {
+                alert('Pilih setidaknya satu karyawan!');
+                return;
+            }
+
+            $.ajax({
+                url: '/admin/save-user-list',
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    selected_karyawan: JSON.stringify(selectedKaryawan)
+                },
+                success: function (response) {
+                    alert(response.message);
+                    location.reload(); // Reload halaman untuk update list
+                },
+                error: function () {
+                    alert('Terjadi kesalahan saat menyimpan.');
+                }
+            });
+        });
+
+        // Hapus karyawan dari daftar
+        $(document).on('click', '.btn-hapus', function () {
+            let karyawanId = $(this).data('id');
+
+            $.ajax({
+                url: '/admin/remove-user',
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    karyawan_id: karyawanId
+                },
+                success: function (response) {
+                    alert(response.message);
+                    $('#row-' + karyawanId).remove(); // Hapus row tanpa reload
+                },
+                error: function () {
+                    alert('Gagal menghapus karyawan.');
+                }
+            });
+        });
     });
 </script>
 

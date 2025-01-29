@@ -4,7 +4,6 @@ namespace App\Http\Controllers\RestitusiKaryawan;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
-use App\Models\Auth\DataKaryawan;
 use App\Models\RestitusiKaryawan\RestitusiKaryawan;
 use App\Models\RincianBiaya\RincianBiaya;
 use Illuminate\Support\Facades\Validator;
@@ -92,55 +91,118 @@ class RestitusiKaryawanController extends Controller
 
 
         $karyawan = $karyawan->get();
+        $registeredKaryawan = DataKaryawan::whereIn('id_badge', $listKaryawan)->get();
         // Urutkan hasil secara descending
         
         // Mengembalikan view dengan data yang diambil
         return view('extras/set_list_user', [
             // 'restitusi' => $restitusi,
             'karyawan' => $karyawan,
+            'registeredKaryawan' => $registeredKaryawan
         ]);
     }
 
     public function submitListUser(Request $request)
     {
-        // // Decode JSON ke array
-
-        // $karyawan = User::findOrFail($id);
-        // Simpan ke database (misalnya ke user yang sedang login)
-        // $update = auth()->user()->update([
-        //     'list_karyawan' => $request->selected_karyawan
-        // ]);
-
-        // // return back()->with('success', 'Karyawan berhasil disimpan!');
-
-        // // $selectedPasien = $selectedPasien, true;
-        // return response()->json([
-        //     'status' => 'error',
-        //     'message' => 'Data Request di ambil',
-        //     'Selected Karyawan' => $request->selected_karyawan,
-        // ], 200);
-
+        // Decode JSON dari request
         $selectedKaryawan = json_decode($request->selected_karyawan, true);
 
-        // Pastikan data terdecode dengan benar
+    // Cek apakah data valid
         if (is_null($selectedKaryawan)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal decode JSON'
             ]);
         }
-    
-        // Simpan ke database (pastikan kolom list_karyawan ada di tabel user)
-        auth()->user()->update([
-            'list_karyawan' => json_encode($selectedKaryawan) // Simpan sebagai JSON
-        ]);
-    
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Karyawan berhasil disimpan!',
-            'saved_data' => $selectedKaryawan
-        ]);
+
+        // Ambil data karyawan yang sudah ada
+        $user = auth()->user();
+        $existingKaryawan = json_decode($user->list_karyawan, true) ?? [];
+
+        // Gabungkan data baru dengan yang lama, pastikan unik
+        $mergedKaryawan = array_unique(array_merge($existingKaryawan, $selectedKaryawan));
+
+        // Debug sebelum update
+        \Log::info('Data sebelum update:', ['existing' => $existingKaryawan, 'new' => $selectedKaryawan, 'merged' => $mergedKaryawan]);
+
+        // Simpan ke database
+        $user->list_karyawan = json_encode($mergedKaryawan);
+        $saved = $user->save();
+
+        // Debug setelah update
+        \Log::info('Data setelah update:', ['saved' => $saved, 'updated_user' => $user]);
+
+        if (!$saved) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan data'
+            ]);
+        }
+        return back()->with('success', 'Karyawan berhasil disimpan!');
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Karyawan berhasil disimpan!',
+        //     'saved_data' => $selectedKaryawan
+        // ]);
     }
+    
+
+
+    public function removeUser(Request $request)
+    {
+        $karyawanId = $request->karyawan_id;
+        $user = auth()->user();
+        $existingKaryawan = json_decode($user->list_karyawan, true) ?? [];
+
+        // Hapus ID dari array
+        $updatedKaryawan = array_filter($existingKaryawan, fn($id) => $id != $karyawanId);
+
+        $user->list_karyawan = json_encode(array_values($updatedKaryawan));
+        $user->save();
+        // return back()->with('success', 'Karyawan berhasil dihapus!');
+        return response()->json(['status' => 'success', 'message' => 'Karyawan berhasil dihapus!']);
+    }
+
+    // public function submitListUser(Request $request)
+    // {
+    //     // // Decode JSON ke array
+
+    //     // $karyawan = User::findOrFail($id);
+    //     // Simpan ke database (misalnya ke user yang sedang login)
+    //     // $update = auth()->user()->update([
+    //     //     'list_karyawan' => $request->selected_karyawan
+    //     // ]);
+
+    //     // // return back()->with('success', 'Karyawan berhasil disimpan!');
+
+    //     // // $selectedPasien = $selectedPasien, true;
+    //     // return response()->json([
+    //     //     'status' => 'error',
+    //     //     'message' => 'Data Request di ambil',
+    //     //     'Selected Karyawan' => $request->selected_karyawan,
+    //     // ], 200);
+
+    //     $selectedKaryawan = json_decode($request->selected_karyawan, true);
+
+    //     // Pastikan data terdecode dengan benar
+    //     if (is_null($selectedKaryawan)) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Gagal decode JSON'
+    //         ]);
+    //     }
+    
+    //     // Simpan ke database (pastikan kolom list_karyawan ada di tabel user)
+    //     auth()->user()->update([
+    //         'list_karyawan' => json_encode($selectedKaryawan) // Simpan sebagai JSON
+    //     ]);
+    
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Karyawan berhasil disimpan!',
+    //         'saved_data' => $selectedKaryawan
+    //     ]);
+    // }
 
 
     public function store(Request $request)
