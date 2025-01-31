@@ -5,7 +5,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <div class="card">
     <div class="card-header">
-        <h2 class="my-4">Set User List</h2>
+        <h2 class="my-4">Set Cost Center List</h2>
     </div>
     <style>
         /* Style untuk Dropdown */
@@ -70,61 +70,58 @@
 
     </style>
     <div class="card-body">
-        
-            <form id="karyawanForm" action="{{ route('set_user_submit') }}" method="POST">
-                @csrf
-            
-                <!-- Label Nama Karyawan -->
-                <label for="nama_karyawan">Nama Karyawan</label>
-            
-                <!-- Custom Dropdown -->
-                <div class="custom-dropdown">
-                    <div class="dropdown-header" onclick="toggleDropdown()">Pilih Nama Karyawan</div>
-                    
-                    <!-- Input Pencarian -->
-                    <input type="text" id="searchInput" class="dropdown-search" placeholder="Cari karyawan..." onkeyup="filterKaryawan()">
-                    
-                    <!-- Daftar Karyawan -->
-                    <div class="dropdown-list" id="dropdownList">
-                        @foreach ($karyawan as $item)
-                        <label class="dropdown-item">
-                            <input type="checkbox" name="nama_karyawan[]" value="{{ $item->id_badge }}" onclick="updateSelected()">
-                            {{ $item->nama_karyawan }} - {{ $item->id_badge }}
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-            
-                <!-- Hidden Input untuk Menyimpan Data Terpilih -->
-                <input type="hidden" id="selectedKaryawan" name="selected_karyawan">
-            
-                <button type="submit" class="btn btn-primary mt-3">Simpan</button>
-            </form>
-            <h4 style="margin-top: 20px;">Daftar Karyawan Terdaftar</h4>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nama Karyawan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="karyawanList">
-                    @foreach ($registeredKaryawan as $karyawan)
-                        <tr id="row-{{ $karyawan->id_badge }}">
-                            <td>{{ $karyawan->nama_karyawan }}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm btn-hapus" data-id="{{ $karyawan->id_badge }}">
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
+        <form id="costCenterForm" action="{{ route('set_user_submit') }}" method="POST">
+            @csrf
+    
+            <!-- Label Cost Center -->
+            <label for="cost_center">Cost Center</label>
+    
+            <!-- Custom Dropdown -->
+            <div class="custom-dropdown">
+                <div class="dropdown-header" onclick="toggleDropdown()">Pilih Cost Center</div>
+    
+                <!-- Input Pencarian -->
+                <input type="text" id="searchInput" class="dropdown-search" placeholder="Cari cost center..." onkeyup="filterCostCenter()">
+    
+                <!-- Daftar Cost Center -->
+                <div class="dropdown-list" id="dropdownList">
+                    @foreach ($costCenters as $item)
+                    <label class="dropdown-item">
+                        <input type="checkbox" name="cost_center[]" value="{{ $item->cost_center }}" onclick="updateSelected()">
+                        {{ $item->nama_bagian }} - {{ $item->cost_center }}
+                    </label>
                     @endforeach
-                </tbody>
-            </table>
-        </div>
-            
+                </div>
+            </div>
+    
+            <!-- Hidden Input untuk Menyimpan Data Terpilih -->
+            <input type="hidden" id="selectedCostCenters" name="selected_cost_center">
+    
+            <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+        </form>
+    
+        <h4 style="margin-top: 20px;">Daftar Cost Center Terdaftar</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nama Bagian</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="costCenterList">
+                @foreach ($registeredCostCenters as $costCenter)
+                    <tr id="row-{{ $costCenter->cost_center }}">
+                        <td>{{ $costCenter->nama_bagian }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm btn-hapus" data-id="{{ $costCenter->cost_center }}">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-</div>
 
 @endsection
 @push('scripts')
@@ -140,14 +137,14 @@
         });
 
         // Update hidden input agar data bisa dikirim ke controller
-        document.getElementById('selectedKaryawan').value = JSON.stringify(selected);
+        document.getElementById('selectedCostCenters').value = JSON.stringify(selected);
 
         // Tampilkan data yang dipilih di header dropdown
         let header = document.querySelector('.dropdown-header');
-        header.innerText = selected.length > 0 ? selected.join(", ") : "Pilih Nama Karyawan";
+        header.innerText = selected.length > 0 ? selected.join(", ") : "Pilih Cost Center";
     }
 
-    function filterKaryawan() {
+    function filterCostCenter() {
         let input = document.getElementById("searchInput").value.toLowerCase();
         let items = document.querySelectorAll(".dropdown-item");
 
@@ -169,12 +166,12 @@
         }
     });
 
-        $(document).ready(function () {
-        // Simpan daftar karyawan
+    $(document).ready(function () {
+        // Simpan daftar cost center
         $('#btnSimpan').click(function () {
-            let selectedKaryawan = $('#karyawanSelect').val();
-            if (!selectedKaryawan || selectedKaryawan.length === 0) {
-                alert('Pilih setidaknya satu karyawan!');
+            let selectedCostCenters = $('#costCenterSelect').val();
+            if (!selectedCostCenters || selectedCostCenters.length === 0) {
+                alert('Pilih setidaknya satu cost center!');
                 return;
             }
 
@@ -183,7 +180,7 @@
                 type: 'POST',
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
-                    selected_karyawan: JSON.stringify(selectedKaryawan)
+                    selected_cost_center: JSON.stringify(selectedCostCenters)
                 },
                 success: function (response) {
                     alert(response.message);
@@ -195,23 +192,23 @@
             });
         });
 
-        // Hapus karyawan dari daftar
+        // Hapus cost center dari daftar
         $(document).on('click', '.btn-hapus', function () {
-            let karyawanId = $(this).data('id');
+            let costCenterId = $(this).data('id');
 
             $.ajax({
                 url: '/admin/remove-user',
                 type: 'POST',
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
-                    karyawan_id: karyawanId
+                    cost_center_id: costCenterId
                 },
                 success: function (response) {
                     alert(response.message);
-                    $('#row-' + karyawanId).remove(); // Hapus row tanpa reload
+                    $('#row-' + costCenterId).remove(); // Hapus row tanpa reload
                 },
                 error: function () {
-                    alert('Gagal menghapus karyawan.');
+                    alert('Gagal menghapus cost center.');
                 }
             });
         });

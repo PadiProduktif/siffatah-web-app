@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MasterData\DataKaryawan;
 use App\Models\RestitusiKaryawan\RestitusiKaryawan;
 use App\Models\RincianBiaya\RincianBiaya;
+use App\Models\CostCenter;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class RestitusiKaryawanController extends Controller
             $listKaryawan = json_decode(auth()->user()->list_karyawan, true);
 
             // Query data karyawan berdasarkan id_badge
-            $karyawan = DataKaryawan::whereIn('id_badge', $listKaryawan);
+            $karyawan = DataKaryawan::whereIn('cost_center', $listKaryawan);
         }else {
             
             $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
@@ -74,63 +75,48 @@ class RestitusiKaryawanController extends Controller
     
     public function set_user_list()
     {
-        
         // Ambil username dan role dari session (atau metode lainnya)
-        $username = auth()->user()->username; // Pastikan 'username' tersimpan di session
-        $role = auth()->user()->role; // Pastikan 'role' tersimpan di session
+        $username = auth()->user()->username;
+        $role = auth()->user()->role;
 
-        $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
-        $listKaryawan = json_decode(auth()->user()->list_karyawan, true);
-        // Tambahkan kondisi jika role adalah 'tko'
-        
-        // return response()->json([
-        //     'status' => 'error',
-        //     'message' => 'Data gagal successfully',
-        //     'data' => $karyawan,
-        // ], 200);
+        // Ambil semua data cost_center
+        $costCenters = CostCenter::orderBy('nama_bagian', 'asc')->get();
 
+        // Ambil daftar cost center yang sudah tersimpan dalam user
+        $listCostCenter = json_decode(auth()->user()->list_karyawan, true) ?? [];
 
-        $karyawan = $karyawan->get();
-        $registeredKaryawan = DataKaryawan::whereIn('id_badge', $listKaryawan)->get();
-        // Urutkan hasil secara descending
-        
-        // Mengembalikan view dengan data yang diambil
+        // Ambil data cost center yang sudah terdaftar
+        $registeredCostCenters = CostCenter::whereIn('cost_center', $listCostCenter)->get();
+
         return view('extras/set_list_user', [
-            // 'restitusi' => $restitusi,
-            'karyawan' => $karyawan,
-            'registeredKaryawan' => $registeredKaryawan
+            'costCenters' => $costCenters,
+            'registeredCostCenters' => $registeredCostCenters
         ]);
     }
 
     public function submitListUser(Request $request)
     {
         // Decode JSON dari request
-        $selectedKaryawan = json_decode($request->selected_karyawan, true);
+        $selectedCostCenters = json_decode($request->selected_cost_center, true);
 
-    // Cek apakah data valid
-        if (is_null($selectedKaryawan)) {
+        // Cek apakah data valid
+        if (is_null($selectedCostCenters)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal decode JSON'
             ]);
         }
 
-        // Ambil data karyawan yang sudah ada
+        // Ambil user yang sedang login
         $user = auth()->user();
-        $existingKaryawan = json_decode($user->list_karyawan, true) ?? [];
+        $existingCostCenters = json_decode($user->list_karyawan, true) ?? [];
 
         // Gabungkan data baru dengan yang lama, pastikan unik
-        $mergedKaryawan = array_unique(array_merge($existingKaryawan, $selectedKaryawan));
-
-        // Debug sebelum update
-        \Log::info('Data sebelum update:', ['existing' => $existingKaryawan, 'new' => $selectedKaryawan, 'merged' => $mergedKaryawan]);
+        $mergedCostCenters = array_unique(array_merge($existingCostCenters, $selectedCostCenters));
 
         // Simpan ke database
-        $user->list_karyawan = json_encode($mergedKaryawan);
+        $user->list_karyawan = json_encode($mergedCostCenters);
         $saved = $user->save();
-
-        // Debug setelah update
-        \Log::info('Data setelah update:', ['saved' => $saved, 'updated_user' => $user]);
 
         if (!$saved) {
             return response()->json([
@@ -138,71 +124,24 @@ class RestitusiKaryawanController extends Controller
                 'message' => 'Gagal menyimpan data'
             ]);
         }
-        return back()->with('success', 'Karyawan berhasil disimpan!');
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => 'Karyawan berhasil disimpan!',
-        //     'saved_data' => $selectedKaryawan
-        // ]);
-    }
-    
 
+        return back()->with('success', 'Cost Center berhasil disimpan!');
+    }
 
     public function removeUser(Request $request)
     {
-        $karyawanId = $request->karyawan_id;
+        $costCenterId = $request->cost_center_id;
         $user = auth()->user();
-        $existingKaryawan = json_decode($user->list_karyawan, true) ?? [];
+        $existingCostCenters = json_decode($user->list_karyawan, true) ?? [];
 
         // Hapus ID dari array
-        $updatedKaryawan = array_filter($existingKaryawan, fn($id) => $id != $karyawanId);
+        $updatedCostCenters = array_filter($existingCostCenters, fn($id) => $id != $costCenterId);
 
-        $user->list_karyawan = json_encode(array_values($updatedKaryawan));
+        $user->list_karyawan = json_encode(array_values($updatedCostCenters));
         $user->save();
-        // return back()->with('success', 'Karyawan berhasil dihapus!');
-        return response()->json(['status' => 'success', 'message' => 'Karyawan berhasil dihapus!']);
+
+        return response()->json(['status' => 'success', 'message' => 'Cost Center berhasil dihapus!']);
     }
-
-    // public function submitListUser(Request $request)
-    // {
-    //     // // Decode JSON ke array
-
-    //     // $karyawan = User::findOrFail($id);
-    //     // Simpan ke database (misalnya ke user yang sedang login)
-    //     // $update = auth()->user()->update([
-    //     //     'list_karyawan' => $request->selected_karyawan
-    //     // ]);
-
-    //     // // return back()->with('success', 'Karyawan berhasil disimpan!');
-
-    //     // // $selectedPasien = $selectedPasien, true;
-    //     // return response()->json([
-    //     //     'status' => 'error',
-    //     //     'message' => 'Data Request di ambil',
-    //     //     'Selected Karyawan' => $request->selected_karyawan,
-    //     // ], 200);
-
-    //     $selectedKaryawan = json_decode($request->selected_karyawan, true);
-
-    //     // Pastikan data terdecode dengan benar
-    //     if (is_null($selectedKaryawan)) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Gagal decode JSON'
-    //         ]);
-    //     }
-    
-    //     // Simpan ke database (pastikan kolom list_karyawan ada di tabel user)
-    //     auth()->user()->update([
-    //         'list_karyawan' => json_encode($selectedKaryawan) // Simpan sebagai JSON
-    //     ]);
-    
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Karyawan berhasil disimpan!',
-    //         'saved_data' => $selectedKaryawan
-    //     ]);
-    // }
 
 
     public function store(Request $request)
@@ -280,25 +219,7 @@ class RestitusiKaryawanController extends Controller
             ], 200);
         }
     }
-    // public function getDetailPasien(Request $request)
-    // {
-    //     $pasienIds = $request->input('pasien_ids', []);
-    //     Log::info('Pasien IDs diterima:', $pasienIds);
-    //     Log::info('Request Data :', $request);
-    //     // if (!is_array($pasienIds)) {
-    //     //     Log::error('Data pasien_ids bukan array atau kosong.');
-    //     //     return response()->json(['status' => 'error', 'message' => 'Invalid data format.'], 400);
-    //     // }
-    
-    //     // $dataPasien = DB::table('table_non_karyawan')
-    //     //     ->whereIn('id_non_karyawan', $pasienIds)
-    //     //     ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
-    //     //     ->get();
-    
-    //     // Log::info('Data pasien ditemukan:', $dataPasien->toArray());
-    
-    //     // return response()->json(['status' => 'success', 'data' => $dataPasien]);
-    // }
+
     public function getDetailPasien(Request $request)
     {
         $pasienIds = $request->input('pasien_ids', []);
@@ -370,88 +291,6 @@ class RestitusiKaryawanController extends Controller
         ];
     
         return $map[$number] ?? $number;
-    }
-
-    public function uploadExcel(Request $request){
-        $validator = Validator::make($request->all(), [
-            'file_excel' => 'required|mimes:xlsx,xls',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
-        }
-        
-        // Proses unggah file
-        if ($request->hasFile('file_excel')) {
-            $path = $request->file('file_excel')->getRealPath();
-            $data = Excel::toArray([], $request->file('file_excel'));
-
-            if (!empty($data) && count($data[0]) > 0) {
-                $totalProcessed = 0; // Total data yang diproses
-                $successCount = 0;   // Data yang berhasil ditambahkan
-
-                foreach ($data[0] as $key => $row) {
-                    // Lewati baris pertama (header)
-                    if ($key < 2) continue;
-            
-                    $totalProcessed++; // Tambahkan ke total data yang diproses
-
-                    $badge = substr($row[3] ?? '', 0, 50);
-                    $dataKaryawan = DataKaryawan::where('id_badge', $badge)->first();
-
-                    if (!$dataKaryawan) continue;
-
-                    try {
-
-                        $tgl = Carbon::createFromFormat('d F Y', $tanggal)->format('Y-m-d');
-                        $dataImp = [
-
-                            // 'tanggal_pengobatan' => !empty($row[23]) ? Carbon::parse($row[23])->format('Y-m-d') : null,
-
-                            'urgensi' => match ($row[24] ?? '') {
-                                'Low' => 'Low',
-                                'Medium' => 'Medium',
-                                'High' => 'High',
-                                default => null,
-                            },
-
-
-                            'status_pengajuan' => substr($row[27] ?? '', 0, 50),
-
-                            'url_file' => '',
-
-                            'updated_at' => now(),
-                            'updated_by' => auth()->user()->role,
-                            'created_at' => now(),
-                            'created_by' => auth()->user()->role,
-                        ];
-            
-                        dd(
-                            $dataImp,
-                            $row,
-                            $badge,
-                            $dataKaryawan,
-                            4498,
-                            $data[0],
-                        );
-                        RestitusiKaryawan::create($dataImp);
-                        
-
-                        $successCount++; // Tambahkan ke jumlah sukses
-                    } catch (\Exception $e) {
-                        // Log error atau abaikan jika terjadi kesalahan
-                        \Log::error('Error adding data: ' . $e->getMessage());
-                    }
-                }
-            }
-            // Redirect dengan pesan jumlah sukses dan total
-            return redirect()->back()->with('toast_message', 'success')->with(
-                'toast_success',
-                "$successCount dari $totalProcessed data berhasil diunggah!"
-            );
-        }
-
-        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
     public function getNonKaryawan(Request $request)
