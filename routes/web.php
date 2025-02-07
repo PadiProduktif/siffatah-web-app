@@ -7,6 +7,7 @@ use App\Http\Controllers\BerkasPengobatan\BerkasPengobatanController;
 use App\Http\Controllers\Ekses\EksesController;
 use App\Http\Controllers\KelengkapanKerja\KelengkapanKerjaController;
 use App\Http\Controllers\MasterData\MasterDataNonKaryawanController;
+use App\Http\Controllers\MasterData\MasterDataCostCenter;
 use App\Http\Controllers\PengajuanKlaim\KlaimKecelakaanController;
 use App\Http\Controllers\PengajuanKlaim\KlaimKematianController;
 use App\Http\Controllers\PengajuanKlaim\KlaimLumpsumKacamataController;
@@ -93,6 +94,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/master_data_non_karyawan/delete/{id}', [MasterDataNonKaryawanController::class, 'destroy']);
 
 
+    //Master Data Cost Center
+    Route::get('/admin/master_data_cost_center', [MasterDataCostCenter::class,'index']);
+    Route::post('/admin/master_data_cost_center/tambah', [MasterDataCostCenter::class, 'store'])->name('cost_center.store');
+    Route::post('/admin/master_data_cost_center/update/{id}', [MasterDataCostCenter::class, 'update']);
+    Route::post('/admin/master_data_cost_center/upload', [MasterDataCostCenter::class, 'uploadExcel'])->name('cost_center.upload');
+    
     //Berkas Pengobatan
     Route::get('/admin/berkas-pengobatan', [BerkasPengobatanController::class, 'index'])->name('berkas-pengobatan.index');
     Route::post('/admin/berkas-pengobatan/tambah', [BerkasPengobatanController::class, 'store'])->name('berkas-pengobatan.store');

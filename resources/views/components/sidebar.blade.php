@@ -24,6 +24,7 @@
         <ul class="nav flex-column">
             @if(auth()->user()->role === 'superadmin')
                 <li><a href="/admin/master_data_karyawan" class="nav-link {{ Request::is('admin/master_data_karyawan') ? 'active' : '' }}">Master Data Karyawan</a></li>
+                <li><a href="/admin/master_data_cost_center" class="nav-link {{ Request::is('admin/master_data_cost_center') ? 'active' : '' }}">Master Data Cost Center</a></li>
                 <li><a href="/admin/kelengkapan_kerja" class="nav-link {{ Request::is('admin/kelengkapan_kerja') ? 'active' : '' }}">Kelengkapan Kerja</a></li>
             @endif
         </ul>

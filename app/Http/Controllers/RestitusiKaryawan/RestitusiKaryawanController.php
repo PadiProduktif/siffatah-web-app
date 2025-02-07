@@ -40,9 +40,12 @@ class RestitusiKaryawanController extends Controller
         } elseif ($role === 'adm_karyawan') {
             // Ambil list_karyawan dari user yang sedang login
             $listKaryawan = json_decode(auth()->user()->list_karyawan, true);
-
+            // $query->where('table_pengajuan_reimburse.id_badge', $username);
             // Query data karyawan berdasarkan id_badge
             $karyawan = DataKaryawan::whereIn('cost_center', $listKaryawan);
+            $filteredIds = $karyawan->pluck('id_badge')->toArray(); // Mengambil semua id_badge dari koleksi
+
+            $query->whereIn('table_pengajuan_reimburse.id_badge', $filteredIds);
         }else {
             
             $karyawan = DataKaryawan::orderBy('nama_karyawan', 'asc');
