@@ -253,7 +253,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/get-keluarga', [MasterDataNonKaryawanController::class, 'get_keluarga_from_badge']);
 
+    Route::get('kelengkapan-kerja/export/', [KelengkapanKerjaController::class, 'export']);
 
+
+    
+    Route::delete('/admin/kelengkapan_kerja/delete-kelengkapan/{periode}', [KelengkapanKerjaController::class, 'deleteKelengkapan'])->name('delete.kelengkapan');
 
     
     Route::get('/admin/berkas-tagihan-rumah-sakit/{id}', [BerkasPengobatanController::class, 'show'])->name('berkas-tagihan-rumah-sakit.show');
