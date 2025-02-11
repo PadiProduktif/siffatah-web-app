@@ -5,6 +5,7 @@ namespace App\Http\Controllers\KelengkapanKerja;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\KelengkapanKerja\KelengkapanKerja;
+use App\Models\MasterData\DataKaryawan;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
@@ -12,44 +13,292 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
+use App\Exports\KelengkapanExport;
+
 class KelengkapanKerjaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function export(Request $request) 
+    {
+        $createdAt = $request->query('created_at'); // Ambil parameter created_at dari URL
+
+        if (!$createdAt) {
+            return redirect()->back()->with('error', 'Parameter created_at tidak ditemukan.');
+        }
+
+        $fileName = 'Kelengkapan_Kerja_' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new KelengkapanExport($createdAt), $fileName);
+    }
     public function index()
     {
-        $kelengkapan = KelengkapanKerja::all();
-        $user = Auth::user();
-        $data['user'] = $user->fullname;
-        $data['kelengkapan'] = $kelengkapan;
-        $data['chartData'] = [
-            'sepatu_kantor' => KelengkapanKerja::select(DB::raw("IF(sepatu_kantor IS NULL OR sepatu_kantor = '' OR sepatu_kantor = '-' OR sepatu_kantor = null, 'Tidak Dapat', sepatu_kantor) as sepatu_kantor"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('sepatu_kantor')
-                ->get(),
-            'sepatu_safety' => KelengkapanKerja::select(DB::raw("IF(sepatu_safety IS NULL OR sepatu_safety = null OR sepatu_safety = '' OR sepatu_safety = '-', 'Tidak Dapat', sepatu_safety) as sepatu_safety"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('sepatu_safety')
-                ->get(),
-            'wearpack_cover_all' => KelengkapanKerja::select(DB::raw("IF(wearpack_cover_all IS NULL OR wearpack_cover_all = null OR wearpack_cover_all = '' OR wearpack_cover_all = '-', 'Tidak Dapat', wearpack_cover_all) as wearpack_cover_all"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('wearpack_cover_all')
-                ->get(),
-            'jaket_shift' => KelengkapanKerja::select(DB::raw("IF(jaket_shift IS NULL OR jaket_shift = null OR jaket_shift = '' OR jaket_shift = '-', 'Tidak Dapat', jaket_shift) as jaket_shift"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('jaket_shift')
-                ->get(),
-            'seragam_olahraga' => KelengkapanKerja::select(DB::raw("IF(seragam_olahraga IS NULL OR seragam_olahraga = null OR seragam_olahraga = '' OR seragam_olahraga = '-', 'Tidak Dapat', seragam_olahraga) as seragam_olahraga"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('seragam_olahraga')
-                ->get(),
-            'jaket_casual' => KelengkapanKerja::select(DB::raw("IF(jaket_casual IS NULL OR jaket_casual = null OR jaket_casual = '' OR jaket_casual = '-', 'Tidak Dapat', jaket_casual) as jaket_casual"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('jaket_casual')
-                ->get(),
-            'seragam_dinas_harian' => KelengkapanKerja::select(DB::raw("IF(seragam_dinas_harian IS NULL OR seragam_dinas_harian = null OR seragam_dinas_harian = '' OR seragam_dinas_harian = '-', 'Tidak Dapat', seragam_dinas_harian) as seragam_dinas_harian"), DB::raw('COUNT(*) as jumlah'))
-                ->groupBy('seragam_dinas_harian')
-                ->get(),
-        ];
+        $kelengkapan = KelengkapanKerja::select(  
+            DB::raw('DATE(created_at) AS periode'),  
+            DB::raw('count(id_kelengkapan_kerja) AS count_karyawan')  
+        )  
+        ->groupBy('periode') // Mengelompokkan berdasarkan periode dan ukuran  
+        ->get();
 
+        foreach ($kelengkapan as $key1 => $value1) {
+            $sepatuKantor = [];
+            $sepatuSafety = [];
+            $seragamDinasHarian = [];
+            $jaketCasual = [];
+            $seragamOlahraga = [];
+            $jaketShift = [];
+            $wearpack = [];
 
-        return view('dashboard/kelengkapan-kerja',$data);
+            // ! LOGIC
+                $dataKelengkapanRAW = KelengkapanKerja::select(
+                    'id_kelengkapan_kerja',
+                    'sepatu_kantor',
+                    'sepatu_safety',
+                    'wearpack_cover_all',
+                    'jaket_shift',
+                    'seragam_olahraga',
+                    'jaket_casual',
+                    'seragam_dinas_harian',
+                )->whereDate('created_at', $value1->periode)->get();
+
+                $wearpackGrouping = KelengkapanKerja::select(  
+                    'wearpack_cover_all', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('wearpack_cover_all') // Mengelompokkan berdasarkan wearpack_cover_all  
+                ->get();
+                $sepatuKantorGrouping = KelengkapanKerja::select(  
+                    'sepatu_kantor', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('sepatu_kantor') // Mengelompokkan berdasarkan sepatu_kantor  
+                ->get();
+                $sepatuSafetyGrouping = KelengkapanKerja::select(  
+                    'sepatu_safety', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('sepatu_safety') // Mengelompokkan berdasarkan sepatu_Safety  
+                ->get();
+                $jaketShiftGrouping = KelengkapanKerja::select(  
+                    'jaket_shift', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('jaket_shift') // Mengelompokkan berdasarkan jaket_shift  
+                ->get();
+                $seragamOlahragaGrouping = KelengkapanKerja::select(  
+                    'seragam_olahraga', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('seragam_olahraga') // Mengelompokkan berdasarkan seragam_olahraga  
+                ->get();
+                $jaketCasualGrouping = KelengkapanKerja::select(  
+                    'jaket_casual', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('jaket_casual') // Mengelompokkan berdasarkan jaket_casual  
+                ->get();
+                $seragamDinasHarianGrouping = KelengkapanKerja::select(  
+                    'seragam_dinas_harian', // Hanya memilih kolom yang relevan untuk grouping  
+                    DB::raw('count(id_kelengkapan_kerja) as total') // Menghitung jumlah id_kelengkapan_kerja  
+                )  
+                ->whereDate('created_at', $value1->periode) // Menggunakan whereDate untuk membandingkan tanggal  
+                ->groupBy('seragam_dinas_harian') // Mengelompokkan berdasarkan seragam_dinas_harian  
+                ->get();
+
+                foreach ($seragamDinasHarianGrouping as $key2 => $value2) {
+                    $seragamDinasHarian[] = [  
+                        'size' => $value2->seragam_dinas_harian,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($jaketCasualGrouping as $key2 => $value2) {
+                    $jaketCasual[] = [  
+                        'size' => $value2->jaket_casual,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($seragamOlahragaGrouping as $key2 => $value2) {
+                    $seragamOlahraga[] = [  
+                        'size' => $value2->seragam_olahraga,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($jaketShiftGrouping as $key2 => $value2) {
+                    $jaketShift[] = [  
+                        'size' => $value2->jaket_shift,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($wearpackGrouping as $key2 => $value2) {
+                    $wearpack[] = [  
+                        'size' => $value2->wearpack_cover_all,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($sepatuSafetyGrouping as $key2 => $value2) {
+                    $sepatuSafety[] = [  
+                        'size' => $value2->sepatu_safety,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+                foreach ($sepatuKantorGrouping as $key2 => $value2) {
+                    $sepatuKantor[] = [  
+                        'size' => $value2->sepatu_kantor,  
+                        'jumlah' => $value2->total,  
+                    ];  
+                }
+            // ! ./ LOGIC
+
+            $value1['seragam_dinas_harian'] = $seragamDinasHarian;
+            $value1['jaket_casual'] = $jaketCasual;
+            $value1['seragam_olahraga'] = $seragamOlahraga;
+            $value1['jaket_shift'] = $jaketShift;
+            $value1['wearpack'] = $wearpack;
+            $value1['sepatu_kantor'] = $sepatuKantor;
+            $value1['sepatu_safety'] = $sepatuSafety;
+        }
+
+        $res = [  
+            'dataKelengkapanKerja' => $kelengkapan,  
+        ];  
+        
+        // Mengembalikan data ke view  
+        return view('dashboard/kelengkapan-kerja', $res);  
     }
+
+
+    public function generateKelengkapanKerja()  
+    {
+        // date_default_timezone_set('Asia/Jakarta');
+        // $dateNow = date('Y-m-d H:i:s');
+        // $checkRedundan = KelengkapanKerja::whereDate('created_at', $dateNow)->first();
+        // if ($checkRedundan) {
+        //     return redirect()->back()->with('error', 'Tunggu beberapa menit');
+        // }
+        // $dataKaryawan = DataKaryawan::select(  
+        //     'sepatu_kantor',  
+        //     'sepatu_safety',  
+        //     'wearpack',  
+        //     'jaket_shift',  
+        //     'jaket_casual',  
+        //     'seragam_olahraga',  
+        //     'seragam_dinas_harian',  
+        //     'id_badge',  
+        //     'nama_karyawan'  
+        // )->get();  
+        // foreach ($dataKaryawan as $key => $value) {
+        //     KelengkapanKerja::create([
+        //         'id_badge' => $value->id_badge,
+        //         'sepatu_kantor' => $value->sepatu_kantor,
+        //         'sepatu_safety' => $value->sepatu_safety,
+        //         'wearpack_cover_all' => $value->wearpack,
+        //         'jaket_shift' => $value->jaket_shift,
+        //         'seragam_olahraga' => $value->seragam_olahraga,
+        //         'jaket_casual' => $value->jaket_casual,
+        //         'seragam_dinas_harian' => $value->seragam_dinas_harian,
+        //         'created_at' => $dateNow,
+        //         'updated_at' => $dateNow,
+        //     ]);
+        // }
+        // return redirect()->back()->with('success', 'Data berhasil direkap');
+        date_default_timezone_set('Asia/Jakarta');    
+        $dateNow = date('Y-m-d'); // Menggunakan helper Laravel untuk mendapatkan waktu saat ini   
+        
+        $checkRedundan = KelengkapanKerja::orderBy('created_at', 'DESC')->first();
+        
+        // Cek apakah sudah ada data yang direkap pada waktu ini    
+        if ($dateNow === date('Y-m-d', strtotime($checkRedundan->created_at))) {    
+            return redirect()->back()->with('error', 'Sudah dilakukan rekapitulasi hari ini');    
+        }    
+        
+        // Ambil data karyawan yang diperlukan    
+        $dataKaryawan = DataKaryawan::select(      
+            'sepatu_kantor',      
+            'sepatu_safety',      
+            'wearpack',      
+            'jaket_shift',      
+            'jaket_casual',      
+            'seragam_olahraga',      
+            'seragam_dinas_harian',      
+            'id_badge',      
+            'nama_karyawan'      
+        )->get();      
+        
+        // Siapkan data untuk batch insert    
+        $dataToInsert = $dataKaryawan->map(function ($value) use ($dateNow) {    
+            return [    
+                'id_badge' => $value->id_badge,    
+                'sepatu_kantor' => $value->sepatu_kantor,    
+                'sepatu_safety' => $value->sepatu_safety,    
+                'wearpack_cover_all' => $value->wearpack,    
+                'jaket_shift' => $value->jaket_shift,    
+                'seragam_olahraga' => $value->seragam_olahraga,    
+                'jaket_casual' => $value->jaket_casual,    
+                'seragam_dinas_harian' => $value->seragam_dinas_harian,    
+                'created_at' => $dateNow,    
+                'updated_at' => $dateNow,    
+            ];    
+        });    
+        
+        // Melakukan batch insert    
+        KelengkapanKerja::insert($dataToInsert->toArray());    
+        
+        return redirect()->back()->with('success', 'Data berhasil direkap');    
+
+    }
+    
+    public function deleteKelengkapan($periode)  
+    {  
+        // Mengonversi periode menjadi format tanggal yang sesuai  
+        $date = \Carbon\Carbon::parse($periode)->format('Y-m-d');  
+  
+        // Menghapus semua data kelengkapan kerja yang memiliki created_at sesuai dengan periode  
+        $deletedRows = KelengkapanKerja::whereDate('created_at', $date)->delete();  
+  
+        // Mengembalikan response  
+        if ($deletedRows) {  
+            
+            return redirect()->back()->with('success', 'Data berhasil di dihapus!');
+        } else {  
+            return redirect()->back()->with('error', 'Data tidak ditemukan!');
+        }  
+    }  
+    // public function index()
+    // {
+    //     $kelengkapan = KelengkapanKerja::all();
+    //     $user = Auth::user();
+    //     $data['user'] = $user->fullname;
+    //     $data['kelengkapan'] = $kelengkapan;
+    //     $data['chartData'] = [
+    //         'sepatu_kantor' => KelengkapanKerja::select(DB::raw("IF(sepatu_kantor IS NULL OR sepatu_kantor = '' OR sepatu_kantor = '-' OR sepatu_kantor = null, 'Tidak Dapat', sepatu_kantor) as sepatu_kantor"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('sepatu_kantor')
+    //             ->get(),
+    //         'sepatu_safety' => KelengkapanKerja::select(DB::raw("IF(sepatu_safety IS NULL OR sepatu_safety = null OR sepatu_safety = '' OR sepatu_safety = '-', 'Tidak Dapat', sepatu_safety) as sepatu_safety"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('sepatu_safety')
+    //             ->get(),
+    //         'wearpack_cover_all' => KelengkapanKerja::select(DB::raw("IF(wearpack_cover_all IS NULL OR wearpack_cover_all = null OR wearpack_cover_all = '' OR wearpack_cover_all = '-', 'Tidak Dapat', wearpack_cover_all) as wearpack_cover_all"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('wearpack_cover_all')
+    //             ->get(),
+    //         'jaket_shift' => KelengkapanKerja::select(DB::raw("IF(jaket_shift IS NULL OR jaket_shift = null OR jaket_shift = '' OR jaket_shift = '-', 'Tidak Dapat', jaket_shift) as jaket_shift"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('jaket_shift')
+    //             ->get(),
+    //         'seragam_olahraga' => KelengkapanKerja::select(DB::raw("IF(seragam_olahraga IS NULL OR seragam_olahraga = null OR seragam_olahraga = '' OR seragam_olahraga = '-', 'Tidak Dapat', seragam_olahraga) as seragam_olahraga"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('seragam_olahraga')
+    //             ->get(),
+    //         'jaket_casual' => KelengkapanKerja::select(DB::raw("IF(jaket_casual IS NULL OR jaket_casual = null OR jaket_casual = '' OR jaket_casual = '-', 'Tidak Dapat', jaket_casual) as jaket_casual"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('jaket_casual')
+    //             ->get(),
+    //         'seragam_dinas_harian' => KelengkapanKerja::select(DB::raw("IF(seragam_dinas_harian IS NULL OR seragam_dinas_harian = null OR seragam_dinas_harian = '' OR seragam_dinas_harian = '-', 'Tidak Dapat', seragam_dinas_harian) as seragam_dinas_harian"), DB::raw('COUNT(*) as jumlah'))
+    //             ->groupBy('seragam_dinas_harian')
+    //             ->get(),
+    //     ];
+
+
+    //     return view('dashboard/kelengkapan-kerja',$data);
+    // }
     public function index_sepatu()
     {
         $kelengkapan = KelengkapanKerja::all();

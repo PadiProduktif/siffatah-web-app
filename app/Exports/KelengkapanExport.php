@@ -10,18 +10,24 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
 class KelengkapanExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths
 {
+    protected $createdAt;
+
+    public function __construct($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
     public function collection()
     {
         $checkCreatedAt = KelengkapanKerja::orderByDesc('created_at')->first();
 
-        
-        $dataExport = KelengkapanKerja::where('table_kelengkapan_kerja.created_at', $checkCreatedAt->created_at)
-        ->join('table_karyawan', 'table_karyawan.id_badge', '=', 'table_kelengkapan_kerja.id_badge')
-        ->select(
+        $dataExport = KelengkapanKerja::select(
             'table_kelengkapan_kerja.*',
             'table_karyawan.nama_karyawan',
             'table_karyawan.cost_center',
         )
+        ->join('table_karyawan', 'table_karyawan.id_badge', '=', 'table_kelengkapan_kerja.id_badge')
+        ->whereDate('table_kelengkapan_kerja.created_at', $this->createdAt)
 
         ->orderByRaw("
             (CASE WHEN table_kelengkapan_kerja.sepatu_kantor IS NOT NULL THEN 1 ELSE 0 END) +
@@ -34,6 +40,7 @@ class KelengkapanExport implements FromCollection, WithHeadings, WithMapping, Wi
         ")
 
         ->get();
+
         return $dataExport;
     }
 
