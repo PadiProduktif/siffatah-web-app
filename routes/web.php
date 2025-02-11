@@ -84,6 +84,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/admin/master_data_karyawan/reset-password/{id}', [AuthController::class, 'resetPassword'])->name('karyawan.resetPassword');
 
+    
+    Route::post('/admin/master_data_karyawan/update-kelengkapan-kerja/{id}', [MasterDataKaryawanController::class, 'updateKelengkapanKerja'])->name('karyawan.update.kelengkapan');  
 
     
     //Master Data Non Karyawan
@@ -247,9 +249,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/restitusi_karyawan/upload', [RestitusiKaryawanController::class, 'uploadExcel'])->name('restitusi-karyawan.upload');
     
     Route::get('/keluarga', [MasterDataKaryawanController::class, 'keluarga']);
-    Route::get('set-profil', function () {
-        return view('extras/set-profil');
-    });
+    // Route::get('set-profil', function () {
+    //     return view('extras/set-profil');
+    // });
+    
+    Route::get('/set-profil', [MasterDataKaryawanController::class, 'set_profil']);
     
     Route::post('/get-keluarga', [MasterDataNonKaryawanController::class, 'get_keluarga_from_badge']);
 
