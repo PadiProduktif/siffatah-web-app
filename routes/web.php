@@ -99,6 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/master_data_cost_center/tambah', [MasterDataCostCenter::class, 'store'])->name('cost_center.store');
     Route::post('/admin/master_data_cost_center/update/{id}', [MasterDataCostCenter::class, 'update']);
     Route::post('/admin/master_data_cost_center/upload', [MasterDataCostCenter::class, 'uploadExcel'])->name('cost_center.upload');
+    Route::get('/admin/master_data_cost_center/delete/{id}', [MasterDataCostCenter::class, 'destroy']);
+    Route::post('/admin/master_data_cost_center/delete-multiple', [MasterDataCostCenter::class, 'deleteMultiple'])->name('cost_center.delete-multiple');
     
     //Berkas Pengobatan
     Route::get('/admin/berkas-pengobatan', [BerkasPengobatanController::class, 'index'])->name('berkas-pengobatan.index');

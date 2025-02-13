@@ -7,7 +7,7 @@
 
     <div class="container">
         <div class="d-flex justify-content-end align-items-center mb-4">
-            <h4 class="me-auto">Master Data - Cost Center Pupuk Kujang Cikampek</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
+            <h4 class="me-auto">Master Data - Cost Center PKC</h4> <!-- Tambahkan kelas 'me-auto' untuk memberi margin ke kanan pada judul -->
             <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDataBaru">+ Masukan Data Baru</a>
             <a href="" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#modalDataExcel">+ Masukan Data Excel</a> <!-- Tambahkan kelas 'ms-2' untuk memberi margin kiri pada tombol kedua -->
         </div>
@@ -138,16 +138,16 @@
                             <!-- Informasi Dasar -->
 
                             <!-- Informasi Dasar -->
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <label for="id_badge" class="form-label">Cost Center</label>
                                 <input type="text" class="form-control" id="editCostCenter" name="cost_center" required>
                             </div>
 
-                            <div class="col-md-5">
+                            <div class="col-md-8">
                                 <label for="gelar_depan" class="form-label">Nama Bagian</label>
                                 <input type="text" class="form-control" id="editNamaBagian" name="nama_bagian">
                             </div>
-                            
+                            <input type="hidden" name="id_cost_center" id="editIdCostCenter" >
                         </div>
                     </div>
 
@@ -313,6 +313,7 @@
             const cost_center = $(this).data('cost_center') || '-';
             const nama_bagian = $(this).data('nama_bagian') || '-';
 
+            $('#editIdCostCenter').val(id || '-');
             $('#editCostCenter').val(cost_center || '-');
             $('#editNamaBagian').val(nama_bagian || '-');
             
@@ -346,7 +347,7 @@
             if (result.isConfirmed) {
                 // Jika dikonfirmasi, kirim permintaan hapus ke server
                 $.ajax({
-                url: '/admin/bpjs/bpjs-kesehatan/delete/' + id,
+                url: '/admin/master_data_cost_center/delete/' + id,
                 type: 'GET', // Ubah dari DELETE ke GET
                 success: function (response) {
                     Swal.fire('Berhasil!', 'Data berhasil dihapus.', 'success');
@@ -404,7 +405,7 @@
                     if (result.isConfirmed) {
                         // Kirim permintaan hapus melalui AJAX
                         $.ajax({
-                            url: '/admin/bpjs/bpjs-kesehatan/delete-multiple', // Endpoint untuk hapus data
+                            url: '/admin/master_data_cost_center/delete-multiple', // Endpoint untuk hapus data
                             type: 'POST',
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content'),

@@ -58,6 +58,29 @@ class MasterDataCostCenter extends Controller
         
     }
 
+    public function update(Request $request, string $id)
+    {
+
+        try {
+            Log::info('Updating Master Data Cost Center: ' . $id . ', Request Data: ', $request->all());
+            $CostCenter = CostCenter::findOrFail($id);
+            $CostCenter->update([
+
+                'cost_center' => $request->cost_center,
+                'nama_bagian' => $request->nama_bagian,
+    
+            ]);
+            return redirect()->back()->with('success', 'Data berhasil di Perbarui!');
+        } catch (\Throwable $th) {
+            
+            return response()->json([
+                'status' => 'failed',
+                'message' => $th->getMessage(),
+                'data' => $request->all(),
+            ]);
+        }
+
+    }
     public function uploadExcel(Request $request){
 
                     // Validasi file
@@ -103,5 +126,55 @@ class MasterDataCostCenter extends Controller
         }
 
         return redirect()->back()->with('error', 'Gagal mengunggah file!');
+    }
+
+    public function destroy(string $id)
+    {
+        try {
+            Log::info("Menghapus data Cost Center  ID: {$id}"); // Log untuk debugging awal
+            
+            // Ambil data berdasarkan ID
+            $CostCenter = CostCenter::findOrFail($id);
+
+    
+            // Hapus data dari database
+            $CostCenter->delete();
+            Log::info("Data Cost Center dengan ID: {$id} berhasil dihapus.");
+    
+            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            Log::error("Error saat menghapus data dengan ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+    
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+        }
+    
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        try {
+            $ids = $request->input('ids'); // Ambil array ID dari request
+            Log::info('IDs yang akan dihapus: ', $ids);
+            
+    
+            // Ambil semua data berdasarkan ID
+            $CostCenter = CostCenter::whereIn('id_cost_center', $ids)->get();
+    
+    
+            // Hapus data dari database
+            CostCenter::whereIn('id_cost_center', $ids)->delete();
+    
+            return response()->json(['message' => 'Data berhasil dihapus.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error saat menghapus data:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json(['message' => 'Terjadi kesalahan saat menghapus data.'], 500);
+        }
     }
 }
