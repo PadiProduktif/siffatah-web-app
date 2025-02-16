@@ -145,6 +145,11 @@ class RestitusiKaryawanController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Cost Center berhasil dihapus!']);
     }
+    
+
+
+    
+
 
 
     public function store(Request $request)
@@ -222,7 +227,25 @@ class RestitusiKaryawanController extends Controller
             ], 200);
         }
     }
-
+    // public function getDetailPasien(Request $request)
+    // {
+    //     $pasienIds = $request->input('pasien_ids', []);
+    //     Log::info('Pasien IDs diterima:', $pasienIds);
+    //     Log::info('Request Data :', $request);
+    //     // if (!is_array($pasienIds)) {
+    //     //     Log::error('Data pasien_ids bukan array atau kosong.');
+    //     //     return response()->json(['status' => 'error', 'message' => 'Invalid data format.'], 400);
+    //     // }
+    
+    //     // $dataPasien = DB::table('table_non_karyawan')
+    //     //     ->whereIn('id_non_karyawan', $pasienIds)
+    //     //     ->select('id_non_karyawan', 'nama_lengkap', 'hubungan_keluarga')
+    //     //     ->get();
+    
+    //     // Log::info('Data pasien ditemukan:', $dataPasien->toArray());
+    
+    //     // return response()->json(['status' => 'success', 'data' => $dataPasien]);
+    // }
     public function getDetailPasien(Request $request)
     {
         $pasienIds = $request->input('pasien_ids', []);
@@ -294,6 +317,88 @@ class RestitusiKaryawanController extends Controller
         ];
     
         return $map[$number] ?? $number;
+    }
+
+    public function uploadExcel(Request $request){
+        $validator = Validator::make($request->all(), [
+            'file_excel' => 'required|mimes:xlsx,xls',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
+        }
+        
+        // Proses unggah file
+        if ($request->hasFile('file_excel')) {
+            $path = $request->file('file_excel')->getRealPath();
+            $data = Excel::toArray([], $request->file('file_excel'));
+
+            if (!empty($data) && count($data[0]) > 0) {
+                $totalProcessed = 0; // Total data yang diproses
+                $successCount = 0;   // Data yang berhasil ditambahkan
+
+                foreach ($data[0] as $key => $row) {
+                    // Lewati baris pertama (header)
+                    if ($key < 2) continue;
+            
+                    $totalProcessed++; // Tambahkan ke total data yang diproses
+
+                    $badge = substr($row[3] ?? '', 0, 50);
+                    $dataKaryawan = DataKaryawan::where('id_badge', $badge)->first();
+
+                    if (!$dataKaryawan) continue;
+
+                    try {
+
+                        $tgl = Carbon::createFromFormat('d F Y', $tanggal)->format('Y-m-d');
+                        $dataImp = [
+
+                            // 'tanggal_pengobatan' => !empty($row[23]) ? Carbon::parse($row[23])->format('Y-m-d') : null,
+
+                            'urgensi' => match ($row[24] ?? '') {
+                                'Low' => 'Low',
+                                'Medium' => 'Medium',
+                                'High' => 'High',
+                                default => null,
+                            },
+
+
+                            'status_pengajuan' => substr($row[27] ?? '', 0, 50),
+
+                            'url_file' => '',
+
+                            'updated_at' => now(),
+                            'updated_by' => auth()->user()->role,
+                            'created_at' => now(),
+                            'created_by' => auth()->user()->role,
+                        ];
+            
+                        dd(
+                            $dataImp,
+                            $row,
+                            $badge,
+                            $dataKaryawan,
+                            4498,
+                            $data[0],
+                        );
+                        RestitusiKaryawan::create($dataImp);
+                        
+
+                        $successCount++; // Tambahkan ke jumlah sukses
+                    } catch (\Exception $e) {
+                        // Log error atau abaikan jika terjadi kesalahan
+                        \Log::error('Error adding data: ' . $e->getMessage());
+                    }
+                }
+            }
+            // Redirect dengan pesan jumlah sukses dan total
+            return redirect()->back()->with('toast_message', 'success')->with(
+                'toast_success',
+                "$successCount dari $totalProcessed data berhasil diunggah!"
+            );
+        }
+
+        return redirect()->back()->withErrors($validator)->withInput()->with('toast_message', 'Validasi gagal. Silakan periksa kembali input Anda.');
     }
 
     public function getNonKaryawan(Request $request)
@@ -483,17 +588,22 @@ class RestitusiKaryawanController extends Controller
             // Hilangkan duplikat file dan reset index array
             $finalFiles = array_values(array_unique($currentFiles));
     
-            if (auth()->user()->role === "superadmin") {
+            if (auth()->user()->role === "superadmin" || auth()->user()->role === "tko" || auth()->user()->role === "adm_karyawan" ) {
                 $restitusi->update([
                     'url_file' => json_encode($finalFiles),
                     'rumah_sakit' => $request->rumah_sakit,
                     'urgensi' => $request->urgensi,
-                    
+                    'jenis_perawatan' => $request->kategori_perawatan,
                     'tanggal_pengobatan' => $request->tanggal_pengobatan,
                     'keterangan_pengajuan' => $request->keterangan_pengajuan,
                     'status_pengajuan' => 1,
                     'reject_notes' => null,
                     'deskripsi' => $request->deskripsi,
+                ]);
+            }elseif (auth()->user()->role === "dr_hph") {
+                $restitusi->update([
+                    'jenis_perawatan' => $request->kategori_perawatan,
+                    
                 ]);
             }
             // Update data restitusi
@@ -626,18 +736,26 @@ class RestitusiKaryawanController extends Controller
     
             // dd($restitusi);
             // Lakukan logika persetujuan DR
-            $restitusi->status_pengajuan = '2';
+
+            if ($restitusi->jenis_perawatan == "asuransi") {
+                $restitusi->status_pengajuan = '3';
+                $idKategori = $restitusi->id_pengajuan;
+                $idRincianArray = RincianBiaya::where('id_kategori', $idKategori)->pluck('id_rincian_biaya')->toArray();
+                RincianBiaya::whereIn('id_rincian_biaya', $idRincianArray)
+                    ->update([
+                        'status_rincian_biaya' => 3,
+                        'nominal_akhir' => 350000
+                ]);
+
+                    
+            }else {
+                $restitusi->status_pengajuan = '2';
+            }
             $restitusi->tanggal_approval_screening = now();
             $restitusi->save();
     
             return redirect('/admin/restitusi_karyawan')->with('success', 'Approval Screening.');
-            // return response()->json([
-            //     'status' => 'failed',
-            //     'message' => 'Data Gagal.',
-            //     'request' => $request->all(),
-            //     // 'message' => $th->getMessage(),
-            //     // 'filesFinal'=>$finalFiles,
-            // ]);
+            
 
         } catch (\Throwable $th) {
             return redirect('/admin/restitusi_karyawan')->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
@@ -735,6 +853,7 @@ class RestitusiKaryawanController extends Controller
 
 
             // Update database restitusi
+            
             $restitusi->update([
                 'url_file_dr' => json_encode(array_unique($currentFiles)),
                 'status_pengajuan' => 3, // Status disetujui dokter
