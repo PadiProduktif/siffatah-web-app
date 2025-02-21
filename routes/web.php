@@ -227,7 +227,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/restitusi_karyawan/get-non-karyawan', [RestitusiKaryawanController::class, 'getNonKaryawan'])->name('restitusi_karyawan_delete.get_non_karyawan');
     Route::post('/restitusi_karyawan/get-detail-pasien', [RestitusiKaryawanController::class, 'getDetailPasien'])->name('getDetailPasien');
     Route::post('/download-restitusi', [RestitusiKaryawanController::class, 'downloadPDF'])->name('print-restitusi');
-
+    Route::post('/download-restitusi-printout', [RestitusiKaryawanController::class, 'downloadPrintOutRK'])->name('print-restitusi-printout');
     //Kepesertaan BPJS  Kesehatan
     Route::get('/admin/bpjs/bpjs-kesehatan', [PesertaBPJSKesehatanController::class, 'index']);
     Route::post('/admin/bpjs/bpjs-kesehatan/upload', [PesertaBPJSKesehatanController::class, 'uploadExcel'])->name('bpjs-kesehatan.upload');

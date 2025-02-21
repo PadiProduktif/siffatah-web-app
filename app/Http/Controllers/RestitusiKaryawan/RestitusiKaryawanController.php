@@ -952,5 +952,45 @@ class RestitusiKaryawanController extends Controller
         return view('forms.FormPA', compact('data'));
         // return redirect(url('forms/FormPA.html?print=1'));
     }
+    
+    public function downloadPrintOutRK(Request $request)
+    {
+        $restitusi = RestitusiKaryawan::where('id_pengajuan', $request->id_pengajuan)->first();
+        // Periksa apakah data ditemukan
+        if (!$restitusi) {
+            return abort(404, 'Data tidak ditemukan');
+        }
+            $rincianBiaya = RincianBiaya::where('id_kategori', $restitusi->id_pengajuan)
+        ->where('status_rincian_biaya', 4)
+        ->sum('nominal_akhir');
+        $formatted_total_biaya = format_currency($rincianBiaya);
+        $tanggalPecah = explode("-",$restitusi->tanggal_pengajuan);
+        $data['formatNoPA'] = $tanggalPecah;
+        $data['tanggal'] = Carbon::parse($restitusi->tanggal_pengajuan)->translatedFormat('d F Y');
+        $data['deskripsi'] = $restitusi->deskripsi;
+        $tanggal_raw = Carbon::parse($restitusi->tanggal_pengajuan);
+        $tahun = $tanggal_raw->year;
+        $bulan_romawi = $this->convertToRoman($tanggal_raw->month);
+        $data['formatNoPA'] = $bulan_romawi.'/'.$tahun;
+        $data['totalBiaya'] = ($formatted_total_biaya);
+        $data['rawBiaya'] = $rincianBiaya;
+        $data['terbilang'] = terbilang($rincianBiaya) . " Rupiah";
 
+        $user = DataKaryawan::where('id_badge', $restitusi->id_badge)->first();
+        $costCenter = CostCenter::where('cost_center', $user->cost_center)->first();
+        $data['bagian'] = $costCenter->nama_bagian;
+        $data['nama'] = $user->nama_karyawan;
+        $data['no_badge'] = $restitusi->id_badge;
+        // return response()->json([
+        //     'status' => 'Test Request',
+        //     'message' => 'Request Di ambil .',
+        //     'data' => $data,
+        //     'restitusi' => $restitusi,
+        //     'data Karyawan' => $user,
+
+        //     // 'presentase' => $presentaseDokter[0],
+        // ], 500);
+        return view('forms.FormRK', compact('data'));
+        // return redirect(url('forms/FormPA.html?print=1'));
+    }
 }

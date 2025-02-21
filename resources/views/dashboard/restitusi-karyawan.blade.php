@@ -494,6 +494,13 @@
                                         
                                         <button class="btn btn-primary" type="submit">Print PA Restitusi</button>
                                     </form>
+
+                                    <form action="{{ route('print-restitusi-printout') }}" method="POST" target="_blank">
+                                        @csrf
+                                        <input type="hidden" name="id_pengajuan" value="{{ $data1->id_pengajuan }}">
+                                        
+                                        <button class="btn btn-primary" type="submit">Print PrintOut Restitusi</button>
+                                    </form>
  
                                         <!-- <button style="margin-left: 10px;" type="button" class="btn btn-sm btn-success w-100" onclick="openRejectModal('{{ $data1->id_pengajuan }}')">Reject</button> -->
                                         {{-- <a href="{{ url('/download-restitusi') }}" class="btn btn-primary">Download PA</a> --}}
